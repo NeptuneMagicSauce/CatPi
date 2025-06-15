@@ -1,0 +1,10 @@
+.ninja_deps
+.ninja_log
+.qt/
+CMakeCache.txt
+CMakeFiles/
+CatPi
+CatPi_autogen/
+build.ninja
+cmake_install.cmake
+compile_commands.json
