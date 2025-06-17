@@ -6,7 +6,7 @@ ninja
 ```
 
 # TODO
-- fixed size? size of pi screen?
+
 - getting the weight from c++
 - print the weight
 - as a graphic widget
@@ -27,3 +27,5 @@ ninja
 - tool bar (vertical)
 - button quit
 - button fullscreen
+- fixed size? size of pi screen?
+-> automatic size, maximized or fullscreen on small screen
