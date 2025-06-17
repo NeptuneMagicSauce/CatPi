@@ -7,6 +7,25 @@ ninja
 
 # TODO
 
+```
+do gpio from c -> relay before weight
+
+- read doc https://www.kernel.org/doc/Documentation/gpio/sysfs.txt
+- try this https://superuser.com/a/1449936
+
+device name in /sys/kernel/debug/pinctrl/pinctrl-devices
+folder /sys/kernel/debug/pinctrl/*$devicename
+read = grep gpio17 pins
+write = TODO
+maybe because there are few writes:
+call pinctrl, like relay_off/on
+port ~/bin/relay* to c++
+port ~/examples/min.py:
+  inline calls to calls gpiozero
+port weight to c++
+```
+
+
 - getting the weight from c++
 - print the weight
 - as a graphic widget
