@@ -1,4 +1,4 @@
-for i in cmake ninja-build clang qt6-base-dev qt6-wayland; do
+for i in cmake ninja-build clang qt6-base-dev qt6-wayland liblgpio-dev; do
     apt list $i 2>/dev/null | grep -qw installed || sudo apt install -y $i
 done
 
