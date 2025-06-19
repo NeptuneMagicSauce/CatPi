@@ -9,3 +9,4 @@ cmake . \
       --fresh \
       -DCMAKE_BUILD_TYPE=Debug \
       -DCMAKE_CXX_COMPILER=clang++ \
+      -DLIBPINCTRLDIR=$HOME/raspberry-utils/pinctrl

@@ -18,4 +18,4 @@ endforeach()
 set(QTPLUGINDIR plugins/platforms)
 
 # hardcode, works on my machine
-target_link_libraries(${PROJECT_NAME} /home/pi/rasbperry-utils/pinctrl/libpinctrl.a)
+target_link_libraries(${PROJECT_NAME} ${LIBPINCTRLDIR}/libpinctrl.a)
