@@ -10,9 +10,12 @@ set(CMAKE_AUTOMOC ON) # must be before add_executable() # fails with clang19 (an
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 add_executable(${PROJECT_NAME} ${sources} ${resources})
-set(QTLIBLIST Core Widgets Gui)
+set(QTLIBLIST Widgets) # Core Gui
 find_package(Qt6 REQUIRED ${QTLIBLIST})
 foreach(qtlib ${QTLIBLIST})
   target_link_libraries(${PROJECT_NAME} Qt6::${qtlib})
 endforeach()
 set(QTPLUGINDIR plugins/platforms)
+
+# hardcode, works on my machine
+target_link_libraries(${PROJECT_NAME} /home/pi/rasbperry-utils/pinctrl/libpinctrl.a)

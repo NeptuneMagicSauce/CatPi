@@ -37,9 +37,13 @@ struct Impl
 
 
   QApplication* app = nullptr;
-  MainWindow* w;
+  MainWindow* w = nullptr;
   ToolBar* toolbar = nullptr;
   bool const isSmallScreen;
+
+  struct {
+    QPushButton* buttonDispense = nullptr;
+  } panelAction;
 };
 namespace {
   std::unique_ptr<Impl> instance;
@@ -54,7 +58,7 @@ struct MainWindow: public QMainWindow {
 };
 
 struct Central : public QWidget {
-  Central();
+  Central(Impl* instance);
 };
 
 struct ToolBar: public QToolBar {
@@ -62,6 +66,18 @@ struct ToolBar: public QToolBar {
   QAction* quit = nullptr;
   QAction* fullscreen = nullptr;
 };
+
+extern "C" {
+  // that's the raspberry-utils program pinctrl as a lib
+  int main_pinctrl(int argc, char *argv[]);
+}
+void pinctrl(const vector<string>& args) {
+  vector<const char*> char_args = { "pinctrl" };
+  for (const auto& arg: args) {
+    char_args.push_back((char*)arg.c_str());
+  }
+  main_pinctrl(char_args.size(), (char**)char_args.data());
+}
 
 void Impl::connectSignals() {
   QObject::connect(
@@ -73,8 +89,22 @@ void Impl::connectSignals() {
         instance->w->showFullScreen();
       } else {
         instance->w->showNormal();
+        instance->w->setWindowState(Qt::WindowMaximized);
       }
 
+    });
+  QObject::connect(
+    instance->panelAction.buttonDispense,
+    &QPushButton::released,
+    []() {
+      // std::cout << "released" << std::endl;
+      // pinctrl({"-p"});
+      pinctrl({"set", "17", "op", "dh"});
+      instance->panelAction.buttonDispense->setEnabled(false);
+      QTimer::singleShot(4000, [] () {
+        pinctrl({"set", "17", "op", "dl"});
+        instance->panelAction.buttonDispense->setEnabled(true);
+      });
     });
 }
 
@@ -121,23 +151,28 @@ int main(int argc, char **argv) {
   instance->connectSignals();
   return instance->app->exec();
 }
-
 Impl::Impl(int argc, char **argv)
-    : app(new QApplication(argc, argv)), w(new MainWindow),
-      isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
+    : app(new QApplication(argc, argv)),
+      w(new MainWindow),
+      isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720)
+{
   if (isSmallScreen) {
     w->setWindowState(Qt::WindowMaximized);
   }
-  w->setCentralWidget(new Central());
+  w->setCentralWidget(new Central(this));
   toolbar = new ToolBar();
   w->addToolBar(Qt::LeftToolBarArea, toolbar);
   w->show();
+  app->setStyleSheet("QLabel{font-size: 48pt;} QPushButton{font-size: 48pt;} ");
 }
 
-Central::Central() {
+Central::Central(Impl* instance) {
   auto layout = new QHBoxLayout(this);
-  layout->addWidget(new QLabel("foo"));
-  layout->addWidget(new QLabel("bar"));
+  auto& b = instance->panelAction.buttonDispense;
+  b = new QPushButton("Now!");
+  b->setSizePolicy({QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding});
+  layout->addWidget(new QLabel("0 grams"));
+  layout->addWidget(b);
 }
 
 ToolBar::ToolBar() {
@@ -145,7 +180,8 @@ ToolBar::ToolBar() {
   setMovable(false);
   setFloatable(false);
   setContextMenuPolicy(Qt::ContextMenuPolicy::PreventContextMenu);
-  // setFixedWidth(30);
+  setFixedWidth(90);
+  setIconSize({90, 90});
 
   quit = new QAction();
   quit->setIcon(instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_TabCloseButton));
