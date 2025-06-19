@@ -89,9 +89,10 @@ void Impl::connectSignals() {
         instance->w->showFullScreen();
       } else {
         instance->w->showNormal();
-        instance->w->setWindowState(Qt::WindowMaximized);
+        if (instance->isSmallScreen) {
+          instance->w->setWindowState(Qt::WindowMaximized);
+        }
       }
-
     });
   QObject::connect(
     instance->panelAction.buttonDispense,
