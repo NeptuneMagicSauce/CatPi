@@ -132,6 +132,7 @@ void Impl::connectSignals() {
     &QTimer::timeout,
     [] () {
       auto file = QFile("/home/pi/weights.measures");
+      if (file.exists() == false) { return; }
       file.open(QIODeviceBase::ReadOnly);
       auto str = file.readAll().trimmed();
       instance->weight.measure = str;
@@ -189,17 +190,22 @@ int main(int argc, char **argv) {
     QStandardPaths::standardLocations(
       QStandardPaths::StandardLocation::HomeLocation).first();
 
-  measureProcess.setProgram(home + "/examples/min.py");
-  measureProcess.setArguments({ "-q" });
-  measureProcess.startDetached(&pid);
-  std::cout << "measure process pid " << pid << endl;
-  
+  auto measureProgram = home + "/examples/min.py";
+  if (QFile{measureProgram}.exists()) {
+
+    measureProcess.setProgram(measureProgram);
+    measureProcess.setArguments({"-q"});
+    measureProcess.startDetached(&pid);
+    std::cout << "measure process pid " << pid << endl;
+  }
   auto ret = instance->app->exec();
 
   // TODO do this clean-up when Ctrl-C
-  measureProcess.setProgram("kill");
-  measureProcess.setArguments({ QString::number(pid) });
-  measureProcess.startDetached();
+  if (measureProcess.program().length() > 0) {
+    measureProcess.setProgram("kill");
+    measureProcess.setArguments({QString::number(pid)});
+    measureProcess.startDetached();
+  }
 
   return ret;
 }
@@ -212,7 +218,7 @@ Impl::Impl(int argc, char **argv)
   toolbar = new ToolBar();
   w->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
-  
+
   weight.watcher.setSingleShot(false);
   weight.watcher.start(1000);
 
