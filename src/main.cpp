@@ -1,5 +1,6 @@
-#include <cstdint>
 #include <iostream>
+#include <string>
+#include <ranges>
 
 #include <QFile>
 #include <QStandardPaths>
@@ -19,16 +20,6 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QWidget>
-#include <memory>
-#include <qaction.h>
-#include <qapplication.h>
-#include <qmainwindow.h>
-#include <qnamespace.h>
-#include <qwidget.h>
-#include <string>
-#include <type_traits>
-
-#include <ranges>
 
 using namespace std;
 
