@@ -7,9 +7,9 @@ ninja
 
 # TODO
 
-- document/reproduce the patch pinctrl exe2lib, move apt libfdt-dev to this patch
-- on quit: all driven pins to low
 - clang-format
+- move to smaller files for compile performance on pi
+- on quit: all driven pins to low
 - getting the weight from c++
 - print the weight
 - as a graphic widget
@@ -51,3 +51,4 @@ final choice: compile pinctrl
 patch it to be a library
 call it from c++
 ```
+- document/reproduce the patch pinctrl exe2lib

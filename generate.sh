@@ -1,12 +1,14 @@
-# liblgpio-dev
+set -e
+
 sudo apt install -y \
         cmake \
         ninja-build \
         clang-19 \
         qt6-base-dev \
         qt6-wayland \
-        libfdt-dev \
+        libfdt-dev
 
+"$(dirname $0)/src/scripts/install-libpinctrl.sh"
 
 rm -f CMakeCache.txt
 

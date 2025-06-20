@@ -1,0 +1,55 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cc05025..01f0989 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3,15 +3,4 @@ cmake_minimum_required(VERSION 3.1...3.27)
+ project(utils)
+ 
+ # List of subsidiary CMakeLists
+-add_subdirectory(dtmerge)
+-add_subdirectory(eeptools)
+-add_subdirectory(kdtc)
+-add_subdirectory(otpset)
+-add_subdirectory(overlaycheck)
+-add_subdirectory(ovmerge)
+ add_subdirectory(pinctrl)
+-add_subdirectory(piolib)
+-add_subdirectory(raspinfo)
+-add_subdirectory(vcgencmd)
+-add_subdirectory(vclog)
+-add_subdirectory(vcmailbox)
+diff --git a/pinctrl/CMakeLists.txt b/pinctrl/CMakeLists.txt
+index 23cccd9..3028276 100644
+--- a/pinctrl/CMakeLists.txt
++++ b/pinctrl/CMakeLists.txt
+@@ -8,16 +8,4 @@ project(pinctrl)
+ 
+ add_compile_definitions(LIBRARY_BUILD=1)
+ 
+-add_library(gpiolib gpiolib.c util.c library_gpiochips.c gpiochip_bcm2835.c gpiochip_bcm2712.c gpiochip_rp1.c gpiochip_firmware.c)
+-target_sources(gpiolib PUBLIC gpiolib.h)
+-set_target_properties(gpiolib PROPERTIES PUBLIC_HEADER gpiolib.h)
+-set_target_properties(gpiolib PROPERTIES SOVERSION 0)
+-
+-#add executables
+-add_executable(pinctrl pinctrl.c)
+-target_link_libraries(pinctrl gpiolib)
+-install(TARGETS pinctrl RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+-install(TARGETS gpiolib
+-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+-install(FILES pinctrl-completion.bash RENAME pinctrl DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions")
++add_library(pinctrl gpiolib.c util.c library_gpiochips.c gpiochip_bcm2835.c gpiochip_bcm2712.c gpiochip_rp1.c gpiochip_firmware.c pinctrl.c)
+diff --git a/pinctrl/pinctrl.c b/pinctrl/pinctrl.c
+index f49ecf9..a9091a3 100644
+--- a/pinctrl/pinctrl.c
++++ b/pinctrl/pinctrl.c
+@@ -329,7 +329,7 @@ static void verbose_callback(const char *msg)
+     printf("%s", msg);
+ }
+ 
+-int main(int argc, char *argv[])
++int main_pinctrl(int argc, char *argv[])
+ {
+     int ret;
+ 
