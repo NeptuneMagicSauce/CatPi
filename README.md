@@ -7,8 +7,8 @@ ninja
 
 # TODO
 
+- document/reproduce the patch pinctrl exe2lib, move apt libfdt-dev to this patch
 - on quit: all driven pins to low
-- document/reproduce the patch pinctrl exe2lib
 - clang-format
 - getting the weight from c++
 - print the weight

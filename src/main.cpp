@@ -1,6 +1,9 @@
 #include <cstdint>
 #include <iostream>
 
+#include <QFile>
+#include <QStandardPaths>
+#include <QProcess>
 #include <QScreen>
 #include <QAction>
 #include <QApplication>
@@ -46,6 +49,12 @@ struct Impl
   struct {
     QPushButton* buttonDispense = nullptr;
   } panelAction;
+
+  struct {
+    QTimer watcher;
+    QString measure;
+    QLabel label;
+  } weight;
 };
 namespace {
   std::unique_ptr<Impl> instance;
@@ -118,6 +127,17 @@ void Impl::connectSignals() {
         instance->panelAction.buttonDispense->setEnabled(true);
       });
     });
+  QObject::connect(
+    &instance->weight.watcher,
+    &QTimer::timeout,
+    [] () {
+      auto file = QFile("/home/pi/weights.measures");
+      file.open(QIODeviceBase::ReadOnly);
+      auto str = file.readAll().trimmed();
+      instance->weight.measure = str;
+      instance->weight.label.setText(str + " grams");
+      // std::cout << instance->weight.measure.toStdString() << endl;
+    });
 }
 
 auto printDesktop() {
@@ -161,29 +181,56 @@ auto printDesktop() {
 int main(int argc, char **argv) {
   instance = std::make_unique<Impl>(argc, argv);
   instance->connectSignals();
-  return instance->app->exec();
+
+  qint64 pid = 0;
+  auto measureProcess = QProcess();
+
+  auto const home =
+    QStandardPaths::standardLocations(
+      QStandardPaths::StandardLocation::HomeLocation).first();
+
+  measureProcess.setProgram(home + "/examples/min.py");
+  measureProcess.setArguments({ "-q" });
+  measureProcess.startDetached(&pid);
+  std::cout << "measure process pid " << pid << endl;
+  
+  auto ret = instance->app->exec();
+
+  // TODO do this clean-up when Ctrl-C
+  measureProcess.setProgram("kill");
+  measureProcess.setArguments({ QString::number(pid) });
+  measureProcess.startDetached();
+
+  return ret;
 }
 Impl::Impl(int argc, char **argv)
     : app(new QApplication(argc, argv)),
       w(new MainWindow),
       isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720)
 {
-  if (isSmallScreen) {
-    w->setWindowState(Qt::WindowMaximized);
-  }
   w->setCentralWidget(new Central(this));
   toolbar = new ToolBar();
   w->addToolBar(Qt::LeftToolBarArea, toolbar);
-  w->show();
-  app->setStyleSheet("QLabel{font-size: 48pt;} QPushButton{font-size: 48pt;} ");
+  app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
+  
+  weight.watcher.setSingleShot(false);
+  weight.watcher.start(1000);
+
+  if (isSmallScreen) {
+    w->showFullScreen();
+    toolbar->fullscreen->setChecked(true);
+  } else {
+    w->show();
+  }
 }
 
 Central::Central(Impl* instance) {
   auto layout = new QHBoxLayout(this);
   auto& b = instance->panelAction.buttonDispense;
   b = new QPushButton("Now!");
-  b->setSizePolicy({QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding});
-  layout->addWidget(new QLabel("0 grams"));
+  b->setSizePolicy({QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding});
+  instance->weight.label.setText("--");
+  layout->addWidget(&instance->weight.label);
   layout->addWidget(b);
 }
 
