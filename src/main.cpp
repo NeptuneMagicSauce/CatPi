@@ -25,6 +25,8 @@
 #include <string>
 #include <type_traits>
 
+#include <ranges>
+
 using namespace std;
 
 struct ToolBar;
@@ -71,20 +73,29 @@ extern "C" {
   // that's the raspberry-utils program pinctrl as a lib
   int main_pinctrl(int argc, char *argv[]);
 }
-void pinctrl(const vector<string>& args) {
-  vector<const char*> char_args = { "pinctrl" };
-  for (const auto& arg: args) {
-    char_args.push_back((char*)arg.c_str());
-  }
+
+void pinctrl(string_view sv) {
+  // split on blank space
+  auto splitted = sv
+    | views::split(' ')
+    | views::transform([](auto i) { return string{string_view{i}}; });
+  // to vector<char*>
+  vector<const char*> char_args = { "pinctrl" };;
+  ranges::transform(
+    vector<string>{ splitted.begin(), splitted.end() },
+    back_inserter(char_args),
+    [] (auto& i) { return i.data(); });
+  // // debug print
+  // ranges::for_each(char_args, [](auto i) { cout << (void*)i << " " << i << endl; });
   main_pinctrl(char_args.size(), (char**)char_args.data());
 }
 
 void Impl::connectSignals() {
   QObject::connect(
     instance->toolbar->quit, &QAction::triggered,
-    instance->app, &QApplication::quit);
+    instance->app,  &QApplication::quit);
   QObject::connect(
-    instance->toolbar->fullscreen, &QAction::toggled, [] (bool checked) {
+    instance->toolbar->fullscreen, &QAction::toggled, [](bool checked) {
       if (checked) {
         instance->w->showFullScreen();
       } else {
@@ -99,11 +110,11 @@ void Impl::connectSignals() {
     &QPushButton::released,
     []() {
       // std::cout << "released" << std::endl;
-      // pinctrl({"-p"});
-      pinctrl({"set", "17", "op", "dh"});
+      // pinctrl("-p");
+      pinctrl("set 17 op dh");
       instance->panelAction.buttonDispense->setEnabled(false);
-      QTimer::singleShot(4000, [] () {
-        pinctrl({"set", "17", "op", "dl"});
+      QTimer::singleShot(4000, []() {
+        pinctrl("set 17 op dl");
         instance->panelAction.buttonDispense->setEnabled(true);
       });
     });
