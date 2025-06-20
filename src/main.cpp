@@ -127,7 +127,7 @@ void Impl::connectSignals() {
       file.open(QIODeviceBase::ReadOnly);
       auto str = file.readAll().trimmed();
       instance->weight.measure = str;
-      instance->weight.label.setText(str + " grams");
+      instance->weight.label.setText(str + "\ngrams");
       // std::cout << instance->weight.measure.toStdString() << endl;
     });
 }
@@ -211,7 +211,7 @@ Impl::Impl(int argc, char **argv)
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
   weight.watcher.setSingleShot(false);
-  weight.watcher.start(1000);
+  weight.watcher.start(100);
 
   if (isSmallScreen) {
     w->showFullScreen();
@@ -227,6 +227,7 @@ Central::Central(Impl* instance) {
   b = new QPushButton("Now!");
   b->setSizePolicy({QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding});
   instance->weight.label.setText("--");
+  instance->weight.label.setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   layout->addWidget(&instance->weight.label);
   layout->addWidget(b);
 }
