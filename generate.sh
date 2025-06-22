@@ -6,8 +6,7 @@ sudo apt install -y \
         clang-19 \
         clang-format \
         qt6-base-dev \
-        qt6-wayland \
-        libfdt-dev
+        qt6-wayland
 
 "$(dirname $0)/src/scripts/install-libpinctrl.sh"
 

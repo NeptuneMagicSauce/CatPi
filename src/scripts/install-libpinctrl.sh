@@ -1,5 +1,7 @@
 set -e
 
+sudo apt install -y libfdt-dev
+
 SCRIPTDIR="$(realpath $(dirname $0))"
 
 cd ~
