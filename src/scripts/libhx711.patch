@@ -1,0 +1,30 @@
+diff --git a/include/Value.h b/include/Value.h
+index ff3551b..48f14c8 100644
+--- a/include/Value.h
++++ b/include/Value.h
+@@ -45,8 +45,8 @@ protected:
+      * Datasheet pg. 3
+      * But also a consequence of the sensor being 24 bits
+      */
+-    static constexpr val_t _MIN = -static_cast<val_t>(std::pow(2, 24 - 1));
+-    static constexpr val_t _MAX = static_cast<val_t>(std::pow(2, 24 - 1)) - 1;
++    // static constexpr val_t _MIN = -static_cast<val_t>(std::pow(2, 24 - 1));
++    // static constexpr val_t _MAX = static_cast<val_t>(std::pow(2, 24 - 1)) - 1;
+ 
+ 
+ public:
+diff --git a/src/Value.cpp b/src/Value.cpp
+index 2480488..d950cd6 100644
+--- a/src/Value.cpp
++++ b/src/Value.cpp
+@@ -42,6 +42,10 @@ bool Value::isMaxSaturated() const noexcept {
+ }
+ 
+ bool Value::isValid() const noexcept {
++  
++    static const val_t _MIN = -static_cast<val_t>(std::pow(2, 24 - 1));
++    static const val_t _MAX = static_cast<val_t>(std::pow(2, 24 - 1)) - 1;
++    
+     return this->_v >= _MIN && this->_v <= _MAX;
+ }
+ 

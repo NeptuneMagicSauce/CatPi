@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include "WeightProgram.hpp"
-
 struct QApplication;
 struct QPushButton;
 struct QTimer;
@@ -11,6 +9,7 @@ struct QString;
 struct QLabel;
 struct ToolBar;
 struct MainWindow;
+struct Weight;
 
 struct Instance {
   Instance(int argc, char** argv);
@@ -25,10 +24,5 @@ struct Instance {
     QPushButton* buttonDispense = nullptr;
   } action;
 
-  struct {
-    QTimer* watcher = nullptr;
-    QString* measure = nullptr;
-    QLabel* label = nullptr;
-    std::unique_ptr<WeightProgram> program;
-  } weight;
+  Weight* weight = nullptr ;
 };

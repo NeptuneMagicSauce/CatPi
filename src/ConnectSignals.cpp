@@ -1,6 +1,5 @@
 #include <QAction>
 #include <QApplication>
-#include <QFile>
 #include <QLabel>
 #include <QObject>
 #include <QPushButton>
@@ -10,11 +9,13 @@
 #include "MainWindow.hpp"
 #include "PinCtrl.hpp"
 #include "ToolBar.hpp"
+#include "Weight.hpp"
 
 using PinCtrl::pinctrl;
 
 void Instance::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
+  
   QObject::connect(toolbar->fullscreen, &QAction::toggled, [this](bool checked) {
     if (checked) {
       window->showFullScreen();
@@ -25,6 +26,7 @@ void Instance::connectSignals() {
       }
     }
   });
+  
   QObject::connect(action.buttonDispense, &QPushButton::released, [this]() {
     // std::cout << "released" << std::endl;
     // pinctrl("-p");
@@ -35,15 +37,6 @@ void Instance::connectSignals() {
       action.buttonDispense->setEnabled(true);
     });
   });
-  QObject::connect(weight.watcher, &QTimer::timeout, [this]() {
-    auto file = QFile("/home/pi/weights.measures");
-    if (file.exists() == false) {
-      return;
-    }
-    file.open(QIODeviceBase::ReadOnly);
-    auto str = file.readAll().trimmed();
-    *weight.measure = str;
-    weight.label->setText(str + "\ngrams");
-    // std::cout << weight.measure.toStdString() << endl;
-  });
+  
+  weight->connect();
 }

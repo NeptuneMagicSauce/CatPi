@@ -6,15 +6,18 @@ ninja
 ```
 
 # TODO
-- on quit: all driven pins to low
-- getting the weight from c++
-- print the weight
-- as a graphic widget
+- set up v19 for all 3 clangs: clang format clangd
+
+- libhx711: can we take out the implementation and do it in tree?
+- libhx711: is there a tare function?
+- libhx711: implement calibration
+
+- weight graphic widget: progress bar or circular dial?
 - with history: histogram?
 - tare button (saved and restored)
-- another sub panel
-- plug the relay from c++
-- into a button
+
+- on quit: all driven pins to low
+
 - logic "weight goes down <=> eat event"
 - logic "dispense when eaten and/or dispense > 10 minutes away"
 
@@ -29,6 +32,9 @@ ninja
 - button fullscreen
 - fixed size? size of pi screen?
 -> automatic size, maximized or fullscreen on small screen
+- another sub panel
+- plug the relay from c++
+- into a button
 - gpio from c
 do gpio from c -> relay before weight
   read doc https://www.kernel.org/doc/Documentation/gpio/sysfs.txt
@@ -49,3 +55,5 @@ do gpio from c -> relay before weight
 - document/reproduce the patch pinctrl exe2lib
 - move to smaller files for compile performance on pi
 - clang-format
+- getting the weight from c++
+- print the weight

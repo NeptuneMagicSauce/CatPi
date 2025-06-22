@@ -17,4 +17,11 @@ foreach(qtlib ${QTLIBLIST})
   target_link_libraries(${PROJECT_NAME} Qt6::${qtlib})
 endforeach()
 set(QTPLUGINDIR plugins/platforms)
+
+# lib pinctrl
 target_link_libraries(${PROJECT_NAME} ${LIBPINCTRLDIR}/libpinctrl.a)
+
+# lib hx711
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${LIBHX711}/include")
+target_link_libraries(${PROJECT_NAME} "-llgpio")
+target_link_libraries(${PROJECT_NAME} "${LIBHX711}/build/static/libhx711.a")
