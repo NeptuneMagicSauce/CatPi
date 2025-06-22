@@ -13,7 +13,7 @@ ninja
 - print the weight
 - as a graphic widget
 - with history: histogram?
-- tare button
+- tare button (saved and restored)
 - another sub panel
 - plug the relay from c++
 - into a button
