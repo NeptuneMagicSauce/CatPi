@@ -1,5 +1,5 @@
-project(CatPi)
 cmake_minimum_required(VERSION 3.25)
+project(CatPi)
 FILE(GLOB_RECURSE sources CONFIGURE_DEPENDS src/*.cpp)
 FILE(GLOB_RECURSE resources CONFIGURE_DEPENDS data/*.qrc)
 set(CMAKE_CXX_FLAGS "-std=c++23") # better than CMAKE_CXX_STANDARD for clangd
