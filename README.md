@@ -6,8 +6,6 @@ ninja
 ```
 
 # TODO
-
-- clang-format
 - on quit: all driven pins to low
 - getting the weight from c++
 - print the weight
@@ -52,3 +50,4 @@ call it from c++
 ```
 - document/reproduce the patch pinctrl exe2lib
 - move to smaller files for compile performance on pi
+- clang-format

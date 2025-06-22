@@ -1,11 +1,11 @@
 #include "ToolBar.hpp"
 
-#include <QStyle>
 #include <QApplication>
+#include <QStyle>
+
 #include "Instance.hpp"
 
 ToolBar::ToolBar(Instance* instance) {
-
   setMovable(false);
   setFloatable(false);
   setContextMenuPolicy(Qt::ContextMenuPolicy::PreventContextMenu);

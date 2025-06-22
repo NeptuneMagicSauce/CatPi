@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+
 #include "WeightProgram.hpp"
 
 struct QApplication;
@@ -11,8 +12,7 @@ struct QLabel;
 struct ToolBar;
 struct MainWindow;
 
-struct Instance
-{
+struct Instance {
   Instance(int argc, char** argv);
   void connectSignals();
 

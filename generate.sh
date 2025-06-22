@@ -4,6 +4,7 @@ sudo apt install -y \
         cmake \
         ninja-build \
         clang-19 \
+        clang-format \
         qt6-base-dev \
         qt6-wayland \
         libfdt-dev

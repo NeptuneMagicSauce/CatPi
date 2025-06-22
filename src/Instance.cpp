@@ -1,14 +1,15 @@
 #include "Instance.hpp"
 
 #include <QApplication>
-#include <QScreen>
 #include <QLabel>
+#include <QScreen>
 #include <QTimer>
 #include <iostream>
+
+#include "CentralWidget.hpp"
+#include "MainWindow.hpp"
 #include "PinCtrl.hpp"
 #include "ToolBar.hpp"
-#include "MainWindow.hpp"
-#include "CentralWidget.hpp"
 #include "WeightProgram.hpp"
 
 using namespace std;
@@ -16,17 +17,16 @@ using namespace std;
 Instance::Instance(int argc, char **argv)
     : app(new QApplication(argc, argv)),
       window(new MainWindow),
-      isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720)
-{
+      isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
   toolbar = new ToolBar(this);
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
   weight = {
-    new QTimer(),
-    new QString(),
-    new QLabel(),
-    make_unique<WeightProgram>(),
+      new QTimer(),
+      new QString(),
+      new QLabel(),
+      make_unique<WeightProgram>(),
   };
   weight.label->setText("--");
   weight.label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -42,5 +42,5 @@ Instance::Instance(int argc, char **argv)
     window->show();
   }
 
-  connectSignals(); // must be after all membes are constructed
+  connectSignals();  // must be after all membes are constructed
 }

@@ -1,10 +1,10 @@
 #pragma once
 
-class WeightProgram
-{
-public:
+class WeightProgram {
+ public:
   WeightProgram();
   ~WeightProgram();
-private:
+
+ private:
   long long int pid = 0;
 };

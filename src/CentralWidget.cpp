@@ -1,8 +1,8 @@
 #include "CentralWidget.hpp"
 
 #include <QHBoxLayout>
-#include <QPushButton>
 #include <QLabel>
+#include <QPushButton>
 
 #include "Instance.hpp"
 
