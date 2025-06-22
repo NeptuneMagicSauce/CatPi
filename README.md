@@ -8,6 +8,8 @@ ninja
 # TODO
 - set up v19 for all 3 clangs: clang format clangd
 
+- libhx711: what happens when unplugged?
+- libhx711: what about setting another gain? (including for calibration?)
 - libhx711: can we take out the implementation and do it in tree?
 - libhx711: is there a tare function?
 - libhx711: implement calibration
