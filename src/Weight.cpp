@@ -1,13 +1,16 @@
 #include "Weight.hpp"
 
+#include <QElapsedTimer>
 #include <QLabel>
 #include <QTimer>
 #include <iostream>
 #include <map>
 
+#include "GpioException.h"
 #include "Instance.hpp"
 #include "SimpleHX711.h"
-#include "common.h"  // libhx711
+#include "TimeoutException.h"
+// #include "common.h"  // libhx711
 
 using namespace std;
 
@@ -28,10 +31,15 @@ auto tryCreateHX711() {
         {HX711::Gain::GAIN_64, {-452, -22906}},
     };
     auto const calibration = calibrationData.at(gain);
+    // with 5th parameter non-default HX711::Rate::HZ_80 -> same results
     auto ret = new HX711::SimpleHX711(5, 6, calibration.first, calibration.second);
     ret->setConfig(HX711::Channel::A, gain);
     return ret;
-  } catch (HX711::GpioException e) {
+  } catch (HX711::GpioException &e) {
+    std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+  } catch (HX711::TimeoutException &e) {
+    std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+  } catch (exception &e) {
     std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
   }
   return (HX711::SimpleHX711 *)nullptr;
@@ -54,8 +62,20 @@ void Weight::connect() {
   QObject::connect(timer, &QTimer::timeout, [this]() {
     auto mass = optional<HX711::Mass>{};
     try {
-      mass = hx711->weight(3);
+      // auto const samples = 15; // takes 1500 ms
+      auto const samples = 3;  // takes 150 ms
+      QElapsedTimer elapsed;
+      elapsed.start();
+      mass = hx711->weight(samples);
+      auto const ms = elapsed.elapsed();
+      std::cout << ms << " milliseconds " << ms / samples << " per sample " << endl;
     } catch (HX711::GpioException e) {
+      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      return;
+    } catch (HX711::TimeoutException &e) {
+      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      return;
+    } catch (exception &e) {
       std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
       return;
     }
@@ -65,8 +85,14 @@ void Weight::connect() {
     } catch (HX711::GpioException e) {
       std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
       return;
+    } catch (HX711::TimeoutException &e) {
+      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      return;
+    } catch (exception &e) {
+      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      return;
     }
-    // std::cout << *massGrams << endl;
+    std::cout << *massGrams << endl;
     auto s = QString::fromStdString(*massGrams);
     s.replace(" g", "\ngrams");
     label->setText(s);

@@ -10,8 +10,9 @@ ninja
 - libhx711: what happens when unplugged? crashes
  - start unplugged
  - start unplugged then plug (multiple times)
- - start plugged then unplug (multiple times)
+ - start plugged then unplug (multiple times) -> busy wait
  - start in buggy state
+- libhx711: fix the busy wait
 - libhx711: can we take out the implementation and do it in tree?
 - libhx711: is there a tare function?
 - libhx711: implement calibration
