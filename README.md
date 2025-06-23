@@ -9,10 +9,9 @@ ninja
 
 - libhx711: what happens when unplugged? crashes
  - start unplugged
+ - unplug/replug multiple times
  - start unplugged then plug (multiple times)
- - start plugged then unplug (multiple times) -> busy wait
  - start in buggy state
-- libhx711: fix the busy wait
 - libhx711: can we take out the implementation and do it in tree?
 - libhx711: is there a tare function?
 - libhx711: implement calibration
@@ -67,3 +66,5 @@ do gpio from c -> relay before weight
 - libhx711: what about setting another gain? (including for calibration?)
   measures look very similar with 64 and 128
   128 should be more precise because numeric range is greater (scale is greater)
+- libhx711: start plugged then unplug (multiple times) -> busy wait
+- libhx711: fix the busy wait

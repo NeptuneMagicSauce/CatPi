@@ -1,0 +1,26 @@
+diff --git a/include/AdvancedHX711.h b/include/AdvancedHX711.h
+index e5315a4..ad9adfa 100644
+--- a/include/AdvancedHX711.h
++++ b/include/AdvancedHX711.h
+@@ -46,6 +46,8 @@ public:
+ 
+     virtual ~AdvancedHX711();
+ 
++    int samplesInTimeOutMode = -1;
++
+     virtual std::vector<Value> getValues(const std::chrono::nanoseconds timeout) override;
+     virtual std::vector<Value> getValues(const std::size_t samples) override;
+ 
+diff --git a/src/AdvancedHX711.cpp b/src/AdvancedHX711.cpp
+index 2b6012d..905a8bb 100644
+--- a/src/AdvancedHX711.cpp
++++ b/src/AdvancedHX711.cpp
+@@ -63,7 +63,7 @@ std::vector<Value> AdvancedHX711::getValues(const std::chrono::nanoseconds timeo
+ 
+     while(true) {
+ 
+-        if(steady_clock::now() >= endTime) {
++        if(steady_clock::now() >= endTime || (samplesInTimeOutMode > 0 && vals.size() >= samplesInTimeOutMode)) {
+             this->_wx->pause();
+             return vals;
+         }

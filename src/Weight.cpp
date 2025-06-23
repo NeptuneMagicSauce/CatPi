@@ -6,11 +6,10 @@
 #include <iostream>
 #include <map>
 
+#include "AdvancedHX711.h"
 #include "GpioException.h"
 #include "Instance.hpp"
-#include "SimpleHX711.h"
 #include "TimeoutException.h"
-// #include "common.h"  // libhx711
 
 using namespace std;
 
@@ -32,17 +31,17 @@ auto tryCreateHX711() {
     };
     auto const calibration = calibrationData.at(gain);
     // with 5th parameter non-default HX711::Rate::HZ_80 -> same results
-    auto ret = new HX711::SimpleHX711(5, 6, calibration.first, calibration.second);
+    auto ret = new HX711::AdvancedHX711(5, 6, calibration.first, calibration.second, HX711::Rate::HZ_80);
     ret->setConfig(HX711::Channel::A, gain);
     return ret;
   } catch (HX711::GpioException &e) {
-    std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
   } catch (HX711::TimeoutException &e) {
-    std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
   } catch (exception &e) {
-    std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
   }
-  return (HX711::SimpleHX711 *)nullptr;
+  return (HX711::AdvancedHX711 *)nullptr;
 }
 }  // namespace
 
@@ -60,39 +59,45 @@ QWidget *Weight::widget() const { return label; }
 
 void Weight::connect() {
   QObject::connect(timer, &QTimer::timeout, [this]() {
+    label->setText("error");
     auto mass = optional<HX711::Mass>{};
     try {
       // auto const samples = 15; // takes 1500 ms
-      auto const samples = 3;  // takes 150 ms
+      // auto const samples = 3;  // takes 150 ms
+      auto const samples = 1;
+      hx711->samplesInTimeOutMode = samples;  // this is my patch to libhx711: no busy wait
+      // see more comments in install-libhx711.sh
+      auto const durationMs = 100;
       QElapsedTimer elapsed;
       elapsed.start();
-      mass = hx711->weight(samples);
+      mass = hx711->weight(std::chrono::milliseconds{durationMs});
       auto const ms = elapsed.elapsed();
-      std::cout << ms << " milliseconds " << ms / samples << " per sample " << endl;
+      // std::cout << ms << " milliseconds " << ms / samples << " per sample " << endl;
+      // std::cout << ms << " milliseconds " << durationMs << " max " << samples << " samples " << endl;
     } catch (HX711::GpioException e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     } catch (HX711::TimeoutException &e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     } catch (exception &e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     }
     auto massGrams = optional<string>{};
     try {
       massGrams = mass->toString(HX711::Mass::Unit::G);
     } catch (HX711::GpioException e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     } catch (HX711::TimeoutException &e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     } catch (exception &e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << e.what() << endl;
+      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     }
-    std::cout << *massGrams << endl;
+    // std::cout << *massGrams << endl;
     auto s = QString::fromStdString(*massGrams);
     s.replace(" g", "\ngrams");
     label->setText(s);

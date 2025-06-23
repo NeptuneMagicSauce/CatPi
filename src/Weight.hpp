@@ -5,16 +5,16 @@ struct QLabel;
 struct QWidget;
 struct Instance;
 namespace HX711 {
-struct SimpleHX711;
+struct AdvancedHX711;
 }
 
 class Weight {
-public:
+ public:
   Weight();
   QWidget* widget() const;
-  void connect(); // const
-private:  
+  void connect();  // const
+ private:
   QTimer* timer = nullptr;
   QLabel* label = nullptr;
-  HX711::SimpleHX711* hx711 = nullptr;
+  HX711::AdvancedHX711* hx711 = nullptr;
 };
