@@ -12,10 +12,10 @@ ninja
  - start unplugged then plug (multiple times)
  - start plugged then unplug (multiple times)
  - start in buggy state
-- libhx711: what about setting another gain? (including for calibration?)
 - libhx711: can we take out the implementation and do it in tree?
 - libhx711: is there a tare function?
 - libhx711: implement calibration
+- libhx711: catch all exceptions same as samples: TimeOut, see all bins
 
 - weight graphic widget: progress bar or circular dial?
 - with history: histogram?
@@ -63,3 +63,6 @@ do gpio from c -> relay before weight
 - getting the weight from c++
 - print the weight
 - set up v19 for all 3 clangs: clang format clangd
+- libhx711: what about setting another gain? (including for calibration?)
+  measures look very similar with 64 and 128
+  128 should be more precise because numeric range is greater (scale is greater)
