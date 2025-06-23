@@ -9,6 +9,11 @@ sudo apt install -y \
         qt6-base-dev \
         qt6-wayland
 
+for i in clang clangd clang-format
+do
+    sudo update-alternatives --install /usr/bin/$i $i /usr/bin/$i-19 100
+done
+
 "$(dirname $0)/src/scripts/install-libpinctrl.sh"
 "$(dirname $0)/src/scripts/install-libhx711.sh"
 
