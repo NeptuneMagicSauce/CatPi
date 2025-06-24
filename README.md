@@ -7,14 +7,15 @@ ninja
 
 # TODO
 
+- libhx711: implement a tare function
+- libhx711: implement calibration
+
 - libhx711: what happens when unplugged? crashes
  - start unplugged
  - unplug/replug multiple times
  - start unplugged then plug (multiple times)
  - start in buggy state
 - libhx711: can we take out the implementation and do it in tree?
-- libhx711: is there a tare function?
-- libhx711: implement calibration
 - libhx711: catch all exceptions same as samples: TimeOut, see all bins
 
 - weight graphic widget: progress bar or circular dial?

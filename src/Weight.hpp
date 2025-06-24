@@ -10,7 +10,7 @@ struct AdvancedHX711;
 
 class Weight {
  public:
-  Weight();
+  Weight(Instance*);
   QWidget* widget() const;
   void connect();  // const
  private:

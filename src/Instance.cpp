@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QLabel>
 #include <QScreen>
+#include <QSettings>
 #include <QTimer>
 #include <iostream>
 
@@ -14,16 +15,24 @@
 
 using namespace std;
 
-Instance::Instance(int argc, char **argv)
-    : app(new QApplication(argc, argv)),
+struct Application : public QApplication {
+  Application(int& argc, char** argv) : QApplication(argc, argv) {
+    QCoreApplication::setOrganizationName("CatPi");
+    QCoreApplication::setApplicationName("CatPi");
+    // setOrgName must be called before construction of QSettings
+  }
+};
+
+Instance::Instance(int argc, char** argv)
+    : app(new Application(argc, argv)),
       window(new MainWindow),
+      toolbar(new ToolBar(this)),
+      settings(new QSettings()),
       isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
-  
-  toolbar = new ToolBar(this);
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
-  weight = new Weight();
+  weight = new Weight(this);
 
   window->setCentralWidget(new CentralWidget(this));
 
@@ -34,5 +43,5 @@ Instance::Instance(int argc, char **argv)
     window->show();
   }
 
-  connectSignals();  // must be after all membes are constructed
+  connectSignals();  // must be after all members are constructed
 }

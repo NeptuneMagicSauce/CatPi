@@ -2,6 +2,7 @@
 
 #include <QElapsedTimer>
 #include <QLabel>
+#include <QSettings>
 #include <QTimer>
 #include <iostream>
 #include <map>
@@ -12,6 +13,14 @@
 #include "TimeoutException.h"
 
 using namespace std;
+
+namespace {
+Instance *instance = nullptr;
+struct {
+  const QString key = "tare";
+  double value = 0;
+} tare;
+}  // namespace
 
 namespace {
 auto tryCreateHX711() {
@@ -45,9 +54,13 @@ auto tryCreateHX711() {
 }
 }  // namespace
 
-Weight::Weight() : timer(new QTimer()), label(new QLabel()), hx711(tryCreateHX711()) {
+Weight::Weight(Instance *instance) : timer(new QTimer()), label(new QLabel()), hx711(tryCreateHX711()) {
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+  ::instance = instance;
+  tare.value = ::instance->settings->value(tare.key, 0.0).toDouble();
+  std::cout << "Tare " << tare.value << endl;
 
   timer->setSingleShot(false);
   if (hx711 != nullptr) {
