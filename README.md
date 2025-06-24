@@ -7,6 +7,11 @@ ninja
 
 # TODO
 - libhx711: implement calibration
+- settings editor:
+ - two pins of HX711
+ - gain?
+ - duration of confirm tare
+ - calibration data
 - libhx711: what happens when unplugged? crashes
  - start unplugged
  - unplug/replug multiple times
@@ -24,9 +29,11 @@ ninja
 - logic "weight goes down <=> eat event"
 - logic "dispense when eaten and/or dispense > 10 minutes away"
 
-- settings
-- logs
-- icons
+- easy change of setting "min duration between servings"
+- easy change of setting "duration of button/relay press" (<-> quantity)
+
+- logs of weight change, of eat and dispense events
+- icons: nicer
 
 # DONE
 - two horizonal split panels
@@ -67,3 +74,4 @@ do gpio from c -> relay before weight
 - libhx711: start plugged then unplug (multiple times) -> busy wait
 - libhx711: fix the busy wait
 - libhx711: implement a tare function
+- keyboard shortcuts: fullscreen and quit
