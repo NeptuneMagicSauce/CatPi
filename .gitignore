@@ -10,3 +10,5 @@ compile_commands.json
 .ninja_log
 .qt/
 src/pipins
+experiments/standardicons/standardicons
+experiments/standardicons/standardicons_autogen/
