@@ -16,7 +16,7 @@ find_package(Qt6 REQUIRED ${QTLIBLIST})
 foreach(qtlib ${QTLIBLIST})
   target_link_libraries(${PROJECT_NAME} Qt6::${qtlib})
 endforeach()
-set(QTPLUGINDIR plugins/platforms)
+# set(QTPLUGINDIR plugins/platforms) // really ?
 
 # lib pinctrl
 target_link_libraries(${PROJECT_NAME} ${LIBPINCTRLDIR}/libpinctrl.a)
