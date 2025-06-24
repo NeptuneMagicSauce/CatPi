@@ -2,8 +2,10 @@
 
 #include <QElapsedTimer>
 #include <QLabel>
+#include <QPushButton>
 #include <QSettings>
 #include <QTimer>
+#include <QVBoxLayout>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -17,19 +19,21 @@
 using namespace std;
 
 struct WeightImpl {
-  QTimer *timer = nullptr;
-  QLabel *label = nullptr;
+  QWidget *widget = new QWidget();
+  QTimer *timer = new QTimer;
+  QLabel *label = new QLabel;
   double massGrams = 0;
-  HX711::AdvancedHX711 *hx711 = nullptr;
+  HX711::AdvancedHX711 *hx711 = tryCreateHX711();
   Instance *instance = nullptr;
   struct {
     const QString key = "tare";
     double value = 0;
+    QPushButton *button = new QPushButton();
   } tare;
+  static HX711::AdvancedHX711 *tryCreateHX711();
 };
 
-namespace {
-auto tryCreateHX711() {
+HX711::AdvancedHX711 *WeightImpl::tryCreateHX711() {
   try {
     auto const gain = HX711::Gain::GAIN_128;
     // auto const gain = HX711::Gain::GAIN_64;
@@ -58,24 +62,24 @@ auto tryCreateHX711() {
   } catch (exception &e) {
     std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
   }
-  return (HX711::AdvancedHX711 *)nullptr;
+  return nullptr;
 }
-}  // namespace
 
-Weight::Weight(Instance *instance) {
-  impl = new WeightImpl({
-      new QTimer(),
-      new QLabel(),
-      0,
-      tryCreateHX711(),
-  });
-
+Weight::Weight(Instance *instance) : impl(new WeightImpl()) {
   impl->label->setText("--");
   impl->label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
+  impl->tare.button->setText("Tare");
+
   impl->instance = instance;
   impl->tare.value = instance->settings->value(impl->tare.key, 0.0).toDouble();
-  // std::cout << "Tare " << tare.value << endl;
+  // debug
+  std::cout << "Tare " << impl->tare.value << endl;
+
+  auto layout = new QVBoxLayout();
+  impl->widget->setLayout(layout);
+  layout->addWidget(impl->label);
+  layout->addWidget(impl->tare.button);
 
   impl->timer->setSingleShot(false);
   if (impl->hx711 != nullptr) {
@@ -83,7 +87,7 @@ Weight::Weight(Instance *instance) {
   }
 }
 
-QWidget *Weight::widget() const { return impl->label; }
+QWidget *Weight::widget() const { return impl->widget; }
 
 void Weight::connect() {
   QObject::connect(impl->timer, &QTimer::timeout, [this]() {
@@ -119,10 +123,15 @@ void Weight::connect() {
 
     impl->massGrams = mass->getValue(HX711::Mass::Unit::G);  // Mass::getValue() is noexcept
     ostringstream massSs;
-    massSs << fixed << setprecision(1) << impl->massGrams;
+    massSs << fixed << setprecision(1) << impl->massGrams - impl->tare.value;
     impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
 
     // debug
-    cout << "mass " << impl->massGrams << endl;
+    cout << "mass " << impl->massGrams << " tare " << impl->tare.value << endl;
+  });
+
+  QObject::connect(impl->tare.button, &QAbstractButton::released, [this]() {
+    impl->tare.value = impl->massGrams;
+    impl->instance->settings->setValue(impl->tare.key, impl->tare.value);
   });
 }
