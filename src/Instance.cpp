@@ -25,16 +25,16 @@ struct Application : public QApplication {
 
 Instance::Instance(int argc, char** argv)
     : app(new Application(argc, argv)),
+      settings(new QSettings),
       window(new MainWindow),
+      weight(new Weight(this)),
+      central(new CentralWidget(this)),
       toolbar(new ToolBar(this)),
-      settings(new QSettings()),
       isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
-  weight = new Weight(this);
-
-  window->setCentralWidget(new CentralWidget(this));
+  window->setCentralWidget(central);
   window->show();
 
   connectSignals();  // must be after all members are constructed

@@ -9,6 +9,7 @@ struct QSettings;
 struct ToolBar;
 struct MainWindow;
 struct Weight;
+struct CentralWidget;
 
 struct Instance {
   Instance(int argc, char** argv);
@@ -16,14 +17,14 @@ struct Instance {
   void connectSignals();
 
   QApplication* app = nullptr;
-  MainWindow* window = nullptr;
-  ToolBar* toolbar = nullptr;
   QSettings* settings = nullptr;
+  MainWindow* window = nullptr;
+  Weight* weight = nullptr;
+  CentralWidget* central = nullptr;
+  ToolBar* toolbar = nullptr;
   bool const isSmallScreen = false;
 
   struct {
     QPushButton* buttonDispense = nullptr;
   } action;
-
-  Weight* weight = nullptr;
 };

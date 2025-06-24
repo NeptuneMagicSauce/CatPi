@@ -6,6 +6,7 @@
 #include <iostream>
 #include <optional>
 
+#include "CentralWidget.hpp"
 #include "Instance.hpp"
 #include "MainWindow.hpp"
 
@@ -92,4 +93,6 @@ void ToolBar::connect(Instance* instance) {
     }
     instance->toolbar->fullscreen->setIcon(fullScreenIcon(checked, instance));
   });
+  QObject::connect(calibration, &QAction::triggered,
+                   [instance]() { instance->central->setPage(CentralWidget::Page::Calibration); });
 }
