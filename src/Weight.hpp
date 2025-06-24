@@ -16,5 +16,6 @@ class Weight {
  private:
   QTimer* timer = nullptr;
   QLabel* label = nullptr;
+  double massGrams = 0;
   HX711::AdvancedHX711* hx711 = nullptr;
 };

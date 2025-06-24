@@ -4,12 +4,14 @@
 #include <QLabel>
 #include <QSettings>
 #include <QTimer>
+#include <iomanip>
 #include <iostream>
 #include <map>
 
 #include "AdvancedHX711.h"
 #include "GpioException.h"
 #include "Instance.hpp"
+#include "Mass.h"
 #include "TimeoutException.h"
 
 using namespace std;
@@ -60,7 +62,7 @@ Weight::Weight(Instance *instance) : timer(new QTimer()), label(new QLabel()), h
 
   ::instance = instance;
   tare.value = ::instance->settings->value(tare.key, 0.0).toDouble();
-  std::cout << "Tare " << tare.value << endl;
+  // std::cout << "Tare " << tare.value << endl;
 
   timer->setSingleShot(false);
   if (hx711 != nullptr) {
@@ -97,22 +99,19 @@ void Weight::connect() {
       std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
       return;
     }
-    auto massGrams = optional<string>{};
-    try {
-      massGrams = mass->toString(HX711::Mass::Unit::G);
-    } catch (HX711::GpioException e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
-      return;
-    } catch (HX711::TimeoutException &e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
-      return;
-    } catch (exception &e) {
-      std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
-      return;
-    }
-    // std::cout << *massGrams << endl;
-    auto s = QString::fromStdString(*massGrams);
-    s.replace(" g", "\ngrams");
-    label->setText(s);
+
+    // auto massString = mass->toString(HX711::Mass::Unit::G);  // Mass::toString() is noexcept
+    // // std::cout << massString << endl;
+    // auto s = QString::fromStdString(massString);
+    // s.replace(" g", "\ngrams");
+    // label->setText(s);
+
+    massGrams = mass->getValue(HX711::Mass::Unit::G);  // Mass::getValue() is noexcept
+    ostringstream massSs;
+    massSs << fixed << setprecision(1) << massGrams;
+    label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
+
+    // debug
+    cout << "mass " << massGrams << endl;
   });
 }
