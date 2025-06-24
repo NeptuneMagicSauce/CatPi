@@ -17,17 +17,6 @@ using PinCtrl::pinctrl;
 void Instance::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
 
-  QObject::connect(toolbar->fullscreen, &QAction::toggled, [this](bool checked) {
-    if (checked) {
-      window->showFullScreen();
-    } else {
-      window->showNormal();
-      if (isSmallScreen) {
-        window->setWindowState(Qt::WindowMaximized);
-      }
-    }
-  });
-
   QObject::connect(action.buttonDispense, &QPushButton::released, [this]() {
     // std::cout << "released" << std::endl;
     // pinctrl("-p");
@@ -38,6 +27,8 @@ void Instance::connectSignals() {
       action.buttonDispense->setEnabled(true);
     });
   });
+
+  toolbar->connect(this);
 
   weight->connect();
 

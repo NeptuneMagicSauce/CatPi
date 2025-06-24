@@ -35,13 +35,11 @@ Instance::Instance(int argc, char** argv)
   weight = new Weight(this);
 
   window->setCentralWidget(new CentralWidget(this));
-
-  if (isSmallScreen) {
-    window->showFullScreen();
-    toolbar->fullscreen->setChecked(true);
-  } else {
-    window->show();
-  }
+  window->show();
 
   connectSignals();  // must be after all members are constructed
+
+  if (isSmallScreen) {
+    toolbar->fullscreen->setChecked(true);
+  }
 }
