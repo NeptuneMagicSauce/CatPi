@@ -48,6 +48,8 @@ auto tryCreateHX711() {
     // with 5th parameter non-default HX711::Rate::HZ_80 -> same results
     auto ret = new HX711::AdvancedHX711(5, 6, calibration.first, calibration.second, HX711::Rate::HZ_80);
     ret->setConfig(HX711::Channel::A, gain);
+    ret->samplesInTimeOutMode = 1;  // this is my patch to libhx711: no busy wait
+                                    // see more comments in install-libhx711.sh
     return ret;
   } catch (HX711::GpioException &e) {
     std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
@@ -90,9 +92,7 @@ void Weight::connect() {
     try {
       // auto const samples = 15; // takes 1500 ms
       // auto const samples = 3;  // takes 150 ms
-      auto const samples = 1;
-      impl->hx711->samplesInTimeOutMode = samples;  // this is my patch to libhx711: no busy wait
-      // see more comments in install-libhx711.sh
+      // auto const samples = 1;
       auto const durationMs = 100;
       QElapsedTimer elapsed;
       elapsed.start();
