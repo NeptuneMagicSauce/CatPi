@@ -6,10 +6,7 @@ ninja
 ```
 
 # TODO
-
-- libhx711: implement a tare function
 - libhx711: implement calibration
-
 - libhx711: what happens when unplugged? crashes
  - start unplugged
  - unplug/replug multiple times
@@ -69,3 +66,4 @@ do gpio from c -> relay before weight
   128 should be more precise because numeric range is greater (scale is greater)
 - libhx711: start plugged then unplug (multiple times) -> busy wait
 - libhx711: fix the busy wait
+- libhx711: implement a tare function

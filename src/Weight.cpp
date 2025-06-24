@@ -88,6 +88,7 @@ Weight::Weight(Instance *instance) : impl(new WeightImpl()) {
   tare.buttonPressedTimer->setInterval(tare.interval);
   tare.progress->setMaximum(tare.maxTicks);
   tare.progress->setTextVisible(false);
+  tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
   auto layout = new QVBoxLayout();
   impl->widget->setLayout(layout);
