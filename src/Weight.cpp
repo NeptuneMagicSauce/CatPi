@@ -69,12 +69,14 @@ Weight::Weight(Instance *instance) : impl(new WeightImpl()) {
   impl->label->setText("--");
   impl->label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-  impl->tare.button->setText("Tare");
+  impl->tare.button->setText("⚖️ Tare");
+  impl->tare.button->setStyleSheet(
+      "QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
 
   impl->instance = instance;
   impl->tare.value = instance->settings->value(impl->tare.key, 0.0).toDouble();
-  // debug
-  std::cout << "Tare " << impl->tare.value << endl;
+  // // debug
+  // std::cout << "Tare " << impl->tare.value << endl;
 
   auto layout = new QVBoxLayout();
   impl->widget->setLayout(layout);
@@ -126,8 +128,8 @@ void Weight::connect() {
     massSs << fixed << setprecision(1) << impl->massGrams - impl->tare.value;
     impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
 
-    // debug
-    cout << "mass " << impl->massGrams << " tare " << impl->tare.value << endl;
+    // // debug
+    // cout << "mass " << impl->massGrams << " tare " << impl->tare.value << endl;
   });
 
   QObject::connect(impl->tare.button, &QAbstractButton::released, [this]() {
