@@ -17,7 +17,7 @@ done
 "$(dirname $0)/src/scripts/install-libpinctrl.sh"
 "$(dirname $0)/src/scripts/install-libhx711.sh"
 
-rm -f CMakeCache.txt
+rm -fr CMakeCache.txt build.ninja *_autogen/ CMakeFiles/ cmake_install.cmake  compile_commands.json
 
 cmake . \
       -G Ninja \
