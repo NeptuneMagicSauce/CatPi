@@ -16,13 +16,17 @@
 
 using namespace std;
 
-namespace {
-Instance *instance = nullptr;
-struct {
-  const QString key = "tare";
-  double value = 0;
-} tare;
-}  // namespace
+struct WeightImpl {
+  QTimer *timer = nullptr;
+  QLabel *label = nullptr;
+  double massGrams = 0;
+  HX711::AdvancedHX711 *hx711 = nullptr;
+  Instance *instance = nullptr;
+  struct {
+    const QString key = "tare";
+    double value = 0;
+  } tare;
+};
 
 namespace {
 auto tryCreateHX711() {
@@ -56,36 +60,43 @@ auto tryCreateHX711() {
 }
 }  // namespace
 
-Weight::Weight(Instance *instance) : timer(new QTimer()), label(new QLabel()), hx711(tryCreateHX711()) {
-  label->setText("--");
-  label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+Weight::Weight(Instance *instance) {
+  impl = new WeightImpl({
+      new QTimer(),
+      new QLabel(),
+      0,
+      tryCreateHX711(),
+  });
 
-  ::instance = instance;
-  tare.value = ::instance->settings->value(tare.key, 0.0).toDouble();
+  impl->label->setText("--");
+  impl->label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+  impl->instance = instance;
+  impl->tare.value = instance->settings->value(impl->tare.key, 0.0).toDouble();
   // std::cout << "Tare " << tare.value << endl;
 
-  timer->setSingleShot(false);
-  if (hx711 != nullptr) {
-    timer->start(1000);
+  impl->timer->setSingleShot(false);
+  if (impl->hx711 != nullptr) {
+    impl->timer->start(1000);
   }
 }
 
-QWidget *Weight::widget() const { return label; }
+QWidget *Weight::widget() const { return impl->label; }
 
 void Weight::connect() {
-  QObject::connect(timer, &QTimer::timeout, [this]() {
-    label->setText("error");
+  QObject::connect(impl->timer, &QTimer::timeout, [this]() {
+    impl->label->setText("error");
     auto mass = optional<HX711::Mass>{};
     try {
       // auto const samples = 15; // takes 1500 ms
       // auto const samples = 3;  // takes 150 ms
       auto const samples = 1;
-      hx711->samplesInTimeOutMode = samples;  // this is my patch to libhx711: no busy wait
+      impl->hx711->samplesInTimeOutMode = samples;  // this is my patch to libhx711: no busy wait
       // see more comments in install-libhx711.sh
       auto const durationMs = 100;
       QElapsedTimer elapsed;
       elapsed.start();
-      mass = hx711->weight(std::chrono::milliseconds{durationMs});
+      mass = impl->hx711->weight(std::chrono::milliseconds{durationMs});
       auto const ms = elapsed.elapsed();
       // std::cout << ms << " milliseconds " << ms / samples << " per sample " << endl;
       // std::cout << ms << " milliseconds " << durationMs << " max " << samples << " samples " << endl;
@@ -106,12 +117,12 @@ void Weight::connect() {
     // s.replace(" g", "\ngrams");
     // label->setText(s);
 
-    massGrams = mass->getValue(HX711::Mass::Unit::G);  // Mass::getValue() is noexcept
+    impl->massGrams = mass->getValue(HX711::Mass::Unit::G);  // Mass::getValue() is noexcept
     ostringstream massSs;
-    massSs << fixed << setprecision(1) << massGrams;
-    label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
+    massSs << fixed << setprecision(1) << impl->massGrams;
+    impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
 
     // debug
-    cout << "mass " << massGrams << endl;
+    cout << "mass " << impl->massGrams << endl;
   });
 }
