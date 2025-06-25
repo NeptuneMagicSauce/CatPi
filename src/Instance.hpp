@@ -1,10 +1,6 @@
 #pragma once
 
 struct QApplication;
-struct QPushButton;
-struct QTimer;
-struct QString;
-struct QLabel;
 struct QSettings;
 struct ToolBar;
 struct MainWindow;
@@ -22,8 +18,4 @@ struct Instance {
   Weight* weight = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
-
-  struct {
-    QPushButton* buttonDispense = nullptr;
-  } action;
 };

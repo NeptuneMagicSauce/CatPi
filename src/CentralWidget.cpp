@@ -14,6 +14,7 @@ struct CentralWidgetImpl {
   QWidget* main = nullptr;
   QWidget* calibration = nullptr;
   QStackedLayout* layout = nullptr;
+  QPushButton* dispense = nullptr;
   const std::map<CentralWidget::Page, int> indices = {{CentralWidget::Page::Main, 0},
                                                       {CentralWidget::Page::Calibration, 1}};
 };
@@ -22,15 +23,16 @@ CentralWidget::CentralWidget(Instance* instance) : impl(new CentralWidgetImpl(in
   setLayout(impl->layout);
 }
 
+QPushButton* CentralWidget::widget() { return impl->dispense; }
+
 CentralWidgetImpl::CentralWidgetImpl(Instance* instance) {
   main = new QWidget();
   auto layoutMain = new QHBoxLayout();
   main->setLayout(layoutMain);
-  auto& b = instance->action.buttonDispense;
-  b = new QPushButton("Now!");
-  b->setSizePolicy({b->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
+  dispense = new QPushButton("Now!");
+  dispense->setSizePolicy({dispense->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
   layoutMain->addWidget(instance->weight->widget());
-  layoutMain->addWidget(b);
+  layoutMain->addWidget(dispense);
 
   calibration = new QWidget();
   auto layoutCalibration = new QVBoxLayout();

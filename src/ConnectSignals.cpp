@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <iostream>
 
+#include "CentralWidget.hpp"
 #include "Instance.hpp"
 #include "MainWindow.hpp"
 #include "PinCtrl.hpp"
@@ -18,14 +19,14 @@ using PinCtrl::pinctrl;
 void Instance::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
 
-  QObject::connect(action.buttonDispense, &QPushButton::released, [this]() {
+  QObject::connect(central->widget(), &QPushButton::released, [this]() {
     std::cout << "released" << std::endl;
     // pinctrl("-p");
     pinctrl("set 17 op dh");
-    action.buttonDispense->setEnabled(false);
+    central->widget()->setEnabled(false);
     QTimer::singleShot(4000, [this]() {
       pinctrl("set 17 op dl");
-      action.buttonDispense->setEnabled(true);
+      central->widget()->setEnabled(true);
     });
   });
 
