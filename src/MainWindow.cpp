@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QGuiApplication>
 #include <QScreen>
+#include <iostream>
 
 MainWindow::MainWindow(QWidget* centralWidget, QToolBar* toolbar)
     : isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
@@ -17,6 +18,9 @@ void MainWindow::toggleFullscreen(bool checked) {
     showNormal();
     if (isSmallScreen) {
       setWindowState(Qt::WindowMaximized);
+    } else {
+      // use the resolution of the pi
+      resize(800, 480);
     }
   }
 }

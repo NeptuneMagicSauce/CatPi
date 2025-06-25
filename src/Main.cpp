@@ -48,9 +48,9 @@ Main::Main(int& argc, char** argv)
   window->show();    // must be after window is  finished constructing and after setStyleSheet
   connectSignals();  // must be after all members are constructed
 
-  if (window->isSmallScreen) {
-    toolbar->fullscreen->setChecked(true);
-  }
+  auto startFullscreen = window->isSmallScreen;
+  toolbar->fullscreen->setChecked(startFullscreen);
+  window->toggleFullscreen(startFullscreen);
 }
 
 void Main::connectSignals() {
