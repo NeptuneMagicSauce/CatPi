@@ -10,7 +10,7 @@
 #include "Weight.hpp"
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl(Instance*);
+  CentralWidgetImpl();
   QWidget* main = nullptr;
   QWidget* calibration = nullptr;
   QStackedLayout* layout = nullptr;
@@ -19,19 +19,17 @@ struct CentralWidgetImpl {
                                                       {CentralWidget::Page::Calibration, 1}};
 };
 
-CentralWidget::CentralWidget(Instance* instance) : impl(new CentralWidgetImpl(instance)) {
-  setLayout(impl->layout);
-}
+CentralWidget::CentralWidget() : impl(new CentralWidgetImpl()) { setLayout(impl->layout); }
 
 QPushButton* CentralWidget::widget() { return impl->dispense; }
 
-CentralWidgetImpl::CentralWidgetImpl(Instance* instance) {
+CentralWidgetImpl::CentralWidgetImpl() {
   main = new QWidget();
   auto layoutMain = new QHBoxLayout();
   main->setLayout(layoutMain);
   dispense = new QPushButton("Now!");
   dispense->setSizePolicy({dispense->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
-  layoutMain->addWidget(instance->weight->widget());
+  layoutMain->addWidget(Instance::instance->weight->widget());
   layoutMain->addWidget(dispense);
 
   calibration = new QWidget();

@@ -20,7 +20,7 @@
 using namespace std;
 
 struct WeightImpl {
-  WeightImpl(Instance *instance);
+  WeightImpl();
   void connect();
 
   QWidget *widget = new QWidget();
@@ -28,7 +28,6 @@ struct WeightImpl {
   QLabel *label = new QLabel;
   double massGrams = 0;
   HX711::AdvancedHX711 *hx711 = tryCreateHX711();
-  Instance *instance = nullptr;
   struct {
     const QString key = "tare";
     double value = 0;
@@ -75,16 +74,16 @@ HX711::AdvancedHX711 *WeightImpl::tryCreateHX711() {
   return nullptr;
 }
 
-Weight::Weight(Instance *instance) : impl(new WeightImpl(instance)) {}
+Weight::Weight() : impl(new WeightImpl()) {}
 
-WeightImpl::WeightImpl(Instance *instance) : instance(instance) {
+WeightImpl::WeightImpl() {
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
   tare.button->setText(tare.buttonText);
   tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
 
-  tare.value = instance->settings->value(tare.key, 0.0).toDouble();
+  tare.value = Instance::instance->settings->value(tare.key, 0.0).toDouble();
   // // debug
   // std::cout << "Tare " << tare.value << endl;
   tare.buttonPressedTimer->setSingleShot(true);
@@ -170,7 +169,7 @@ void WeightImpl::connect() {
       tare.progress->setVisible(false);
       // cout << "long press" << endl;
       tare.value = massGrams;
-      instance->settings->setValue(tare.key, tare.value);
+      Instance::instance->settings->setValue(tare.key, tare.value);
     }
   });
 }

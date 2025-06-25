@@ -14,10 +14,11 @@
 
 using namespace std;
 
-struct Application : public QApplication {
-  // make instance global
+Instance* Instance::instance = nullptr;
 
-  Application(int& argc, char** argv) : QApplication(argc, argv) {
+struct Application : public QApplication {
+  Application(int& argc, char** argv, Instance* instance) : QApplication(argc, argv) {
+    Instance::instance = instance;
     QCoreApplication::setOrganizationName("CatPi");
     QCoreApplication::setApplicationName("CatPi");
     // setOrgName must be called before construction of QSettings
@@ -25,19 +26,15 @@ struct Application : public QApplication {
 };
 
 Instance::Instance(int argc, char** argv)
-    : app(new Application(argc, argv)),
+    : app(new Application(argc, argv, this)),
       settings(new QSettings),
       window(new MainWindow),
-      weight(new Weight(this)),
-      // central(new CentralWidget(this)),
-      toolbar(new ToolBar(this)) {
+      weight(new Weight),
+      central(new CentralWidget()),
+      toolbar(new ToolBar) {
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
-  // TODO why does callback of dispense button fail ...
-  // when this->central is constructed same as the others above ?
-  // rather than next line ?!
-  central = new CentralWidget(this);
   window->setCentralWidget(central);
   window->show();
 

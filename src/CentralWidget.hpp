@@ -3,11 +3,10 @@
 #include <QWidget>
 
 struct QPushButton;
-struct Instance;
 struct CentralWidgetImpl;
 
 struct CentralWidget : public QWidget {
-  CentralWidget(Instance*);
+  CentralWidget();
 
   QPushButton* widget();
 

@@ -8,6 +8,8 @@ struct Weight;
 struct CentralWidget;
 
 struct Instance {
+  static Instance* instance;
+
   Instance(int argc, char** argv);
 
   void connectSignals();

@@ -30,7 +30,7 @@ void Instance::connectSignals() {
     });
   });
 
-  toolbar->connect(this);
+  toolbar->connect();
 
   weight->connect();
 

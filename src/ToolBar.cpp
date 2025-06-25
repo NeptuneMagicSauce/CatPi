@@ -10,9 +10,9 @@
 #include "Instance.hpp"
 #include "MainWindow.hpp"
 
-auto& fullScreenIcon(bool isFullScreen, Instance* instance) {
-  static auto iconYes =
-      instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
+auto& fullScreenIcon(bool isFullScreen) {
+  static auto iconYes = Instance::instance->app->style()->standardIcon(
+      QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
   static auto iconNo = std::optional<QIcon>{};
   if (iconNo == std::nullopt) {
     QTransform transform;
@@ -49,7 +49,7 @@ auto grayscaleQIcon(const QIcon& icon, const QSize& size) {
   return QIcon{pixmap};
 }
 
-ToolBar::ToolBar(Instance* instance) {
+ToolBar::ToolBar() {
   setMovable(false);
   setFloatable(false);
   setContextMenuPolicy(Qt::ContextMenuPolicy::PreventContextMenu);
@@ -57,7 +57,8 @@ ToolBar::ToolBar(Instance* instance) {
   setIconSize({90, 90});
 
   quit = new QAction();
-  quit->setIcon(instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
+  quit->setIcon(
+      Instance::instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
   // SP_TabCloseButton));
   quit->setText("Quit");
 
@@ -67,13 +68,13 @@ ToolBar::ToolBar(Instance* instance) {
   // SP_DesktopIcon)); // ok
   // SP_DialogHelpButton));
   // SP_FileDialogListView));
-  fullscreen->setIcon(fullScreenIcon(false, instance));
+  fullscreen->setIcon(fullScreenIcon(false));
   fullscreen->setText("Fullscreen");
   fullscreen->setCheckable(true);
 
   calibration = new QAction();
   calibration->setIcon(grayscaleQIcon(
-      instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
+      Instance::instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
   calibration->setText("Weight Calibration");
 
   addAction(fullscreen);
@@ -81,11 +82,11 @@ ToolBar::ToolBar(Instance* instance) {
   addAction(calibration);
 }
 
-void ToolBar::connect(Instance* instance) {
-  QObject::connect(fullscreen, &QAction::toggled, [instance, this](bool checked) {
-    instance->window->toggleFullscreen(checked);
-    fullscreen->setIcon(fullScreenIcon(checked, instance));
+void ToolBar::connect() {
+  QObject::connect(fullscreen, &QAction::toggled, [&](bool checked) {
+    Instance::instance->window->toggleFullscreen(checked);
+    fullscreen->setIcon(fullScreenIcon(checked));
   });
   QObject::connect(calibration, &QAction::triggered,
-                   [instance]() { instance->central->setPage(CentralWidget::Page::Calibration); });
+                   []() { Instance::instance->central->setPage(CentralWidget::Page::Calibration); });
 }
