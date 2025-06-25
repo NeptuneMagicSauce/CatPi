@@ -17,8 +17,8 @@
 using namespace std;
 using PinCtrl::pinctrl;
 
-struct InstanceImpl {
-  InstanceImpl(int& argc, char** argv);
+struct Main {
+  Main(int& argc, char** argv);
   void connectSignals();
 
   QApplication* app = nullptr;
@@ -34,9 +34,9 @@ QSettings& Settings::instance() {
   return ret;
 }
 
-int main(int argc, char** argv) { return InstanceImpl{argc, argv}.app->exec(); }
+int main(int argc, char** argv) { return Main{argc, argv}.app->exec(); }
 
-InstanceImpl::InstanceImpl(int& argc, char** argv)
+Main::Main(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
       weight(new Weight),
       calibration(new Calibration),
@@ -53,7 +53,7 @@ InstanceImpl::InstanceImpl(int& argc, char** argv)
   }
 }
 
-void InstanceImpl::connectSignals() {
+void Main::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
 
   QObject::connect(central->dispenseButton(), &QPushButton::released, [this]() {
