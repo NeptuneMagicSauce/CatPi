@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_AUTOMOC ON) # must be before add_executable()
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+add_compile_options(-Wall -Wextra) # must be before add_executable()
 add_executable(${PROJECT_NAME} ${sources} ${resources})
 set(QTLIBLIST Widgets) # Core Gui
 find_package(Qt6 REQUIRED ${QTLIBLIST})
