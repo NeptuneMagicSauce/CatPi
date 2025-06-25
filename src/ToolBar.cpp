@@ -34,7 +34,7 @@ auto grayscaleQImage(QImage& image) {
       auto cLinear = 0.2126f * r + 0.7152f * g + 0.0722f * b;
       auto cSrgb =
           cLinear <= 0.0031308 ? (12.92f * cLinear) : (1.055f * std::pow(cLinear, 1.f / 2.4f) - 0.055f);
-      auto cLinear255 = (int)(cLinear * 255);
+      auto cLinear255 = (int)(cSrgb * 255);
       rgb = qRgba(cLinear255, cLinear255, cLinear255, qAlpha(rgb));
     }
   }
