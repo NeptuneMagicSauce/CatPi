@@ -28,10 +28,10 @@ struct InstanceImpl {
   void connectSignals();
 
   QApplication* app = nullptr;
-  MainWindow* window = nullptr;
   Weight* weight = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
+  MainWindow* window = nullptr;
 };
 
 Instance::Instance(int& argc, char** argv) : impl(new InstanceImpl(argc, argv)) {}
@@ -40,16 +40,13 @@ int Instance::exec() { return impl->app->exec(); }
 
 InstanceImpl::InstanceImpl(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
-      window(new MainWindow),
       weight(new Weight),
       central(new CentralWidget(weight->widget())),
-      toolbar(new ToolBar) {
-  window->addToolBar(Qt::LeftToolBarArea, toolbar);
+      toolbar(new ToolBar),
+      window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
-  window->setCentralWidget(central);
-  window->show();
-
+  window->show();    // must be after window is  finished constructing and after setStyleSheet
   connectSignals();  // must be after all members are constructed
 
   if (window->isSmallScreen) {

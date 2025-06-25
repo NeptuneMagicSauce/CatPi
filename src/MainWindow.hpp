@@ -1,16 +1,13 @@
 #pragma once
 
+struct QWidget;
+struct QToolBar;
+
 #include <QMainWindow>
 
 struct MainWindow : public QMainWindow {
-  MainWindow();
+  MainWindow(QWidget* centralWidget, QToolBar* toolbar);
+
   bool const isSmallScreen;
-
   void toggleFullscreen(bool);
-
-  //   void resizeEvent(QResizeEvent* event) override {
-  //     QMainWindow::resizeEvent(event);
-  //     std::cout << event->size().width() << "/" << event->size().height()
-  //               << std::endl;
-  //   }
 };
