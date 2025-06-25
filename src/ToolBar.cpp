@@ -6,12 +6,10 @@
 #include <iostream>
 #include <optional>
 
-auto standardIcon(auto name) {
-  return reinterpret_cast<QApplication*>(QApplication::instance())->style()->standardIcon(name);
-}
+#include "MainWindow.hpp"
 
 QIcon& ToolBar::fullScreenIcon(bool isFullScreen) {
-  static auto iconYes = standardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
+  static auto iconYes = MainWindow::StandardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
   static auto iconNo = std::optional<QIcon>{};
   if (iconNo == std::nullopt) {
     QTransform transform;
@@ -56,7 +54,7 @@ ToolBar::ToolBar() {
   setIconSize({90, 90});
 
   quit = new QAction();
-  quit->setIcon(standardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
+  quit->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
   // SP_TabCloseButton));
   quit->setText("Quit");
 
@@ -71,7 +69,8 @@ ToolBar::ToolBar() {
   fullscreen->setCheckable(true);
 
   calibration = new QAction();
-  calibration->setIcon(grayscaleQIcon(standardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
+  calibration->setIcon(
+      grayscaleQIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
   calibration->setText("Weight Calibration");
 
   addAction(fullscreen);

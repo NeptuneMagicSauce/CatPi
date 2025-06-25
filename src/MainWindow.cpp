@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 
+#include <QApplication>
 #include <QGuiApplication>
 #include <QScreen>
 
@@ -18,4 +19,8 @@ void MainWindow::toggleFullscreen(bool checked) {
       setWindowState(Qt::WindowMaximized);
     }
   }
+}
+
+QIcon MainWindow::StandardIcon(QStyle::StandardPixmap name) {
+  return reinterpret_cast<QApplication*>(QApplication::instance())->style()->standardIcon(name);
 }
