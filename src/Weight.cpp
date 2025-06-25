@@ -83,7 +83,7 @@ WeightImpl::WeightImpl() {
   tare.button->setText(tare.buttonText);
   tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
 
-  tare.value = Instance::instance->settings->value(tare.key, 0.0).toDouble();
+  tare.value = Instance::settings().value(tare.key, 0.0).toDouble();
   // // debug
   // std::cout << "Tare " << tare.value << endl;
   tare.buttonPressedTimer->setSingleShot(true);
@@ -169,7 +169,7 @@ void WeightImpl::connect() {
       tare.progress->setVisible(false);
       // cout << "long press" << endl;
       tare.value = massGrams;
-      Instance::instance->settings->setValue(tare.key, tare.value);
+      Instance::settings().setValue(tare.key, tare.value);
     }
   });
 }

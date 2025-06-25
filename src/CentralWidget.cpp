@@ -7,10 +7,9 @@
 #include <map>
 
 #include "Instance.hpp"
-#include "Weight.hpp"
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl();
+  CentralWidgetImpl(QWidget* weight);
   QWidget* main = nullptr;
   QWidget* calibration = nullptr;
   QStackedLayout* layout = nullptr;
@@ -19,17 +18,19 @@ struct CentralWidgetImpl {
                                                       {CentralWidget::Page::Calibration, 1}};
 };
 
-CentralWidget::CentralWidget() : impl(new CentralWidgetImpl()) { setLayout(impl->layout); }
+CentralWidget::CentralWidget(QWidget* weight) : impl(new CentralWidgetImpl(weight)) {
+  setLayout(impl->layout);
+}
 
 QPushButton* CentralWidget::widget() { return impl->dispense; }
 
-CentralWidgetImpl::CentralWidgetImpl() {
+CentralWidgetImpl::CentralWidgetImpl(QWidget* weight) {
   main = new QWidget();
   auto layoutMain = new QHBoxLayout();
   main->setLayout(layoutMain);
   dispense = new QPushButton("Now!");
   dispense->setSizePolicy({dispense->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
-  layoutMain->addWidget(Instance::instance->weight->widget());
+  layoutMain->addWidget(weight);
   layoutMain->addWidget(dispense);
 
   calibration = new QWidget();

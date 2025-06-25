@@ -14,11 +14,13 @@
 
 using namespace std;
 
-Instance* Instance::instance = nullptr;
+QSettings& Instance::settings() {
+  static auto ret = QSettings{};
+  return ret;
+}
 
 struct Application : public QApplication {
   Application(int& argc, char** argv, Instance* instance) : QApplication(argc, argv) {
-    Instance::instance = instance;
     QCoreApplication::setOrganizationName("CatPi");
     QCoreApplication::setApplicationName("CatPi");
     // setOrgName must be called before construction of QSettings
@@ -27,10 +29,9 @@ struct Application : public QApplication {
 
 Instance::Instance(int argc, char** argv)
     : app(new Application(argc, argv, this)),
-      settings(new QSettings),
       window(new MainWindow),
       weight(new Weight),
-      central(new CentralWidget()),
+      central(new CentralWidget(weight->widget())),
       toolbar(new ToolBar) {
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");

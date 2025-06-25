@@ -8,14 +8,13 @@ struct Weight;
 struct CentralWidget;
 
 struct Instance {
-  static Instance* instance;
-
   Instance(int argc, char** argv);
 
   void connectSignals();
 
+  static QSettings& settings();
+
   QApplication* app = nullptr;
-  QSettings* settings = nullptr;
   MainWindow* window = nullptr;
   Weight* weight = nullptr;
   CentralWidget* central = nullptr;

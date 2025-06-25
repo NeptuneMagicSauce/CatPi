@@ -30,7 +30,13 @@ void Instance::connectSignals() {
     });
   });
 
-  toolbar->connect();
+  QObject::connect(toolbar->fullscreen, &QAction::toggled, [&](bool checked) {
+    window->toggleFullscreen(checked);
+    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(checked));
+  });
+
+  QObject::connect(toolbar->calibration, &QAction::triggered,
+                   [&]() { central->setPage(CentralWidget::Page::Calibration); });
 
   weight->connect();
 

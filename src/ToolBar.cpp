@@ -10,9 +10,12 @@
 #include "Instance.hpp"
 #include "MainWindow.hpp"
 
-auto& fullScreenIcon(bool isFullScreen) {
-  static auto iconYes = Instance::instance->app->style()->standardIcon(
-      QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
+auto standardIcon(auto name) {
+  return reinterpret_cast<QApplication*>(QApplication::instance())->style()->standardIcon(name);
+}
+
+QIcon& ToolBar::fullScreenIcon(bool isFullScreen) {
+  static auto iconYes = standardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
   static auto iconNo = std::optional<QIcon>{};
   if (iconNo == std::nullopt) {
     QTransform transform;
@@ -57,8 +60,7 @@ ToolBar::ToolBar() {
   setIconSize({90, 90});
 
   quit = new QAction();
-  quit->setIcon(
-      Instance::instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
+  quit->setIcon(standardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
   // SP_TabCloseButton));
   quit->setText("Quit");
 
@@ -73,20 +75,10 @@ ToolBar::ToolBar() {
   fullscreen->setCheckable(true);
 
   calibration = new QAction();
-  calibration->setIcon(grayscaleQIcon(
-      Instance::instance->app->style()->standardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
+  calibration->setIcon(grayscaleQIcon(standardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
   calibration->setText("Weight Calibration");
 
   addAction(fullscreen);
   addAction(quit);
   addAction(calibration);
-}
-
-void ToolBar::connect() {
-  QObject::connect(fullscreen, &QAction::toggled, [&](bool checked) {
-    Instance::instance->window->toggleFullscreen(checked);
-    fullscreen->setIcon(fullScreenIcon(checked));
-  });
-  QObject::connect(calibration, &QAction::triggered,
-                   []() { Instance::instance->central->setPage(CentralWidget::Page::Calibration); });
 }

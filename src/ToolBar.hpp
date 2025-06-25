@@ -6,7 +6,9 @@ struct QAction;
 
 struct ToolBar : public QToolBar {
   ToolBar();
-  void connect();
+
+  static QIcon& fullScreenIcon(bool isFullScreen);
+
   QAction* quit = nullptr;
   QAction* fullscreen = nullptr;
   QAction* calibration = nullptr;
