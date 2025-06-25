@@ -2,8 +2,10 @@
 
 #include <QLabel>
 #include <QPushButton>
+#include <QStackedLayout>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <iostream>
 
 #include "MainWindow.hpp"
 
@@ -17,13 +19,22 @@ struct CalibrationImpl {
 //   return spacer;
 // };
 
+namespace {
+QStackedLayout* screens = nullptr;
+}
+
 Calibration::Calibration() {  // : impl() { new CalibrationImpl(this)) {
+
+  static auto first = true;
+  assert(first);  // singleton
+  first = false;
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
-  buttons.step1 = new QPushButton("Step 1");
-  buttons.step2 = new QPushButton("Step 2");
+  buttons.step1 = new QPushButton;
+  buttons.step2 = new QPushButton;
   buttons.back = new QToolButton;
+  // TODO test on pi: surely this back button is too small
   buttons.back->setText("Back");
 
   buttons.back->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_MediaSeekBackward));
@@ -39,13 +50,32 @@ Calibration::Calibration() {  // : impl() { new CalibrationImpl(this)) {
     return ret;
   }();
 
+  auto measure = [&](auto button, auto& title, auto& prompt) {
+    auto ret = new QWidget;
+    auto layout = new QHBoxLayout;
+    ret->setLayout(layout);
+
+    auto widget = new QWidget;
+    auto widgetLayout = new QVBoxLayout;
+    widget->setLayout(widgetLayout);
+
+    widgetLayout->addWidget(new QLabel(title));
+    widgetLayout->addWidget(new QLabel(QString{prompt} + "\nAnd press Ready"));
+
+    layout->addWidget(widget);
+    layout->addWidget(button);
+
+    button->setText("Ready");
+    return ret;
+  };
+
   auto central = [&]() {
     auto ret = new QWidget;
-    auto layout = new QVBoxLayout;
-    ret->setLayout(layout);
-    layout->addWidget(buttons.step1);
-    layout->addWidget(buttons.step2);
+    screens = new QStackedLayout;
+    ret->setLayout(screens);
     ret->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    screens->addWidget(measure(buttons.step1, "Empty Measure", "Remove any object from the scale"));
+    screens->addWidget(measure(buttons.step2, "Known Measure", "Put an object of known weight on the scale"));
     return ret;
   }();
 
@@ -56,5 +86,5 @@ Calibration::Calibration() {  // : impl() { new CalibrationImpl(this)) {
   layout->addWidget(central);
 }
 
-void Calibration::Callbacks::step1() {}
-void Calibration::Callbacks::step2() {}
+void Calibration::Callbacks::step1() { screens->setCurrentIndex(1); }
+void Calibration::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }
