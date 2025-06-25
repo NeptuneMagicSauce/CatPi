@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <iostream>
 
+#include "Calibration.hpp"
 #include "CentralWidget.hpp"
 #include "MainWindow.hpp"
 #include "PinCtrl.hpp"
@@ -24,6 +25,7 @@ struct InstanceImpl {
 
   QApplication* app = nullptr;
   Weight* weight = nullptr;
+  Calibration* calibration = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
@@ -41,7 +43,8 @@ int main(int argc, char** argv) { return Instance{argc, argv}.impl->app->exec();
 InstanceImpl::InstanceImpl(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
       weight(new Weight),
-      central(new CentralWidget(weight->widget())),
+      calibration(new Calibration),
+      central(new CentralWidget(weight->widget(), calibration)),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");

@@ -7,7 +7,7 @@
 #include <map>
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl(QWidget* weight);
+  CentralWidgetImpl(QWidget* weight, QWidget* calibration);
   QWidget* main = nullptr;
   QWidget* calibration = nullptr;
   QStackedLayout* layout = nullptr;
@@ -16,13 +16,14 @@ struct CentralWidgetImpl {
                                                       {CentralWidget::Page::Calibration, 1}};
 };
 
-CentralWidget::CentralWidget(QWidget* weight) : impl(new CentralWidgetImpl(weight)) {
+CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration)
+    : impl(new CentralWidgetImpl(weight, calibration)) {
   setLayout(impl->layout);
 }
 
 QPushButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
-CentralWidgetImpl::CentralWidgetImpl(QWidget* weight) {
+CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration) {
   main = new QWidget();
   auto layoutMain = new QHBoxLayout();
   main->setLayout(layoutMain);
@@ -30,11 +31,6 @@ CentralWidgetImpl::CentralWidgetImpl(QWidget* weight) {
   dispense->setSizePolicy({dispense->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
   layoutMain->addWidget(weight);
   layoutMain->addWidget(dispense);
-
-  calibration = new QWidget();
-  auto layoutCalibration = new QVBoxLayout();
-  layoutCalibration->addWidget(new QLabel("foo"));
-  calibration->setLayout(layoutCalibration);
 
   layout = new QStackedLayout();
   layout->insertWidget(indices.at(CentralWidget::Page::Main), main);

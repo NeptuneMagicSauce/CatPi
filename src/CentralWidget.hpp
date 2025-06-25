@@ -7,7 +7,7 @@ struct QWidget;
 struct CentralWidgetImpl;
 
 struct CentralWidget : public QWidget {
-  CentralWidget(QWidget* weight);
+  CentralWidget(QWidget* weight, QWidget* calibration);
 
   QPushButton* dispenseButton();
 
