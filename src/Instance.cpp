@@ -1,5 +1,3 @@
-#include "Instance.hpp"
-
 #include <QApplication>
 #include <QLabel>
 #include <QPushButton>
@@ -36,9 +34,7 @@ QSettings& Settings::instance() {
   return ret;
 }
 
-Instance::Instance(int& argc, char** argv) : impl(new InstanceImpl(argc, argv)) {}
-
-int main(int argc, char** argv) { return Instance{argc, argv}.impl->app->exec(); }
+int main(int argc, char** argv) { return InstanceImpl{argc, argv}.app->exec(); }
 
 InstanceImpl::InstanceImpl(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
