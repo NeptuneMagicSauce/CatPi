@@ -2,6 +2,7 @@
 
 #include <QLabel>
 #include <QPushButton>
+#include <QShowEvent>
 #include <QStackedLayout>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -86,5 +87,9 @@ Calibration::Calibration() {  // : impl() { new CalibrationImpl(this)) {
   layout->addWidget(central);
 }
 
+void Calibration::showEvent(QShowEvent* e) {
+  screens->setCurrentIndex(0);
+  QWidget::showEvent(e);
+}
 void Calibration::Callbacks::step1() { screens->setCurrentIndex(1); }
 void Calibration::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }

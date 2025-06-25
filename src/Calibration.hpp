@@ -1,6 +1,8 @@
 #pragma once
 
 struct QAbstractButton;
+struct QShowEvent;
+
 #include <QWidget>
 
 struct Calibration : public QWidget {
@@ -11,7 +13,7 @@ struct Calibration : public QWidget {
     QAbstractButton* step2 = nullptr;
     QAbstractButton* back = nullptr;
   } buttons;
-
+  void showEvent(QShowEvent* e) override;
   struct Callbacks {
     void step1();
     void step2();
