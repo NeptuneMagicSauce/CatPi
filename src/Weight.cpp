@@ -118,10 +118,10 @@ void WeightImpl::connect() {
       // auto const samples = 3;  // takes 150 ms
       // auto const samples = 1;
       auto const durationMs = 100;
-      QElapsedTimer elapsed;
-      elapsed.start();
+      // QElapsedTimer elapsed;
+      // elapsed.start();
       mass = hx711->weight(std::chrono::milliseconds{durationMs});
-      auto const ms = elapsed.elapsed();
+      // auto const ms = elapsed.elapsed();
       // std::cout << ms << " milliseconds " << ms / samples << " per sample " << endl;
       // std::cout << ms << " milliseconds " << durationMs << " max " << samples << " samples " << endl;
     } catch (HX711::GpioException e) {
