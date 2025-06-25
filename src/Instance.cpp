@@ -36,7 +36,7 @@ QSettings& Settings::instance() {
 
 Instance::Instance(int& argc, char** argv) : impl(new InstanceImpl(argc, argv)) {}
 
-int Instance::exec() { return impl->app->exec(); }
+int main(int argc, char** argv) { return Instance{argc, argv}.impl->app->exec(); }
 
 InstanceImpl::InstanceImpl(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
