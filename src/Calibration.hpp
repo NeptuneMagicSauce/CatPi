@@ -1,10 +1,19 @@
 #pragma once
 
+struct QAbstractButton;
 #include <QWidget>
-
-struct CalibrationImpl;
 
 struct Calibration : public QWidget {
   Calibration();
-  CalibrationImpl* impl;
+
+  struct {
+    QAbstractButton* step1 = nullptr;
+    QAbstractButton* step2 = nullptr;
+    QAbstractButton* back = nullptr;
+  } buttons;
+
+  struct Callbacks {
+    void step1();
+    void step2();
+  } callbacks;
 };

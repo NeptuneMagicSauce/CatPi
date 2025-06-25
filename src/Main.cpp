@@ -84,4 +84,11 @@ void Main::connectSignals() {
   auto fullscreenShortcut = new QShortcut(QKeySequence(Qt::Key_F11), window);
   fullscreenShortcut->setContext(Qt::ApplicationShortcut);
   QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::toggle);
+
+  QObject::connect(calibration->buttons.back, &QPushButton::released,
+                   [&] { central->setPage(CentralWidget::Page::Main); });
+  QObject::connect(calibration->buttons.step1, &QPushButton::released,
+                   [&] { calibration->callbacks.step1(); });
+  QObject::connect(calibration->buttons.step2, &QPushButton::released,
+                   [&] { calibration->callbacks.step2(); });
 }
