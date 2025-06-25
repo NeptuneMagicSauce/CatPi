@@ -2,7 +2,9 @@
 
 #include <QApplication>
 #include <QLabel>
+#include <QPushButton>
 #include <QSettings>
+#include <QShortcut>
 #include <QTimer>
 #include <iostream>
 
@@ -14,13 +16,29 @@
 #include "Weight.hpp"
 
 using namespace std;
+using PinCtrl::pinctrl;
 
 QSettings& Settings::instance() {
   static auto ret = QSettings{"no-organization", "CatPi"};
   return ret;
 }
 
-Instance::Instance(int argc, char** argv)
+struct InstanceImpl {
+  InstanceImpl(int& argc, char** argv);
+  void connectSignals();
+
+  QApplication* app = nullptr;
+  MainWindow* window = nullptr;
+  Weight* weight = nullptr;
+  CentralWidget* central = nullptr;
+  ToolBar* toolbar = nullptr;
+};
+
+Instance::Instance(int& argc, char** argv) : impl(new InstanceImpl(argc, argv)) {}
+
+int Instance::exec() { return impl->app->exec(); }
+
+InstanceImpl::InstanceImpl(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
       window(new MainWindow),
       weight(new Weight),
@@ -37,4 +55,37 @@ Instance::Instance(int argc, char** argv)
   if (window->isSmallScreen) {
     toolbar->fullscreen->setChecked(true);
   }
+}
+
+void InstanceImpl::connectSignals() {
+  QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
+
+  QObject::connect(central->widget(), &QPushButton::released, [this]() {
+    std::cout << "released" << std::endl;
+    // pinctrl("-p");
+    pinctrl("set 17 op dh");
+    central->widget()->setEnabled(false);
+    QTimer::singleShot(4000, [this]() {
+      pinctrl("set 17 op dl");
+      central->widget()->setEnabled(true);
+    });
+  });
+
+  QObject::connect(toolbar->fullscreen, &QAction::toggled, [&](bool checked) {
+    window->toggleFullscreen(checked);
+    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(checked));
+  });
+
+  QObject::connect(toolbar->calibration, &QAction::triggered,
+                   [&]() { central->setPage(CentralWidget::Page::Calibration); });
+
+  weight->connect();
+
+  auto quitShortcut = new QShortcut(QKeySequence(Qt::Key_F12), window);
+  quitShortcut->setContext(Qt::ApplicationShortcut);
+  QObject::connect(quitShortcut, &QShortcut::activated, app, &QApplication::quit);
+
+  auto fullscreenShortcut = new QShortcut(QKeySequence(Qt::Key_F11), window);
+  fullscreenShortcut->setContext(Qt::ApplicationShortcut);
+  QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::toggle);
 }

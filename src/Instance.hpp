@@ -1,19 +1,10 @@
 #pragma once
 
-struct QApplication;
-struct ToolBar;
-struct MainWindow;
-struct Weight;
-struct CentralWidget;
+struct InstanceImpl;
 
 struct Instance {
-  Instance(int argc, char** argv);
+  Instance(int& argc, char** argv);
+  int exec();
 
-  void connectSignals();
-
-  QApplication* app = nullptr;
-  MainWindow* window = nullptr;
-  Weight* weight = nullptr;
-  CentralWidget* central = nullptr;
-  ToolBar* toolbar = nullptr;
+  InstanceImpl* impl;
 };
