@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QLabel>
-#include <QScreen>
 #include <QSettings>
 #include <QTimer>
 #include <iostream>
@@ -16,6 +15,8 @@
 using namespace std;
 
 struct Application : public QApplication {
+  // make instance global
+
   Application(int& argc, char** argv) : QApplication(argc, argv) {
     QCoreApplication::setOrganizationName("CatPi");
     QCoreApplication::setApplicationName("CatPi");
@@ -29,8 +30,7 @@ Instance::Instance(int argc, char** argv)
       window(new MainWindow),
       weight(new Weight(this)),
       // central(new CentralWidget(this)),
-      toolbar(new ToolBar(this)),
-      isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
+      toolbar(new ToolBar(this)) {
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
@@ -43,7 +43,7 @@ Instance::Instance(int argc, char** argv)
 
   connectSignals();  // must be after all members are constructed
 
-  if (isSmallScreen) {
+  if (window->isSmallScreen) {
     toolbar->fullscreen->setChecked(true);
   }
 }

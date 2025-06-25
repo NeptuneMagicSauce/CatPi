@@ -22,7 +22,6 @@ struct Instance {
   Weight* weight = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
-  bool const isSmallScreen = false;
 
   struct {
     QPushButton* buttonDispense = nullptr;

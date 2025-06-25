@@ -82,16 +82,9 @@ ToolBar::ToolBar(Instance* instance) {
 }
 
 void ToolBar::connect(Instance* instance) {
-  QObject::connect(fullscreen, &QAction::toggled, [instance](bool checked) {
-    if (checked) {
-      instance->window->showFullScreen();
-    } else {
-      instance->window->showNormal();
-      if (instance->isSmallScreen) {
-        instance->window->setWindowState(Qt::WindowMaximized);
-      }
-    }
-    instance->toolbar->fullscreen->setIcon(fullScreenIcon(checked, instance));
+  QObject::connect(fullscreen, &QAction::toggled, [instance, this](bool checked) {
+    instance->window->toggleFullscreen(checked);
+    fullscreen->setIcon(fullScreenIcon(checked, instance));
   });
   QObject::connect(calibration, &QAction::triggered,
                    [instance]() { instance->central->setPage(CentralWidget::Page::Calibration); });
