@@ -6,10 +6,6 @@
 #include <iostream>
 #include <optional>
 
-#include "CentralWidget.hpp"
-#include "Instance.hpp"
-#include "MainWindow.hpp"
-
 auto standardIcon(auto name) {
   return reinterpret_cast<QApplication*>(QApplication::instance())->style()->standardIcon(name);
 }

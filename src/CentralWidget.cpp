@@ -6,8 +6,6 @@
 #include <QStackedLayout>
 #include <map>
 
-#include "Instance.hpp"
-
 struct CentralWidgetImpl {
   CentralWidgetImpl(QWidget* weight);
   QWidget* main = nullptr;

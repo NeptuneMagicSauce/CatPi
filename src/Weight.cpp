@@ -13,8 +13,8 @@
 
 #include "AdvancedHX711.h"
 #include "GpioException.h"
-#include "Instance.hpp"
 #include "Mass.h"
+#include "Settings.hpp"
 #include "TimeoutException.h"
 
 using namespace std;
@@ -83,7 +83,7 @@ WeightImpl::WeightImpl() {
   tare.button->setText(tare.buttonText);
   tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
 
-  tare.value = Instance::settings().value(tare.key, 0.0).toDouble();
+  tare.value = Settings::instance().value(tare.key, 0.0).toDouble();
   // // debug
   // std::cout << "Tare " << tare.value << endl;
   tare.buttonPressedTimer->setSingleShot(true);
@@ -169,7 +169,7 @@ void WeightImpl::connect() {
       tare.progress->setVisible(false);
       // cout << "long press" << endl;
       tare.value = massGrams;
-      Instance::settings().setValue(tare.key, tare.value);
+      Settings::instance().setValue(tare.key, tare.value);
     }
   });
 }

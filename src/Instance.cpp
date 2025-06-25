@@ -9,26 +9,19 @@
 #include "CentralWidget.hpp"
 #include "MainWindow.hpp"
 #include "PinCtrl.hpp"
+#include "Settings.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
 
 using namespace std;
 
-QSettings& Instance::settings() {
-  static auto ret = QSettings{};
+QSettings& Settings::instance() {
+  static auto ret = QSettings{"no-organization", "CatPi"};
   return ret;
 }
 
-struct Application : public QApplication {
-  Application(int& argc, char** argv, Instance* instance) : QApplication(argc, argv) {
-    QCoreApplication::setOrganizationName("CatPi");
-    QCoreApplication::setApplicationName("CatPi");
-    // setOrgName must be called before construction of QSettings
-  }
-};
-
 Instance::Instance(int argc, char** argv)
-    : app(new Application(argc, argv, this)),
+    : app(new QApplication(argc, argv)),
       window(new MainWindow),
       weight(new Weight),
       central(new CentralWidget(weight->widget())),
