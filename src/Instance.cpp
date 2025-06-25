@@ -18,11 +18,6 @@
 using namespace std;
 using PinCtrl::pinctrl;
 
-QSettings& Settings::instance() {
-  static auto ret = QSettings{"no-organization", "CatPi"};
-  return ret;
-}
-
 struct InstanceImpl {
   InstanceImpl(int& argc, char** argv);
   void connectSignals();
@@ -33,6 +28,11 @@ struct InstanceImpl {
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
 };
+
+QSettings& Settings::instance() {
+  static auto ret = QSettings{"no-organization", "CatPi"};
+  return ret;
+}
 
 Instance::Instance(int& argc, char** argv) : impl(new InstanceImpl(argc, argv)) {}
 
@@ -57,14 +57,14 @@ InstanceImpl::InstanceImpl(int& argc, char** argv)
 void InstanceImpl::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
 
-  QObject::connect(central->widget(), &QPushButton::released, [this]() {
+  QObject::connect(central->dispenseButton(), &QPushButton::released, [this]() {
     std::cout << "released" << std::endl;
     // pinctrl("-p");
     pinctrl("set 17 op dh");
-    central->widget()->setEnabled(false);
+    central->dispenseButton()->setEnabled(false);
     QTimer::singleShot(4000, [this]() {
       pinctrl("set 17 op dl");
-      central->widget()->setEnabled(true);
+      central->dispenseButton()->setEnabled(true);
     });
   });
 

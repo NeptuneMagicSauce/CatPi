@@ -20,7 +20,7 @@ CentralWidget::CentralWidget(QWidget* weight) : impl(new CentralWidgetImpl(weigh
   setLayout(impl->layout);
 }
 
-QPushButton* CentralWidget::widget() { return impl->dispense; }
+QPushButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
 CentralWidgetImpl::CentralWidgetImpl(QWidget* weight) {
   main = new QWidget();
