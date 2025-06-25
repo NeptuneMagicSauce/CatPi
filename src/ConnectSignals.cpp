@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QShortcut>
 #include <QTimer>
+#include <iostream>
 
 #include "Instance.hpp"
 #include "MainWindow.hpp"
@@ -18,7 +19,7 @@ void Instance::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
 
   QObject::connect(action.buttonDispense, &QPushButton::released, [this]() {
-    // std::cout << "released" << std::endl;
+    std::cout << "released" << std::endl;
     // pinctrl("-p");
     pinctrl("set 17 op dh");
     action.buttonDispense->setEnabled(false);

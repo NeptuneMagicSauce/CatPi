@@ -28,12 +28,16 @@ Instance::Instance(int argc, char** argv)
       settings(new QSettings),
       window(new MainWindow),
       weight(new Weight(this)),
-      central(new CentralWidget(this)),
+      // central(new CentralWidget(this)),
       toolbar(new ToolBar(this)),
       isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
   window->addToolBar(Qt::LeftToolBarArea, toolbar);
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
 
+  // TODO why does callback of dispense button fail ...
+  // when this->central is constructed same as the others above ?
+  // rather than next line ?!
+  central = new CentralWidget(this);
   window->setCentralWidget(central);
   window->show();
 
