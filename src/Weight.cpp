@@ -20,6 +20,9 @@
 using namespace std;
 
 struct WeightImpl {
+  WeightImpl(Instance *instance);
+  void connect();
+
   QWidget *widget = new QWidget();
   QTimer *timer = new QTimer;
   QLabel *label = new QLabel;
@@ -72,15 +75,15 @@ HX711::AdvancedHX711 *WeightImpl::tryCreateHX711() {
   return nullptr;
 }
 
-Weight::Weight(Instance *instance) : impl(new WeightImpl()) {
-  impl->label->setText("--");
-  impl->label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+Weight::Weight(Instance *instance) : impl(new WeightImpl(instance)) {}
 
-  auto &tare = impl->tare;
+WeightImpl::WeightImpl(Instance *instance) : instance(instance) {
+  label->setText("--");
+  label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
   tare.button->setText(tare.buttonText);
   tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
 
-  impl->instance = instance;
   tare.value = instance->settings->value(tare.key, 0.0).toDouble();
   // // debug
   // std::cout << "Tare " << tare.value << endl;
@@ -91,23 +94,25 @@ Weight::Weight(Instance *instance) : impl(new WeightImpl()) {
   tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
   auto layout = new QVBoxLayout();
-  impl->widget->setLayout(layout);
-  layout->addWidget(impl->label);
+  widget->setLayout(layout);
+  layout->addWidget(label);
   layout->addWidget(tare.progress);
   tare.progress->setVisible(false);
   layout->addWidget(tare.button);
 
-  impl->timer->setSingleShot(false);
-  if (impl->hx711 != nullptr) {
-    impl->timer->start(1000);
+  timer->setSingleShot(false);
+  if (hx711 != nullptr) {
+    timer->start(1000);
   }
 }
 
 QWidget *Weight::widget() const { return impl->widget; }
 
-void Weight::connect() {
-  QObject::connect(impl->timer, &QTimer::timeout, [this]() {
-    impl->label->setText("error");
+void Weight::connect() { impl->connect(); }
+
+void WeightImpl::connect() {
+  QObject::connect(timer, &QTimer::timeout, [this]() {
+    label->setText("error");
     auto mass = optional<HX711::Mass>{};
     try {
       // auto const samples = 15; // takes 1500 ms
@@ -116,7 +121,7 @@ void Weight::connect() {
       auto const durationMs = 100;
       QElapsedTimer elapsed;
       elapsed.start();
-      mass = impl->hx711->weight(std::chrono::milliseconds{durationMs});
+      mass = hx711->weight(std::chrono::milliseconds{durationMs});
       auto const ms = elapsed.elapsed();
       // std::cout << ms << " milliseconds " << ms / samples << " per sample " << endl;
       // std::cout << ms << " milliseconds " << durationMs << " max " << samples << " samples " << endl;
@@ -137,36 +142,35 @@ void Weight::connect() {
     // s.replace(" g", "\ngrams");
     // label->setText(s);
 
-    impl->massGrams = mass->getValue(HX711::Mass::Unit::G);  // Mass::getValue() is noexcept
+    massGrams = mass->getValue(HX711::Mass::Unit::G);  // Mass::getValue() is noexcept
     ostringstream massSs;
-    massSs << fixed << setprecision(1) << impl->massGrams - impl->tare.value;
-    impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
+    massSs << fixed << setprecision(1) << massGrams - tare.value;
+    label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
 
     // // debug
-    // cout << "mass " << impl->massGrams << " tare " << impl->tare.value << endl;
+    // cout << "mass " << massGrams << " tare " << tare.value << endl;
   });
 
-  QObject::connect(impl->tare.button, &QAbstractButton::pressed, [this]() {
-    impl->tare.buttonPressedTicks = 0;
-    impl->tare.progress->setValue(0);
-    impl->tare.progress->setVisible(true);
-    impl->tare.buttonPressedTimer->start();
+  QObject::connect(tare.button, &QAbstractButton::pressed, [this]() {
+    tare.buttonPressedTicks = 0;
+    tare.progress->setValue(0);
+    tare.progress->setVisible(true);
+    tare.buttonPressedTimer->start();
   });
-  QObject::connect(impl->tare.button, &QAbstractButton::released, [this]() {
-    impl->tare.buttonPressedTimer->stop();
-    impl->tare.progress->setVisible(false);
+  QObject::connect(tare.button, &QAbstractButton::released, [this]() {
+    tare.buttonPressedTimer->stop();
+    tare.progress->setVisible(false);
   });
-  QObject::connect(impl->tare.buttonPressedTimer, &QTimer::timeout, [this]() {
-    auto &tare = impl->tare;
+  QObject::connect(tare.buttonPressedTimer, &QTimer::timeout, [this]() {
     ++tare.buttonPressedTicks;
-    impl->tare.progress->setValue(tare.buttonPressedTicks);
+    tare.progress->setValue(tare.buttonPressedTicks);
     if (tare.buttonPressedTicks < tare.maxTicks) {
       tare.buttonPressedTimer->start();
     } else {
-      impl->tare.progress->setVisible(false);
+      tare.progress->setVisible(false);
       // cout << "long press" << endl;
-      impl->tare.value = impl->massGrams;
-      impl->instance->settings->setValue(impl->tare.key, impl->tare.value);
+      tare.value = massGrams;
+      instance->settings->setValue(tare.key, tare.value);
     }
   });
 }
