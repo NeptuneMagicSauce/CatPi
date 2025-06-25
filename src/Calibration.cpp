@@ -80,6 +80,16 @@ Calibration::Calibration() {  // : impl() { new CalibrationImpl(this)) {
     return ret;
   }();
 
+  // TODO
+  // text formatting: title page, title prompt, alignment
+  // a weight input for the second step
+  //   compatible with small screen touch only
+  //   default 200g
+  // some way to do hx711
+  // a live measure of the readings
+  // the calibration algorithm
+  // stored and restored
+
   auto layout = new QVBoxLayout();
   setLayout(layout);
 
