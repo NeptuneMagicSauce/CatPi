@@ -10,10 +10,6 @@
 
 #include "MainWindow.hpp"
 
-struct CalibrationImpl {
-  CalibrationImpl(Calibration*);
-};
-
 // auto spacer = []() {
 //   auto spacer = new QWidget;
 //   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -24,8 +20,7 @@ namespace {
 QStackedLayout* screens = nullptr;
 }
 
-Calibration::Calibration() {  // : impl() { new CalibrationImpl(this)) {
-
+Calibration::Calibration() {
   static auto first = true;
   assert(first);  // singleton
   first = false;
