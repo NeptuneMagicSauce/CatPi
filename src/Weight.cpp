@@ -23,7 +23,7 @@ struct WeightImpl {
   WeightImpl();
   void connect();
 
-  QWidget *widget = new QWidget();
+  QWidget *widget = new QWidget;
   QTimer *timer = new QTimer;
   QLabel *label = new QLabel;
   double massGrams = 0;
