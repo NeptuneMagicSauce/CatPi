@@ -58,10 +58,10 @@ struct Callbacks {
 } callbacks;
 }  // namespace
 
+#include "System.hpp"
+
 Calibration::Calibration() {
-  static auto first = true;
-  assert(first);  // singleton
-  first = false;
+  AssertSingleton();
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
