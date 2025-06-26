@@ -6,6 +6,8 @@
 #include <QStackedLayout>
 #include <map>
 
+#include "System.hpp"
+
 struct CentralWidgetImpl {
   CentralWidgetImpl(QWidget* weight, QWidget* calibration);
   QWidget* main = nullptr;
@@ -16,14 +18,19 @@ struct CentralWidgetImpl {
                                                       {CentralWidget::Page::Calibration, 1}};
 };
 
-CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration)
-    : impl(new CentralWidgetImpl(weight, calibration)) {
+namespace {
+CentralWidgetImpl* impl = nullptr;
+}
+
+CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration) {
+  impl = new CentralWidgetImpl(weight, calibration);
   setLayout(impl->layout);
 }
 
 QAbstractButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
 CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration) {
+  AssertSingleton();
   main = new QWidget();
   auto layoutMain = new QHBoxLayout();
   main->setLayout(layoutMain);

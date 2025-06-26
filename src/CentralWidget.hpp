@@ -4,7 +4,6 @@
 
 struct QAbstractButton;
 struct QWidget;
-struct CentralWidgetImpl;
 
 struct CentralWidget : public QWidget {
   CentralWidget(QWidget* weight, QWidget* calibration);
@@ -13,7 +12,4 @@ struct CentralWidget : public QWidget {
 
   enum struct Page { Main, Calibration };
   void setPage(Page page);
-
- private:
-  CentralWidgetImpl* impl;
 };

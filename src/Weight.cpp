@@ -15,6 +15,7 @@
 #include "GpioException.h"
 #include "Mass.h"
 #include "Settings.hpp"
+#include "System.hpp"
 #include "TimeoutException.h"
 
 using namespace std;
@@ -40,6 +41,10 @@ struct WeightImpl {
   } tare;
   static HX711::AdvancedHX711 *tryCreateHX711();
 };
+
+namespace {
+WeightImpl *impl = nullptr;
+}
 
 HX711::AdvancedHX711 *WeightImpl::tryCreateHX711() {
   try {
@@ -73,9 +78,10 @@ HX711::AdvancedHX711 *WeightImpl::tryCreateHX711() {
   return nullptr;
 }
 
-Weight::Weight() : impl(new WeightImpl(this)) {}
+Weight::Weight() { impl = new WeightImpl(this); }
 
 WeightImpl::WeightImpl(auto parent) {
+  AssertSingleton();
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
