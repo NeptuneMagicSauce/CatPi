@@ -21,7 +21,7 @@ CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration)
   setLayout(impl->layout);
 }
 
-QPushButton* CentralWidget::dispenseButton() { return impl->dispense; }
+QAbstractButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
 CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration) {
   main = new QWidget();

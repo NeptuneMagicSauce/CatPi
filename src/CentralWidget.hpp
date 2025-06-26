@@ -2,14 +2,14 @@
 
 #include <QWidget>
 
-struct QPushButton;
+struct QAbstractButton;
 struct QWidget;
 struct CentralWidgetImpl;
 
 struct CentralWidget : public QWidget {
   CentralWidget(QWidget* weight, QWidget* calibration);
 
-  QPushButton* dispenseButton();
+  QAbstractButton* dispenseButton();
 
   enum struct Page { Main, Calibration };
   void setPage(Page page);
