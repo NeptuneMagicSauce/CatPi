@@ -1,5 +1,7 @@
 #include "Calibration.hpp"
 
+#include <QFile>
+#include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QShowEvent>
@@ -29,20 +31,35 @@ Calibration::Calibration() {
 
   buttons.step1 = new QPushButton;
   buttons.step2 = new QPushButton;
-  buttons.back = new QToolButton;
-  // TODO test on pi: surely this back button is too small
-  buttons.back->setText("Back");
+  buttons.back = new QPushButton;
+  buttons.back->setSizePolicy(buttons.back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
 
   buttons.back->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_MediaSeekBackward));
 
+  auto widgetAlignCentered = [](auto widget) {
+    widget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    return widget;
+  };
+
+  auto widgetStyleSheeted = [](auto widget, auto stylesheet) {
+    widget->setStyleSheet(stylesheet);
+    return widget;
+  };
+
+  auto widgetFontSized = [&](auto widget, auto fontsize) {
+    return widgetStyleSheeted(widget,
+                              QString("QWidget{font-size: ") + QString::number(fontsize) + QString("pt; }"));
+  };
+
   auto topbar = [&]() {
-    auto ret = new QWidget;
+    auto ret = new QGroupBox;
     auto layout = new QHBoxLayout;
     ret->setLayout(layout);
-    layout->addWidget(buttons.back);
-    auto title = new QLabel("  Calibration");
-    title->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    layout->addWidget(title);
+    layout->addWidget(buttons.back, 1);
+    auto title = new QLabel("Calibration");
+    widgetAlignCentered(title);
+    widgetFontSized(title, 28);
+    layout->addWidget(title, 4);
     return ret;
   }();
 
@@ -55,13 +72,14 @@ Calibration::Calibration() {
     auto widgetLayout = new QVBoxLayout;
     widget->setLayout(widgetLayout);
 
-    widgetLayout->addWidget(new QLabel(title));
-    widgetLayout->addWidget(new QLabel(QString{prompt} + "\nAnd press Ready"));
+    widgetLayout->addWidget(widgetAlignCentered(new QLabel(title)));
+    widgetLayout->addWidget(widgetAlignCentered(new QLabel(QString{prompt} + "\nAnd press Ready")));
 
-    layout->addWidget(widget);
-    layout->addWidget(button);
+    layout->addWidget(widget, 3);
+    layout->addWidget(button, 1);
 
     button->setText("Ready");
+    button->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
     return ret;
   };
 
@@ -71,7 +89,8 @@ Calibration::Calibration() {
     ret->setLayout(screens);
     ret->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
     screens->addWidget(measure(buttons.step1, "Empty Measure", "Remove any object from the scale"));
-    screens->addWidget(measure(buttons.step2, "Known Measure", "Put an object of known weight on the scale"));
+    screens->addWidget(
+        measure(buttons.step2, "Known Measure", "Put an object of\nknown weight on the scale"));
     return ret;
   }();
 
@@ -88,8 +107,8 @@ Calibration::Calibration() {
   auto layout = new QVBoxLayout();
   setLayout(layout);
 
-  layout->addWidget(topbar);
-  layout->addWidget(central);
+  layout->addWidget(topbar, 1);
+  layout->addWidget(central, 4);
 }
 
 void Calibration::showEvent(QShowEvent* e) {
