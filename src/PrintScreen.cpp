@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void printScreen() {
+void printScreen() {  // must be called after ctor QApplication
   auto s = QGuiApplication::primaryScreen();
 
   auto p = [](string name, auto i) { return name + string(" ") + to_string(i); };
