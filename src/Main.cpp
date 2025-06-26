@@ -40,7 +40,7 @@ Main::Main(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
       weight(new Weight),
       calibration(new Calibration),
-      central(new CentralWidget(weight->widget(), calibration)),
+      central(new CentralWidget(weight, calibration)),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");

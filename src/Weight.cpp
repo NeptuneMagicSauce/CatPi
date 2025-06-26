@@ -20,10 +20,9 @@
 using namespace std;
 
 struct WeightImpl {
-  WeightImpl();
+  WeightImpl(auto parent);
   void connect();
 
-  QWidget *widget = new QWidget;
   QTimer *timer = new QTimer;
   QLabel *label = new QLabel;
   double massGrams = 0;
@@ -74,9 +73,9 @@ HX711::AdvancedHX711 *WeightImpl::tryCreateHX711() {
   return nullptr;
 }
 
-Weight::Weight() : impl(new WeightImpl()) {}
+Weight::Weight() : impl(new WeightImpl(this)) {}
 
-WeightImpl::WeightImpl() {
+WeightImpl::WeightImpl(auto parent) {
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
@@ -93,7 +92,7 @@ WeightImpl::WeightImpl() {
   tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
   auto layout = new QVBoxLayout();
-  widget->setLayout(layout);
+  parent->setLayout(layout);
   layout->addWidget(label);
   layout->addWidget(tare.progress);
   tare.progress->setVisible(false);
@@ -104,8 +103,6 @@ WeightImpl::WeightImpl() {
     timer->start(1000);
   }
 }
-
-QWidget *Weight::widget() const { return impl->widget; }
 
 void Weight::connect() { impl->connect(); }
 

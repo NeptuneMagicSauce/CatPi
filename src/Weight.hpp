@@ -1,13 +1,13 @@
 #pragma once
 
-struct QWidget;
+#include <QWidget>
 struct WeightImpl;
 
-class Weight {
+class Weight : public QWidget {
  public:
   Weight();
-  QWidget* widget() const;
-  void connect();  // const
+  void connect();
+
  private:
   WeightImpl* impl;
 };
