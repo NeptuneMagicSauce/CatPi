@@ -54,7 +54,8 @@ ToolBar::ToolBar() {
   setIconSize({90, 90});
 
   quit = new QAction();
-  quit->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_TitleBarCloseButton));
+  quit->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_LineEditClearButton));
+  // SP_TitleBarCloseButton));
   // SP_TabCloseButton));
   quit->setText("Quit");
 
@@ -70,10 +71,10 @@ ToolBar::ToolBar() {
 
   calibration = new QAction();
   calibration->setIcon(
-      grayscaleQIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_BrowserReload), {64, 64}));
+      grayscaleQIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_BrowserReload), {128, 128}));
   calibration->setText("Weight Calibration");
 
   addAction(fullscreen);
-  addAction(quit);
   addAction(calibration);
+  addAction(quit);
 }
