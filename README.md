@@ -75,3 +75,5 @@ do gpio from c -> relay before weight
 - libhx711: fix the busy wait
 - libhx711: implement a tare function
 - keyboard shortcuts: fullscreen and quit
+- calibration: screens for 2 measures
+- widget to input precise known weight
