@@ -1,5 +1,6 @@
 #include "Calibration.hpp"
 
+#include <QDial>
 #include <QFile>
 #include <QGroupBox>
 #include <QLabel>
@@ -20,7 +21,22 @@
 
 namespace {
 QStackedLayout* screens = nullptr;
-}
+int knownWeight = 200;
+QDial* knowWeightDial = nullptr;
+QLabel* knownWeightLabel = nullptr;
+
+struct {
+  QAbstractButton* step1 = nullptr;
+  QAbstractButton* step2 = nullptr;
+  QAbstractSlider* knownWeight = nullptr;
+} buttons;
+
+struct Callbacks {
+  void step1();
+  void step2();
+  void knowWeightChanged(int value);
+} callbacks;
+}  // namespace
 
 Calibration::Calibration() {
   static auto first = true;
@@ -29,8 +45,8 @@ Calibration::Calibration() {
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
-  buttons.step1 = new QPushButton;
-  buttons.step2 = new QPushButton;
+  ::buttons.step1 = new QPushButton;
+  ::buttons.step2 = new QPushButton;
   buttons.back = new QPushButton;
   buttons.back->setSizePolicy(buttons.back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
 
@@ -88,9 +104,9 @@ Calibration::Calibration() {
     screens = new QStackedLayout;
     ret->setLayout(screens);
     ret->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
-    screens->addWidget(measure(buttons.step1, "Empty Measure", "Remove any object from the scale"));
+    screens->addWidget(measure(::buttons.step1, "Empty Measure", "Remove any object from the scale"));
     screens->addWidget(
-        measure(buttons.step2, "Known Measure", "Put an object of\nknown weight on the scale"));
+        measure(::buttons.step2, "Known Measure", "Put an object of\nknown weight on the scale"));
     return ret;
   }();
 
@@ -115,5 +131,15 @@ void Calibration::showEvent(QShowEvent* e) {
   screens->setCurrentIndex(0);
   QWidget::showEvent(e);
 }
-void Calibration::Callbacks::step1() { screens->setCurrentIndex(1); }
-void Calibration::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }
+void ::Callbacks::step1() { screens->setCurrentIndex(1); }
+void ::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }
+void ::Callbacks::knowWeightChanged(int value) {
+  knownWeight = value;
+  knownWeightLabel->setText(QString::number(knownWeight));
+}
+void Calibration::connect() {
+  QObject::connect(::buttons.step1, &QAbstractButton::released, [&] { callbacks.step1(); });
+  QObject::connect(::buttons.step2, &QAbstractButton::released, [&] { callbacks.step2(); });
+  QObject::connect(::buttons.knownWeight, &QAbstractSlider::valueChanged,
+                   [&](auto value) { callbacks.knowWeightChanged(value); });
+}

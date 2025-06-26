@@ -1,6 +1,6 @@
+#include <QAbstractButton>
 #include <QApplication>
 #include <QLabel>
-#include <QPushButton>
 #include <QSettings>
 #include <QShortcut>
 #include <QTimer>
@@ -56,7 +56,7 @@ Main::Main(int& argc, char** argv)
 void Main::connectSignals() {
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
 
-  QObject::connect(central->dispenseButton(), &QPushButton::released, [this]() {
+  QObject::connect(central->dispenseButton(), &QAbstractButton::released, [this]() {
     std::cout << "released" << std::endl;
     // pinctrl("-p");
     pinctrl("set 17 op dh");
@@ -85,10 +85,7 @@ void Main::connectSignals() {
   fullscreenShortcut->setContext(Qt::ApplicationShortcut);
   QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::toggle);
 
-  QObject::connect(calibration->buttons.back, &QPushButton::released,
+  QObject::connect(calibration->buttons.back, &QAbstractButton::released,
                    [&] { central->setPage(CentralWidget::Page::Main); });
-  QObject::connect(calibration->buttons.step1, &QPushButton::released,
-                   [&] { calibration->callbacks.step1(); });
-  QObject::connect(calibration->buttons.step2, &QPushButton::released,
-                   [&] { calibration->callbacks.step2(); });
+  calibration->connect();
 }
