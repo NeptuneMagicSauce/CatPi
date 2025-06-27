@@ -11,13 +11,9 @@
 #include <iostream>
 #include <map>
 
-#include "AdvancedHX711.h"
-#include "GpioException.h"
 #include "LoadCell.hpp"
-#include "Mass.h"
 #include "Settings.hpp"
 #include "System.hpp"
-#include "TimeoutException.h"
 
 using namespace std;
 
@@ -40,7 +36,6 @@ struct WeightImpl {
     QString const buttonText = "⚖️ Tare";
     QProgressBar *progress = new QProgressBar();
   } tare;
-  static HX711::AdvancedHX711 *tryCreateHX711();
 };
 
 namespace {
@@ -81,10 +76,9 @@ void Weight::connect() { impl->connect(); }
 
 void WeightImpl::connect() {
   QObject::connect(timer, &QTimer::timeout, [this]() {
-    label->setText("error");
-
     auto mass = loadcell->valueGrams();
     if (mass == nullopt) {
+      label->setText("error");
       return;
     }
 

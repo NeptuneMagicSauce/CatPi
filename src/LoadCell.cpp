@@ -1,5 +1,6 @@
 #include "LoadCell.hpp"
 
+#include <QTimer>
 #include <cassert>
 #include <iostream>
 #include <map>
@@ -17,7 +18,8 @@ struct LoadCellImpl {
   static AdvancedHX711 *tryCreateHX711();
 
   std::chrono::milliseconds pollingInterval{100};
-  optional<double> valueGrams() const;
+  optional<double> valueGrams() const noexcept;
+  optional<double> reading() const noexcept;
 
   AdvancedHX711 *hx711 = tryCreateHX711();
 };
@@ -65,24 +67,36 @@ AdvancedHX711 *LoadCellImpl::tryCreateHX711() {
 
 // TODO fix emacs TAB goes to next error in compile
 
-optional<double> LoadCell::valueGrams() const { return impl->valueGrams(); }
-optional<double> LoadCellImpl::valueGrams() const {
+optional<double> LoadCell::valueGrams() const noexcept { return impl->valueGrams(); }
+optional<double> LoadCellImpl::valueGrams() const noexcept {
   if (hx711 == nullptr) {
     return {};
   }
 
-  auto mass = optional<Mass>{};
   try {
-    mass = hx711->weight(pollingInterval);
+    return hx711->weight(pollingInterval).getValue(Mass::Unit::G);
   } catch (GpioException e) {
-    std::cerr << __FILE__ << " GpioException " << e.what() << endl;
-    return {};
+    std::cerr << __FILE__ << ":" << __LINE__ << " GpioException " << e.what() << endl;
   } catch (TimeoutException &e) {
-    std::cerr << __FILE__ << " TimeoutException " << e.what() << endl;
-    return {};
+    std::cerr << __FILE__ << ":" << __LINE__ << " TimeoutException " << e.what() << endl;
   } catch (exception &e) {
-    std::cerr << __FILE__ << " " << e.what() << endl;
-    return {};
+    std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
   }
-  return mass->getValue(Mass::Unit::G);
+  return {};
+}
+
+optional<double> LoadCell::reading() const noexcept { return impl->reading(); }
+optional<double> LoadCellImpl::reading() const noexcept {
+  try {
+    auto ret = hx711->read(Options{pollingInterval});
+    // un-normalize
+    return (ret * hx711->getReferenceUnit()) + hx711->getOffset();
+  } catch (GpioException e) {
+    std::cerr << __FILE__ << ":" << __LINE__ << " GpioException " << e.what() << endl;
+  } catch (TimeoutException &e) {
+    std::cerr << __FILE__ << ":" << __LINE__ << " TimeoutException " << e.what() << endl;
+  } catch (exception &e) {
+    std::cerr << __FILE__ << ":" << __LINE__ << " " << e.what() << endl;
+  }
+  return {};
 }

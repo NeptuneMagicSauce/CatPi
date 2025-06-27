@@ -5,5 +5,6 @@
 struct LoadCell {
   LoadCell();
 
-  std::optional<double> valueGrams() const;
+  std::optional<double> valueGrams() const noexcept;
+  std::optional<double> reading() const noexcept;  // the decimal value uninterpreted
 };
