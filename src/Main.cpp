@@ -56,8 +56,24 @@ Main::Main(int& argc, char** argv)
 }
 
 void Main::connectSignals() {
-  QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
+  // Shortcuts
+  auto quitShortcut = new QShortcut(QKeySequence(Qt::Key_F12), window);
+  quitShortcut->setContext(Qt::ApplicationShortcut);
+  QObject::connect(quitShortcut, &QShortcut::activated, app, &QApplication::quit);
+  auto fullscreenShortcut = new QShortcut(QKeySequence(Qt::Key_F11), window);
+  fullscreenShortcut->setContext(Qt::ApplicationShortcut);
+  QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::toggle);
 
+  // ToolBar
+  QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
+  QObject::connect(toolbar->fullscreen, &QAction::toggled, [&](bool checked) {
+    window->toggleFullscreen(checked);
+    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(checked));
+  });
+  QObject::connect(toolbar->calibration, &QAction::triggered,
+                   [&]() { central->setPage(CentralWidget::Page::Calibration); });
+
+  // Dispense
   QObject::connect(central->dispenseButton(), &QAbstractButton::released, [this]() {
     std::cout << "released" << std::endl;
     // pinctrl("-p");
@@ -69,14 +85,7 @@ void Main::connectSignals() {
     });
   });
 
-  QObject::connect(toolbar->fullscreen, &QAction::toggled, [&](bool checked) {
-    window->toggleFullscreen(checked);
-    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(checked));
-  });
-
-  QObject::connect(toolbar->calibration, &QAction::triggered,
-                   [&]() { central->setPage(CentralWidget::Page::Calibration); });
-
+  // LoadCell
   QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
     if (auto data = loadcell->read()) {
       weight->update(data->value);
@@ -87,21 +96,20 @@ void Main::connectSignals() {
     }
   });
 
+  // Weight
   weight->connect();
 
-  auto quitShortcut = new QShortcut(QKeySequence(Qt::Key_F12), window);
-  quitShortcut->setContext(Qt::ApplicationShortcut);
-  QObject::connect(quitShortcut, &QShortcut::activated, app, &QApplication::quit);
-
-  auto fullscreenShortcut = new QShortcut(QKeySequence(Qt::Key_F11), window);
-  fullscreenShortcut->setContext(Qt::ApplicationShortcut);
-  QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::toggle);
-
+  // Calibration
   QObject::connect(calibration->buttons.back, &QAbstractButton::released,
                    [&] { central->setPage(CentralWidget::Page::Main); });
   QObject::connect(calibration->buttons.step1, &QAbstractButton::released, [&] {
     auto readingZero = loadcell->readPrecise();
     calibration->callbacks.step1(readingZero.has_value() ? readingZero->reading : optional<double>{});
+  });
+  QObject::connect(calibration->buttons.step2, &QAbstractButton::released, [&] {
+    auto readingKnown = loadcell->readPrecise();
+    calibration->callbacks.step2(readingKnown.has_value() ? readingKnown->reading : optional<double>{});
+    central->setPage(CentralWidget::Page::Main);
   });
   calibration->connect();
 }

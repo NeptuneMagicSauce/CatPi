@@ -189,11 +189,19 @@ void Calibration::showEvent(QShowEvent* e) {
 void Calibration::Callbacks::step1(std::optional<double> rawPrecise) {
   if (rawPrecise.has_value()) {
     readingZero = *rawPrecise;
-  } else {
   }
   screens->setCurrentIndex(1);
 }
-void Calibration::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }
+void Calibration::Callbacks::step2(std::optional<double> rawPrecise) {
+  if (rawPrecise.has_value()) {
+    readingKnown = *rawPrecise;
+  }
+
+  if (readingZero && readingKnown) {
+    auto ref = (readingKnown - readingZero) / knownWeight;
+    std::cout << "Ref " << std::round(ref) << " Offset " << readingZero << std::endl;
+  }
+}
 void ::Callbacks::knowWeightChanged(int value) {
   knownWeight = value;
   knownWeightLabel->setText(QString::number(knownWeight) + " grams");
