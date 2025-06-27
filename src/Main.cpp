@@ -8,6 +8,7 @@
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
+#include "LoadCell.hpp"
 #include "MainWindow.hpp"
 #include "PinCtrl.hpp"
 #include "Settings.hpp"
@@ -22,6 +23,7 @@ struct Main {
   void connectSignals();
 
   QApplication* app = nullptr;
+  LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
   Calibration* calibration = nullptr;
   CentralWidget* central = nullptr;
@@ -38,7 +40,8 @@ int main(int argc, char** argv) { return Main{argc, argv}.app->exec(); }
 
 Main::Main(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
-      weight(new Weight),
+      loadcell(new LoadCell),
+      weight(new Weight(loadcell)),
       calibration(new Calibration),
       central(new CentralWidget(weight, calibration)),
       toolbar(new ToolBar),

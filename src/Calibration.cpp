@@ -163,7 +163,8 @@ Calibration::Calibration() {
   // some way to do hx711
   // a live measure of the readings
   // the calibration algorithm
-  // stored and restored
+  // store and restore the calibration value
+  // store and restore the inputted know weight
 
   auto layout = new QVBoxLayout();
   setLayout(layout);
