@@ -22,10 +22,16 @@
 
 namespace {
 
+struct QDeltaDial;
+
 QStackedLayout* screens = nullptr;
 int knownWeight = 200;
 QLabel* knownWeightLabel = nullptr;
 QLabel* readingLabel = nullptr;
+QDeltaDial* deltaDial = nullptr;
+
+double readingZero = 0;
+double readingKnown = 0;
 
 auto const minWeight = 10;
 auto const maxWeight = 1000;
@@ -54,16 +60,8 @@ struct QDeltaDial : public QDial {
     });
   }
 };
-struct {
-  QAbstractButton* step1 = nullptr;
-  QAbstractButton* step2 = nullptr;
-  QDeltaDial* deltaDial = nullptr;
-
-} buttons;
 
 struct Callbacks {
-  void step1();
-  void step2();
   void knowWeightChanged(int value);
 } callbacks;
 }  // namespace
@@ -73,8 +71,8 @@ Calibration::Calibration() {
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
-  ::buttons.step1 = new QPushButton;
-  ::buttons.step2 = new QPushButton;
+  buttons.step1 = new QPushButton;
+  buttons.step2 = new QPushButton;
   buttons.back = new QPushButton;
   buttons.back->setSizePolicy(buttons.back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
 
@@ -119,17 +117,16 @@ Calibration::Calibration() {
     widgetLayout->addWidget(widgetAlignCentered(new QLabel(title)));
     widgetLayout->addWidget(widgetAlignCentered(new QLabel(QString{prompt} + "\nAnd press Ready")));
 
-    if (button == ::buttons.step2) {  // known weight screen
+    if (button == buttons.step2) {  // known weight screen
       auto parent = new QWidget;
       auto layout = new QVBoxLayout;
       parent->setLayout(layout);
       layout->addWidget(widget);
 
       knownWeightLabel = widgetAlignCentered(new QLabel);
-      callbacks.knowWeightChanged(knownWeight);
+      ::callbacks.knowWeightChanged(knownWeight);
 
-      auto deltaDial = new QDeltaDial();
-      ::buttons.deltaDial = deltaDial;
+      deltaDial = new QDeltaDial();
 
       auto group = new QGroupBox;
       auto groupLayout = new QHBoxLayout;
@@ -156,9 +153,9 @@ Calibration::Calibration() {
     screens = new QStackedLayout;
     ret->setLayout(screens);
     ret->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
-    screens->addWidget(measure(::buttons.step1, "Empty Measure", "Remove any object from the scale"));
+    screens->addWidget(measure(buttons.step1, "Empty Measure", "Remove any object from the scale"));
     screens->addWidget(
-        measure(::buttons.step2, "Known Measure", "Put an object of\nknown weight on the scale"));
+        measure(buttons.step2, "Known Measure", "Put an object of\nknown weight on the scale"));
     return ret;
   }();
 
@@ -189,23 +186,27 @@ void Calibration::showEvent(QShowEvent* e) {
   screens->setCurrentIndex(0);
   QWidget::showEvent(e);
 }
-void ::Callbacks::step1() { screens->setCurrentIndex(1); }
-void ::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }
+void Calibration::Callbacks::step1(std::optional<double> rawPrecise) {
+  if (rawPrecise.has_value()) {
+    readingZero = *rawPrecise;
+  } else {
+  }
+  screens->setCurrentIndex(1);
+}
+void Calibration::Callbacks::step2() { std::cout << __PRETTY_FUNCTION__ << std::endl; }
 void ::Callbacks::knowWeightChanged(int value) {
   knownWeight = value;
   knownWeightLabel->setText(QString::number(knownWeight) + " grams");
 }
 void Calibration::connect() {
-  QObject::connect(::buttons.step1, &QAbstractButton::released, [&] { callbacks.step1(); });
-  QObject::connect(::buttons.step2, &QAbstractButton::released, [&] { callbacks.step2(); });
-  QObject::connect(::buttons.deltaDial, &QAbstractSlider::valueChanged, [&] {
-    auto newWeight = knownWeight + ::buttons.deltaDial->delta;
+  QObject::connect(deltaDial, &QAbstractSlider::valueChanged, [&] {
+    auto newWeight = knownWeight + deltaDial->delta;
     if (newWeight > maxWeight || newWeight < minWeight) {
       return;
     }
-    callbacks.knowWeightChanged(newWeight);
+    ::callbacks.knowWeightChanged(newWeight);
   });
-  ::buttons.deltaDial->connect();
+  deltaDial->connect();
 }
 
 void Calibration::update(std::optional<double> reading) {

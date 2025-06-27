@@ -99,5 +99,9 @@ void Main::connectSignals() {
 
   QObject::connect(calibration->buttons.back, &QAbstractButton::released,
                    [&] { central->setPage(CentralWidget::Page::Main); });
+  QObject::connect(calibration->buttons.step1, &QAbstractButton::released, [&] {
+    auto readingZero = loadcell->readPrecise();
+    calibration->callbacks.step1(readingZero.has_value() ? readingZero->reading : optional<double>{});
+  });
   calibration->connect();
 }

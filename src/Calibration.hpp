@@ -10,8 +10,15 @@ struct Calibration : public QWidget {
   Calibration();
 
   struct {
+    QAbstractButton* step1 = nullptr;
+    QAbstractButton* step2 = nullptr;
     QAbstractButton* back = nullptr;
   } buttons;
+
+  struct Callbacks {
+    void step1(std::optional<double> rawPrecise);
+    void step2();
+  } callbacks;
 
   void showEvent(QShowEvent* e) override;
   void connect();

@@ -21,7 +21,7 @@ struct LoadCellImpl {
   AdvancedHX711 *hx711 = tryCreateHX711();
 
   static AdvancedHX711 *tryCreateHX711();
-  optional<double> valueGrams() const noexcept;
+  optional<double> valueGrams(const Options &options) const noexcept;
 };
 
 namespace {
@@ -70,8 +70,9 @@ AdvancedHX711 *LoadCellImpl::tryCreateHX711() {
   }
   return nullptr;
 }
-optional<LoadCell::Data> LoadCell::read() noexcept {
-  auto mass = impl->valueGrams();
+
+optional<LoadCell::Data> readInMode(const Options &options) noexcept {
+  auto mass = impl->valueGrams(options);
   if (mass.has_value() == false) {
     return {};
   }
@@ -80,16 +81,26 @@ optional<LoadCell::Data> LoadCell::read() noexcept {
   // un-normalize
   auto reading = (value * impl->hx711->getReferenceUnit()) + impl->hx711->getOffset();
 
-  return Data{value, reading};
+  return LoadCell::Data{value, reading};
 }
 
-optional<double> LoadCellImpl::valueGrams() const noexcept {
+optional<LoadCell::Data> LoadCell::read() noexcept {
+  // short timeout, only one sample, no busy wait
+  return readInMode(Options{impl->pollingInterval});
+};
+
+optional<LoadCell::Data> LoadCell::readPrecise() noexcept {
+  // fixed number of samples, no timeout, busy wait
+  return readInMode(Options{15});
+}
+
+optional<double> LoadCellImpl::valueGrams(const Options &options) const noexcept {
   if (hx711 == nullptr) {
     return {};
   }
 
   try {
-    return hx711->weight(pollingInterval).getValue(Mass::Unit::G);
+    return hx711->weight(options).getValue(Mass::Unit::G);
   } catch (GpioException e) {
     std::cerr << __FILE__ << ":" << __LINE__ << " GpioException " << e.what() << endl;
   } catch (TimeoutException &e) {
