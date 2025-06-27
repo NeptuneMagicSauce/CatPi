@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "MainWindow.hpp"
+#include "System.hpp"
 
 // auto spacer = []() {
 //   auto spacer = new QWidget;
@@ -20,9 +21,12 @@
 // };
 
 namespace {
+
 QStackedLayout* screens = nullptr;
 int knownWeight = 200;
 QLabel* knownWeightLabel = nullptr;
+QLabel* readingLabel = nullptr;
+
 auto const minWeight = 10;
 auto const maxWeight = 1000;
 
@@ -64,8 +68,6 @@ struct Callbacks {
 } callbacks;
 }  // namespace
 
-#include "System.hpp"
-
 Calibration::Calibration() {
   AssertSingleton();
 
@@ -93,7 +95,7 @@ Calibration::Calibration() {
                               QString("QWidget{font-size: ") + QString::number(fontsize) + QString("pt; }"));
   };
 
-  auto topbar = [&]() {
+  auto topbar = [&] {
     auto ret = new QGroupBox;
     auto layout = new QHBoxLayout;
     ret->setLayout(layout);
@@ -145,10 +147,11 @@ Calibration::Calibration() {
 
     button->setText("Ready");
     button->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+
     return ret;
   };
 
-  auto central = [&]() {
+  auto central = [&] {
     auto ret = new QWidget;
     screens = new QStackedLayout;
     ret->setLayout(screens);
@@ -159,9 +162,17 @@ Calibration::Calibration() {
     return ret;
   }();
 
+  auto bottombar = [&] {
+    auto ret = new QGroupBox;
+    auto layout = new QVBoxLayout;
+    ret->setLayout(layout);
+    readingLabel = new QLabel;
+    widgetAlignCentered(readingLabel);
+    layout->addWidget(readingLabel);
+    return ret;
+  }();
+
   // TODO
-  // some way to do hx711
-  // a live measure of the readings
   // the calibration algorithm
   // store and restore the calibration value
   // store and restore the inputted know weight
@@ -171,6 +182,7 @@ Calibration::Calibration() {
 
   layout->addWidget(topbar, 1);
   layout->addWidget(central, 4);
+  layout->addWidget(bottombar, 1);
 }
 
 void Calibration::showEvent(QShowEvent* e) {
@@ -194,4 +206,8 @@ void Calibration::connect() {
     callbacks.knowWeightChanged(newWeight);
   });
   ::buttons.deltaDial->connect();
+}
+
+void Calibration::update(std::optional<double> reading) {
+  readingLabel->setText(reading.has_value() ? QString::number(*reading) : QString{"error"});
 }

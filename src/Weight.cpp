@@ -70,7 +70,7 @@ WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
 void Weight::connect() { impl->connect(); }
 
 void Weight::update(std::optional<double> value) {
-  if (value == std::nullopt) {
+  if (value.has_value() == false) {
     impl->label->setText("Error");
     return;
   }

@@ -72,7 +72,7 @@ AdvancedHX711 *LoadCellImpl::tryCreateHX711() {
 }
 void LoadCell::update() noexcept {
   auto mass = impl->valueGrams();
-  if (mass == nullopt) {
+  if (mass.has_value() == false) {
     data = {};
     return;
   }

@@ -81,10 +81,10 @@ void Main::connectSignals() {
     loadcell->update();
     if (auto& data = loadcell->data) {
       weight->update(data->value);
-      // calibration->update(loadcell->reading);
+      calibration->update(data->reading);
     } else {
       weight->update({});
-      // calibration->update({});
+      calibration->update({});
     }
   });
 

@@ -4,6 +4,7 @@ struct QAbstractButton;
 struct QShowEvent;
 
 #include <QWidget>
+#include <optional>
 
 struct Calibration : public QWidget {
   Calibration();
@@ -14,4 +15,5 @@ struct Calibration : public QWidget {
 
   void showEvent(QShowEvent* e) override;
   void connect();
+  void update(std::optional<double> reading);
 };

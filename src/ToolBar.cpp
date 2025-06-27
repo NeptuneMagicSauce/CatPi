@@ -11,7 +11,7 @@
 QIcon& ToolBar::fullScreenIcon(bool isFullScreen) {
   static auto iconYes = MainWindow::StandardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
   static auto iconNo = std::optional<QIcon>{};
-  if (iconNo == std::nullopt) {
+  if (iconNo.has_value() == false) {
     QTransform transform;
     transform.rotate(180, Qt::ZAxis);
     auto pixmap = iconYes.pixmap(QSize{64, 64}).transformed(transform);
