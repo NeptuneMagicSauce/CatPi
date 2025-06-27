@@ -54,7 +54,7 @@ do gpio from c -> relay before weight
   device name in /sys/kernel/debug/pinctrl/pinctrl-devices
   folder /sys/kernel/debug/pinctrl/$devicename
   read = grep gpio17 pins
-  write = TODO
+  write = todo
   maybe because there are few writes:
   call pinctrl, like relay_off/on
   port ~/bin/relay* to c++

@@ -83,8 +83,6 @@ optional<LoadCell::Data> LoadCell::read() noexcept {
   return Data{value, reading};
 }
 
-// TODO fix emacs TAB goes to next error in compile
-
 optional<double> LoadCellImpl::valueGrams() const noexcept {
   if (hx711 == nullptr) {
     return {};
