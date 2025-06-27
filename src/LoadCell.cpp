@@ -70,18 +70,17 @@ AdvancedHX711 *LoadCellImpl::tryCreateHX711() {
   }
   return nullptr;
 }
-void LoadCell::update() noexcept {
+optional<LoadCell::Data> LoadCell::read() noexcept {
   auto mass = impl->valueGrams();
   if (mass.has_value() == false) {
-    data = {};
-    return;
+    return {};
   }
 
   auto value = *mass;
   // un-normalize
   auto reading = (value * impl->hx711->getReferenceUnit()) + impl->hx711->getOffset();
 
-  data = {value, reading};
+  return Data{value, reading};
 }
 
 // TODO fix emacs TAB goes to next error in compile

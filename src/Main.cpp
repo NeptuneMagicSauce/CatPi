@@ -78,8 +78,7 @@ void Main::connectSignals() {
                    [&]() { central->setPage(CentralWidget::Page::Calibration); });
 
   QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
-    loadcell->update();
-    if (auto& data = loadcell->data) {
+    if (auto data = loadcell->read()) {
       weight->update(data->value);
       calibration->update(data->reading);
     } else {

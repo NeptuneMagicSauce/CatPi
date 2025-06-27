@@ -6,13 +6,12 @@
 struct LoadCell {
   LoadCell();
 
-  void update() noexcept;
-
   struct Data {
     double value = 0;
     double reading = 0;
   };
-  std::optional<Data> data;
+
+  std::optional<Data> read() noexcept;
 
   QTimer* timer = nullptr;
 };
