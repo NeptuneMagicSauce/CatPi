@@ -209,5 +209,6 @@ void Calibration::connect() {
 }
 
 void Calibration::update(std::optional<double> reading) {
-  readingLabel->setText(reading.has_value() ? QString::number(*reading) : QString{"error"});
+  readingLabel->setText("Raw reading: " +
+                        (reading.has_value() ? QString::number(*reading) : QString{"error"}));
 }
