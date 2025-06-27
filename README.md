@@ -29,8 +29,10 @@ ninja
 - logic "weight goes down <=> eat event"
 - logic "dispense when eaten and/or dispense > 10 minutes away"
 
-- easy change of setting "min duration between servings"
-- easy change of setting "duration of button/relay press" (<-> quantity)
+- settings to easy-change in dedicated menu:
+  - min duration between servings
+  - duration of button/relay press (<-> quantity)
+  - load cell polling timeout, for cpu consumption when unplugged
 
 - logs of weight change, of eat and dispense events
 - icons: nicer
