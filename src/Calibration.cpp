@@ -23,6 +23,8 @@ namespace {
 QStackedLayout* screens = nullptr;
 int knownWeight = 200;
 QLabel* knownWeightLabel = nullptr;
+auto const minWeight = 10;
+auto const maxWeight = 1000;
 
 // a dial to input small deltas, wrapping
 // @member delta: the difference in value when it changed
@@ -30,15 +32,20 @@ struct QDeltaDial : public QDial {
   int oldValue = 0;
   int delta = 0;
   QDeltaDial(QWidget* parent = nullptr) : QDial(parent) {
-    setMaximum(10);
+    setMaximum(30);
     setWrapping(true);
   }
   void connect() {
     QObject::connect(this, &QAbstractSlider::valueChanged, [&](auto value) {
       delta = value - oldValue;
-      if (std::abs(delta) > maximum() / 4) {  // just wrapped, delta is max range
+      auto const firstQuarter = maximum() / 4;
+      auto const lastQuarter = (maximum() * 3) / 4;
+      if ((oldValue < firstQuarter && value > lastQuarter) ||
+          (oldValue > lastQuarter && value < firstQuarter)) {
+        // just wrapped on the other size of zero <-> delta is invalid
         delta = 0;
       }
+
       oldValue = value;
     });
   }
@@ -46,7 +53,6 @@ struct QDeltaDial : public QDial {
 struct {
   QAbstractButton* step1 = nullptr;
   QAbstractButton* step2 = nullptr;
-  QAbstractSlider* knownWeight = nullptr;
   QDeltaDial* deltaDial = nullptr;
 
 } buttons;
@@ -116,14 +122,7 @@ Calibration::Calibration() {
       auto layout = new QVBoxLayout;
       parent->setLayout(layout);
       layout->addWidget(widget);
-      auto dial = new QDial;
-      dial->setNotchesVisible(true);
-      dial->setNotchTarget(50);
-      dial->setMinimum(10);
-      dial->setMaximum(1000);
-      dial->setWrapping(false);
-      dial->setValue(knownWeight);
-      ::buttons.knownWeight = dial;
+
       knownWeightLabel = widgetAlignCentered(new QLabel);
       callbacks.knowWeightChanged(knownWeight);
 
@@ -134,18 +133,8 @@ Calibration::Calibration() {
       auto groupLayout = new QHBoxLayout;
       group->setLayout(groupLayout);
 
-      groupLayout->addWidget(dial, 2);
-      groupLayout->addWidget(deltaDial, 1);
-      groupLayout->addWidget(knownWeightLabel, 2);
-
-      // alternative layout from previous 3 lines ->
-      // auto subgroup = new QWidget;
-      // auto subgroupLayout = new QVBoxLayout;
-      // subgroup->setLayout(subgroupLayout);
-      // subgroupLayout->addWidget(deltaDial);
-      // subgroupLayout->addWidget(knownWeightLabel);
-      // groupLayout->addWidget(dial);
-      // groupLayout->addWidget(subgroup);
+      groupLayout->addWidget(deltaDial);
+      groupLayout->addWidget(knownWeightLabel);
 
       layout->addWidget(group);
       widget = parent;
@@ -196,15 +185,12 @@ void ::Callbacks::knowWeightChanged(int value) {
 void Calibration::connect() {
   QObject::connect(::buttons.step1, &QAbstractButton::released, [&] { callbacks.step1(); });
   QObject::connect(::buttons.step2, &QAbstractButton::released, [&] { callbacks.step2(); });
-  QObject::connect(::buttons.knownWeight, &QAbstractSlider::valueChanged,
-                   [&](auto value) { callbacks.knowWeightChanged(value); });
   QObject::connect(::buttons.deltaDial, &QAbstractSlider::valueChanged, [&] {
     auto newWeight = knownWeight + ::buttons.deltaDial->delta;
-    if (newWeight > ::buttons.knownWeight->maximum() || newWeight < ::buttons.knownWeight->minimum()) {
+    if (newWeight > maxWeight || newWeight < minWeight) {
       return;
     }
     callbacks.knowWeightChanged(newWeight);
-    ::buttons.knownWeight->setValue(knownWeight);
   });
   ::buttons.deltaDial->connect();
 }

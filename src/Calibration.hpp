@@ -2,7 +2,6 @@
 
 struct QAbstractButton;
 struct QShowEvent;
-struct QAbstractSlider;
 
 #include <QWidget>
 
