@@ -1,7 +1,6 @@
 #include <QAbstractButton>
 #include <QApplication>
 #include <QLabel>
-#include <QSettings>
 #include <QShortcut>
 #include <QTimer>
 #include <iostream>
@@ -77,6 +76,17 @@ void Main::connectSignals() {
 
   QObject::connect(toolbar->calibration, &QAction::triggered,
                    [&]() { central->setPage(CentralWidget::Page::Calibration); });
+
+  QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
+    loadcell->update();
+    if (auto& data = loadcell->data) {
+      weight->update(data->value);
+      // calibration->update(loadcell->reading);
+    } else {
+      weight->update({});
+      // calibration->update({});
+    }
+  });
 
   weight->connect();
 

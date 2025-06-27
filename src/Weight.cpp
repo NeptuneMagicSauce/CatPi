@@ -4,7 +4,6 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QSettings>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <iomanip>
@@ -21,7 +20,6 @@ struct WeightImpl {
   WeightImpl(auto parent, LoadCell *loadcell);
   void connect();
 
-  QTimer *timer = new QTimer;
   QLabel *label = new QLabel;
   double massGrams = 0;
   LoadCell *loadcell;
@@ -67,29 +65,25 @@ WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
   layout->addWidget(tare.progress);
   tare.progress->setVisible(false);
   layout->addWidget(tare.button);
-
-  timer->setSingleShot(false);
-  timer->start(1000);
 }
 
 void Weight::connect() { impl->connect(); }
 
+void Weight::update(std::optional<double> value) {
+  if (value == std::nullopt) {
+    impl->label->setText("Error");
+    return;
+  }
+
+  ostringstream massSs;
+  massSs << fixed << setprecision(1) << *value - impl->tare.value;
+  impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
+
+  // // debug
+  // cout << "mass " << value << " tare " << impl->tare.value << endl;
+}
+
 void WeightImpl::connect() {
-  QObject::connect(timer, &QTimer::timeout, [this]() {
-    auto mass = loadcell->valueGrams();
-    if (mass == nullopt) {
-      label->setText("error");
-      return;
-    }
-
-    ostringstream massSs;
-    massSs << fixed << setprecision(1) << *mass - tare.value;
-    label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
-
-    // // debug
-    // cout << "mass " << massGrams << " tare " << tare.value << endl;
-  });
-
   QObject::connect(tare.button, &QAbstractButton::pressed, [this]() {
     tare.buttonPressedTicks = 0;
     tare.progress->setValue(0);
