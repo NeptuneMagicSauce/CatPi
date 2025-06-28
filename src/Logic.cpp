@@ -92,17 +92,17 @@ void Logic::update(std::optional<double> weightGrams, double tare) {
   auto& dispenseTime = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
-  auto weightAboveThreshold = weightGrams.has_value() ? (weightGrams < 1.0) : false;
+  auto weightTarred = optional<double>{};
+  if (weightGrams.has_value()) {
+    weightTarred = *weightGrams - tare;
+  }
+  auto weightAboveThreshold = weightTarred.has_value() ? (weightTarred < 0.8) : false;
   auto& start = dispenseTime.has_value() ? *dispenseTime : impl->startTime;
   auto elapsed = start.secsTo(now);
   auto timeAboveThreshold = elapsed > impl->delaySeconds;
   impl->elapsed = elapsed;
 
   auto log = QString{};
-  auto weightTarred = optional<double>{};
-  if (weightGrams.has_value()) {
-    weightTarred = *weightGrams - tare;
-  }
   for (auto toLog : vector<QString>{
            now.time().toString(),
            weightTarred.has_value() ? QString::number(*weightTarred) : QString{"no weight"},
