@@ -70,17 +70,20 @@ void Weight::connect() { impl->connect(); }
 
 double Weight::tare() { return impl->tare.value; }
 
-void Weight::update(std::optional<double> value) {
+double Weight::update(std::optional<double> value) {
   if (value.has_value() == false) {
     impl->label->setText("Error");
-    return;
+    return 0;
   }
 
   ostringstream massSs;
-  massSs << fixed << setprecision(1) << *value - impl->tare.value;
+  auto weightTarred = *value - impl->tare.value;
+  massSs << fixed << setprecision(1) << weightTarred;
   impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
 
   impl->massGrams = *value;
+
+  return weightTarred;
 
   // // debug
   // cout << "mass " << value << " tare " << impl->tare.value << endl;

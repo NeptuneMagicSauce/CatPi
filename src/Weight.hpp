@@ -10,6 +10,6 @@ class Weight : public QWidget {
   Weight(LoadCell*);
 
   void connect();
-  void update(std::optional<double> value);
+  double update(std::optional<double> value);
   double tare();
 };

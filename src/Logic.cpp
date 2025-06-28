@@ -88,14 +88,10 @@ void LogicImpl::dispense() {
   previousDispense = now;
 }
 
-void Logic::update(std::optional<double> weightGrams, double tare) {
+void Logic::update(std::optional<double> weightTarred, double tare) {
   auto& dispenseTime = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
-  auto weightTarred = optional<double>{};
-  if (weightGrams.has_value()) {
-    weightTarred = *weightGrams - tare;
-  }
   auto weightAboveThreshold = weightTarred.has_value() ? (weightTarred < 0.8) : false;
   auto& start = dispenseTime.has_value() ? *dispenseTime : impl->startTime;
   auto elapsed = start.secsTo(now);
@@ -119,7 +115,6 @@ void Logic::update(std::optional<double> weightGrams, double tare) {
   }
 
   // TODO dispense: button set enabled false
-  // TODO dry substract tare
   // TODO bug: the waitwidgets are pushed offscreen when tare progress bar is shown (pi only)
   // TODO delay: dont change seconds but print minutes: it's not WYSIWYG
   // TODO calibration dial is too small

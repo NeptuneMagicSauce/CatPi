@@ -87,15 +87,16 @@ void Main::connectSignals() {
 
   // LoadCell
   QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
+    auto tare = weight->tare();
     if (auto data = loadcell->read()) {
-      weight->update(data->value);
+      auto weightTarred = weight->update(data->value);
       calibration->update(data->reading);
-      logic->update(data->value, weight->tare());
+      logic->update(weightTarred, tare);
     } else {
       weight->update({});
       calibration->update({});
 
-      logic->update(loadcell->hasGPIO() ? optional<double>{} : 0.0, weight->tare());
+      logic->update(loadcell->hasGPIO() ? optional<double>{} : 0.0, tare);
     }
 
     waitwidgets->setTimeToDispense(logic->timeToDispense());
