@@ -7,6 +7,12 @@ ninja
 
 # TODO
 
+- button to reset calibration to factory defaults
+  because if you go through the calibration screens
+  but you don't have the known weight
+  but you put your finger on the scale
+  then it's in a state with bad calibration data
+
 - icons: nicer
 
 - signal of weight is noisy
