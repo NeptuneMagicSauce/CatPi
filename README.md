@@ -6,36 +6,38 @@ ninja
 ```
 
 # TODO
-- libhx711: implement calibration
-- settings editor:
- - two pins of HX711
- - gain?
- - duration of confirm tare
- - calibration data
+
+- icons: nicer
+
+- logic: dont dispense right after eating, have a delay
+
+- logic: bug sometimes dispense zero or very little: detect and dispense again
+
 - libhx711: what happens when unplugged? crashes
  - start unplugged
  - unplug/replug multiple times
  - start unplugged then plug (multiple times)
  - start in buggy state
+
 - libhx711: can we take out the implementation and do it in tree?
 - libhx711: catch all exceptions same as samples: TimeOut, see all bins
 
-- weight graphic widget: progress bar or circular dial?
-- with history: histogram?
-- tare button (saved and restored)
+- also long-press-protect the DispenseNow! button ?
 
-- on quit: all driven pins to low
+- weights history: histogram?
 
-- logic "weight goes down <=> eat event"
-- logic "dispense when eaten and/or dispense > 10 minutes away"
-
-- settings to easy-change in dedicated menu:
+- settings menu to easy-change in dedicated menu:
   - duration of button/relay press (<-> quantity)
   - load cell polling timeout, for cpu consumption when unplugged
   - minimum weight for bowl is empty
+  - two pins of HX711
+  - gain?
+  - duration of confirm tare
+  - calibration data ?
 
 - logs of weight change, of eat and dispense events
-- icons: nicer
+
+- disable dpi scaling on linux side for emacs and CatPi
 
 # DONE
 - two horizonal split panels
@@ -79,3 +81,8 @@ do gpio from c -> relay before weight
 - keyboard shortcuts: fullscreen and quit
 - calibration: screens for 2 measures
 - widget to input precise known weight
+- libhx711: implement calibration
+- tare button (saved and restored)
+- logic "weight goes down <=> eat event"
+- logic "dispense when eaten and/or dispense > 10 minutes away"
+- NO: weight graphic widget: progress bar or circular dial?

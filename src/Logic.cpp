@@ -114,15 +114,6 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
     impl->dispense();
     dispensed = true;
   }
-
-  // TODO hysteresis: when eating, weight will peak way below zero and dispense while eating
-  // TODO hysteresis: dont dispense right after eating, have a delay
-
-  // TODO bug sometimes dispense zero: detect and dispense again
-
-  // TODO also long-press-protect the Now! button ?
-
-  // TODO disable dpi scaling on linux side
 }
 
 void LogicImpl::logEvent(QString const& event) {
