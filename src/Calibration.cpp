@@ -9,7 +9,7 @@
 #include <QStackedLayout>
 #include <QToolButton>
 #include <QVBoxLayout>
-#include <iostream>
+// #include <iostream>
 
 #include "MainWindow.hpp"
 #include "Settings.hpp"

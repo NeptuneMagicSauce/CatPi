@@ -4,19 +4,18 @@
 #include <QShortcut>
 #include <QStatusBar>
 #include <QTimer>
-#include <iostream>
+// #include <iostream>
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
 #include "LoadCell.hpp"
+#include "Logic.hpp"
 #include "MainWindow.hpp"
-#include "PinCtrl.hpp"
 #include "Settings.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
 
 using namespace std;
-using PinCtrl::pinctrl;
 
 struct Main {
   Main(int& argc, char** argv);
@@ -29,6 +28,7 @@ struct Main {
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
+  Logic* logic = nullptr;
 };
 
 QSettings& Settings::instance() {
@@ -45,7 +45,8 @@ Main::Main(int& argc, char** argv)
       calibration(new Calibration),
       central(new CentralWidget(weight, calibration)),
       toolbar(new ToolBar),
-      window(new MainWindow(central, toolbar)) {
+      window(new MainWindow(central, toolbar)),
+      logic(new Logic) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
@@ -76,14 +77,8 @@ void Main::connectSignals() {
 
   // Dispense
   QObject::connect(central->dispenseButton(), &QAbstractButton::released, [this]() {
-    // std::cout << "released" << std::endl;
-    // pinctrl("-p");
-    pinctrl("set 17 op dh");
     central->dispenseButton()->setEnabled(false);
-    QTimer::singleShot(4000, [this]() {
-      pinctrl("set 17 op dl");
-      central->dispenseButton()->setEnabled(true);
-    });
+    logic->manualDispense();
   });
 
   // LoadCell
@@ -118,4 +113,8 @@ void Main::connectSignals() {
     central->statusMessage(status);
   });
   calibration->connect();
+
+  // Logic
+  logic->connect();
+  QObject::connect(logic->timer, &QTimer::timeout, [&] { central->dispenseButton()->setEnabled(true); });
 }
