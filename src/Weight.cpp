@@ -16,11 +16,13 @@
 using namespace std;
 
 struct WeightImpl {
-  WeightImpl(auto parent, LoadCell *loadcell);
+  WeightImpl(LoadCell *loadcell);
   void connect();
 
   QLabel *label = new QLabel;
   QLabel *labelFooter = new QLabel;
+  QTimer *eventTareFinished = new QTimer;
+  QLayout *layout = nullptr;
   double massGrams = 0;
   LoadCell *loadcell;
   struct {
@@ -40,9 +42,12 @@ namespace {
 WeightImpl *impl = nullptr;
 }
 
-Weight::Weight(LoadCell *loadcell) { impl = new WeightImpl(this, loadcell); }
+Weight::Weight(LoadCell *loadcell) : messageFinished("✌️✌️✌️") {
+  impl = new WeightImpl(loadcell);
+  setLayout(impl->layout);
+}
 
-WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
+WeightImpl::WeightImpl(LoadCell *loadcell) : loadcell(loadcell) {
   AssertSingleton();
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -63,18 +68,23 @@ WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
   tare.progress->setMaximumHeight(15);
   tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
-  auto layout = new QVBoxLayout();
-  parent->setLayout(layout);
+  layout = new QVBoxLayout();
   layout->addWidget(label);
   layout->addWidget(labelFooter);
   layout->addWidget(tare.progress);
   tare.progress->setVisible(false);
   layout->addWidget(tare.button);
+
+  eventTareFinished = new QTimer;
+  eventTareFinished->setSingleShot(true);
+  eventTareFinished->setInterval(1);
 }
 
 void Weight::connect() { impl->connect(); }
 
 double Weight::tare() { return impl->tare.value; }
+
+QTimer *Weight::eventTareFinished() { return impl->eventTareFinished; }
 
 double Weight::update(std::optional<double> value) {
   if (value.has_value() == false) {
@@ -116,6 +126,7 @@ void WeightImpl::connect() {
       // cout << "long press " << massGrams << endl;
       tare.value = massGrams;
       Settings::instance().setValue(tare.key, tare.value);
+      eventTareFinished->start();
     }
   });
 }

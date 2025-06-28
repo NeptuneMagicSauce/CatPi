@@ -116,6 +116,8 @@ void Main::connectSignals() {
 
   // Weight
   weight->connect();
+  QObject::connect(weight->eventTareFinished(), &QTimer::timeout,
+                   [&] { central->statusMessage(weight->messageFinished); });
 
   // Calibration
   QObject::connect(calibration->buttons.back, &QAbstractButton::released,
