@@ -39,6 +39,8 @@ LoadCell::LoadCell() {
   timer->start(value);
 }
 
+bool LoadCell::hasGPIO() { return impl->hx711 != nullptr; }
+
 AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibrationData, QString *status) {
   try {
     auto const gain = Gain::GAIN_128;

@@ -6,7 +6,7 @@ struct QAbstractButton;
 struct QWidget;
 
 struct CentralWidget : public QWidget {
-  CentralWidget(QWidget* weight, QWidget* calibration);
+  CentralWidget(QWidget* weight, QWidget* calibration, QWidget* waitwidgets);
 
   QAbstractButton* dispenseButton();
 

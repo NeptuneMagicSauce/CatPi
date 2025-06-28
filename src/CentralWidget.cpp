@@ -10,7 +10,7 @@
 #include "System.hpp"
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl(QWidget* weight, QWidget* calibration);
+  CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* waitwidgets);
   QStackedLayout* pages = nullptr;
   QPushButton* dispense = nullptr;
   QVBoxLayout* layout = nullptr;
@@ -23,28 +23,33 @@ namespace {
 CentralWidgetImpl* impl = nullptr;
 }
 
-CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration) {
-  impl = new CentralWidgetImpl(weight, calibration);
+CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration, QWidget* waitwidgets) {
+  impl = new CentralWidgetImpl(weight, calibration, waitwidgets);
   setLayout(impl->layout);
 }
 
 QAbstractButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
-CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration) {
+CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* waitwidgets) {
   AssertSingleton();
-  auto main = new QWidget();
-  auto layoutMain = new QHBoxLayout();
-  main->setLayout(layoutMain);
+  auto main = new QWidget;
+
+  auto layoutMainTop = new QHBoxLayout;
   dispense = new QPushButton("Now!");
   dispense->setSizePolicy({dispense->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
-  layoutMain->addWidget(weight);
-  layoutMain->addWidget(dispense);
+  layoutMainTop->addWidget(weight);
+  layoutMainTop->addWidget(dispense);
 
-  pages = new QStackedLayout();
+  auto layoutMain = new QVBoxLayout;
+  main->setLayout(layoutMain);
+  layoutMain->addLayout(layoutMainTop);
+  layoutMain->addWidget(waitwidgets);
+
+  pages = new QStackedLayout;
   pages->insertWidget(indices.at(CentralWidget::Page::Main), main);
   pages->insertWidget(indices.at(CentralWidget::Page::Calibration), calibration);
 
-  layout = new QVBoxLayout();
+  layout = new QVBoxLayout;
   statusMessage = new QLabel;
   statusMessage->setStyleSheet("QWidget{font-size: 25pt;}");
   statusMessage->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

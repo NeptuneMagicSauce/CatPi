@@ -13,6 +13,7 @@
 #include "MainWindow.hpp"
 #include "Settings.hpp"
 #include "ToolBar.hpp"
+#include "WaitWidgets.hpp"
 #include "Weight.hpp"
 
 using namespace std;
@@ -25,6 +26,7 @@ struct Main {
   LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
   Calibration* calibration = nullptr;
+  WaitWidgets* waitwidgets = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
@@ -43,10 +45,11 @@ Main::Main(int& argc, char** argv)
       loadcell(new LoadCell),
       weight(new Weight(loadcell)),
       calibration(new Calibration),
-      central(new CentralWidget(weight, calibration)),
+      waitwidgets(new WaitWidgets),
+      central(new CentralWidget(weight, calibration, waitwidgets)),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)),
-      logic(new Logic) {
+      logic(new Logic(loadcell->hasGPIO())) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
@@ -90,8 +93,11 @@ void Main::connectSignals() {
     } else {
       weight->update({});
       calibration->update({});
-      logic->update({}, weight->tare());
+
+      logic->update(loadcell->hasGPIO() ? optional<double>{} : 0.0, weight->tare());
     }
+
+    waitwidgets->timeToDispense->setText(logic->timeToDispense());
   });
 
   // Weight

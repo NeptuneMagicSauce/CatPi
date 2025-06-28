@@ -7,6 +7,8 @@ struct QString;
 struct LoadCell {
   LoadCell();
 
+  bool hasGPIO();
+
   struct Data {
     double value = 0;
     double reading = 0;
