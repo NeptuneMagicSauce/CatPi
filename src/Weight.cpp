@@ -80,6 +80,8 @@ void Weight::update(std::optional<double> value) {
   massSs << fixed << setprecision(1) << *value - impl->tare.value;
   impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
 
+  impl->massGrams = *value;
+
   // // debug
   // cout << "mass " << value << " tare " << impl->tare.value << endl;
 }
@@ -102,7 +104,7 @@ void WeightImpl::connect() {
       tare.buttonPressedTimer->start();
     } else {
       tare.progress->setVisible(false);
-      // cout << "long press" << endl;
+      // cout << "long press " << massGrams << endl;
       tare.value = massGrams;
       Settings::instance().setValue(tare.key, tare.value);
     }
