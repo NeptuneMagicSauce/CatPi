@@ -141,4 +141,7 @@ optional<double> LoadCellImpl::valueGrams(const Options &options) const noexcept
   return {};
 }
 
-void LoadCell::recalibrate(std::pair<int, int> calibration) { impl->hx711 = impl->createHX711(calibration); }
+void LoadCell::recalibrate(std::pair<int, int> calibration) {
+  delete (impl->hx711);
+  impl->hx711 = impl->createHX711(calibration);
+}
