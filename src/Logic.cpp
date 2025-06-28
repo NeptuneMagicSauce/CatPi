@@ -83,8 +83,9 @@ void LogicImpl::dispense() {
 
   auto now = QDateTime::currentDateTime();
 
-  auto log = QString{">> Dispense, timeSinceDispense: "};
+  auto log = QString{">> Dispense, elapsed "};
   log += QString::number(previousDispense.has_value() ? previousDispense->secsTo(now) : -1);
+  log += QString{", "} + now.toString();
   logEvent(log);
 
   previousDispense = now;
