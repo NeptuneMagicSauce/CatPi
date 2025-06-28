@@ -30,9 +30,9 @@ ninja
 - logic "dispense when eaten and/or dispense > 10 minutes away"
 
 - settings to easy-change in dedicated menu:
-  - min duration between servings
   - duration of button/relay press (<-> quantity)
   - load cell polling timeout, for cpu consumption when unplugged
+  - minimum weight for bowl is empty
 
 - logs of weight change, of eat and dispense events
 - icons: nicer

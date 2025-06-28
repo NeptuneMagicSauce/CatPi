@@ -118,8 +118,6 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   // TODO hysteresis: when eating, weight will peak way below zero and dispense while eating
   // TODO hysteresis: dont dispense right after eating, have a delay
 
-  // TODO setting minimum weight for bowl is empty
-
   // TODO bug sometimes dispense zero: detect and dispense again
 
   // TODO also long-press-protect the Now! button ?
