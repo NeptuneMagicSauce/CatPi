@@ -86,20 +86,18 @@ double Weight::tare() { return impl->tare.value; }
 
 QTimer *Weight::eventTareFinished() { return impl->eventTareFinished; }
 
-double Weight::update(std::optional<double> value) {
+void Weight::update(std::optional<double> value, double &weightTarred) {
   if (value.has_value() == false) {
     impl->label->setText("Error");
-    return 0;
+    return;
   }
 
   ostringstream massSs;
-  auto weightTarred = *value - impl->tare.value;
+  weightTarred = *value - impl->tare.value;
   massSs << fixed << setprecision(1) << weightTarred;
   impl->label->setText(QString::fromStdString(massSs.str()));
 
   impl->massGrams = *value;
-
-  return weightTarred;
 
   // // debug
   // cout << "mass " << value << " tare " << impl->tare.value << endl;

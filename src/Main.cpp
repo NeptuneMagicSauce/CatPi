@@ -97,18 +97,18 @@ void Main::connectSignals() {
   QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
     auto dispensed = false;
     auto tare = weight->tare();
+    auto weightTarred = 0.0;
     if (auto data = loadcell->read()) {
-      auto weightTarred = weight->update(data->value);
+      weight->update(data->value, weightTarred);
       calibration->update(data->reading);
       logic->update(weightTarred, tare, dispensed);
       if (dispensed) {
         central->dispenseButton()->setEnabled(false);
       }
     } else {
-      weight->update({});
+      weight->update({}, weightTarred);
       calibration->update({});
-
-      logic->update(optional<double>{}, tare, dispensed);
+      logic->update({}, tare, dispensed);
     }
 
     waitwidgets->setTimeToDispense(logic->timeToDispense());

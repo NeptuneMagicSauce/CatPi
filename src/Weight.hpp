@@ -15,6 +15,6 @@ class Weight : public QWidget {
   QTimer* eventTareFinished();
 
   void connect();
-  double update(std::optional<double> value);
+  void update(std::optional<double> value, double& weightTarred);
   double tare();
 };
