@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "MainWindow.hpp"
+#include "Settings.hpp"
 #include "System.hpp"
 
 using std::optional;
@@ -28,7 +29,8 @@ namespace {
 struct QDeltaDial;
 
 QStackedLayout* screens = nullptr;
-int knownWeight = 200;
+int knownWeight = 0;
+const QString knownWeightKey = "KnownWeight";
 QLabel* knownWeightLabel = nullptr;
 QLabel* readingLabel = nullptr;
 QDeltaDial* deltaDial = nullptr;
@@ -72,6 +74,8 @@ Calibration::Calibration() {
   AssertSingleton();
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
+
+  knownWeight = Settings::instance().value(knownWeightKey, 200).toInt();
 
   buttons.step1 = new QPushButton;
   buttons.step2 = new QPushButton;
@@ -172,9 +176,7 @@ Calibration::Calibration() {
   }();
 
   // TODO
-  // the calibration algorithm
-  // store and restore the calibration value
-  // store and restore the inputted know weight
+  // give visual feedback, simple ok or ko
 
   auto layout = new QVBoxLayout();
   setLayout(layout);
@@ -211,6 +213,7 @@ optional<pair<int, int>> Calibration::Callbacks::step2(optional<double> rawPreci
 void ::Callbacks::knowWeightChanged(int value) {
   knownWeight = value;
   knownWeightLabel->setText(QString::number(knownWeight) + " grams");
+  Settings::instance().setValue(knownWeightKey, knownWeight);
 }
 void Calibration::connect() {
   QObject::connect(deltaDial, &QAbstractSlider::valueChanged, [&] {
