@@ -7,6 +7,11 @@ ninja
 
 # TODO
 
+- rename wait widgets
+
+- better gui layout
+  frequent buttons bigger
+
 - button to reset calibration to factory defaults
   because if you go through the calibration screens
   but you don't have the known weight
