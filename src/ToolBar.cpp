@@ -1,9 +1,10 @@
 #include "ToolBar.hpp"
 
 #include <QApplication>
+#include <QPixmap>
 #include <QStyle>
 #include <QTransform>
-#include <iostream>
+// #include <iostream>
 #include <optional>
 
 #include "MainWindow.hpp"
@@ -57,6 +58,7 @@ ToolBar::ToolBar() {
   quit->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_LineEditClearButton));
   // SP_TitleBarCloseButton));
   // SP_TabCloseButton));
+  // quit->setIcon(QIcon{QPixmap("://iconExit.png")});
   quit->setText("Quit");
 
   fullscreen = new QAction();
@@ -71,7 +73,8 @@ ToolBar::ToolBar() {
 
   calibration = new QAction();
   calibration->setIcon(
-      grayscaleQIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_BrowserReload), {128, 128}));
+      // grayscaleQIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_BrowserReload), {128, 128}));
+      QIcon{QPixmap("://iconSettings.png")});
   calibration->setText("Weight Calibration");
 
   addAction(fullscreen);

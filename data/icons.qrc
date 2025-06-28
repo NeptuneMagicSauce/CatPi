@@ -1,0 +1,20 @@
+<RCC>
+    <qresource>
+        <file>gear.png</file>
+    </qresource>
+    <qresource>
+        <file>gearSmaller.png</file>
+    </qresource>
+    <qresource>
+        <file>iconArrowDown.png</file>
+    </qresource>
+    <qresource>
+        <file>iconExit.png</file>
+    </qresource>
+    <qresource>
+        <file>iconLeft.png</file>
+    </qresource>
+    <qresource>
+        <file>iconSettings.png</file>
+    </qresource>
+</RCC>
