@@ -114,10 +114,20 @@ void Logic::update(std::optional<double> weightGrams, double tare) {
   }
   impl->logEvent(log);
 
-  // TODO dispense: button set enabled false
   if (timeAboveThreshold && weightAboveThreshold) {
     impl->dispense();
   }
+
+  // TODO dispense: button set enabled false
+  // TODO dry substract tare
+  // TODO bug: the waitwidgets are pushed offscreen when tare progress bar is shown (pi only)
+  // TODO delay: dont change seconds but print minutes: it's not WYSIWYG
+  // TODO calibration dial is too small
+  // TODO hysteresis: when eating, weight will peak way below zero and dispense while eating
+  // TODO hysteresis: dont dispense right after eating, have a delay
+  // TODO bug sometimes dispense zero: detect and dispense again
+  // TODO disable dpi scaling on linux side
+  // TODO also long-press-protect the Now! button ?
 }
 
 void LogicImpl::logEvent(QString const& event) {

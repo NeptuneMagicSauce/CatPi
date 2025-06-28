@@ -72,5 +72,3 @@ void WaitWidgets::setTimeToDispense(int seconds) {
   impl->timeToDispense->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
   impl->progress->setValue(impl->progress->maximum() - seconds);
 }
-
-// TODO calibration dial is too small
