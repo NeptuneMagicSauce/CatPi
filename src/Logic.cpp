@@ -74,7 +74,7 @@ void Logic::connect() {
 void Logic::manualDispense() { impl->dispense(); }
 
 void LogicImpl::dispense() {
-  // std::cout << "released" << std::endl;
+  // std::cout << __PRETTY_FUNCTION__ << std::endl;
   // pinctrl("-p");
   if (impl->hasGPIO) {
     pinctrl("set 17 op dh");
