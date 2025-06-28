@@ -9,9 +9,18 @@ ninja
 
 - icons: nicer
 
+- signal of weight is noisy
+  it easily goes over threshold because of spikes
+  average, median: research a bit
+  still display both the raw and the processed
+
 - logic: dont dispense right after eating, have a delay
+  needs to detect eat events
+  which needs a reliable weight signal
+  which needs the processing
 
 - logic: bug sometimes dispense zero or very little: detect and dispense again
+  needs to detect eat events
 
 - libhx711: what happens when unplugged? crashes
  - start unplugged
@@ -20,11 +29,22 @@ ninja
  - start in buggy state
 
 - libhx711: can we take out the implementation and do it in tree?
-- libhx711: catch all exceptions same as samples: TimeOut, see all bins
 
-- also long-press-protect the DispenseNow! button ?
+- also long-press-protect the DispenseNow button ?
+  with a shared widget: heritor of push button and composer of progress bar
+  so that we can find the signals
+  but then it won't work for toolbar which has tool buttons that do not inherit from push button
+  so inherit from abstract button? but no, we want to instantiate push and tool buttons
 
-- weights history: histogram?
+- logging
+  log eat events and dispense events
+  log weight signal raw and processed
+  rotate / compress the logs for disk
+
+- plot, histograms
+  eat events
+  dispense events
+  dispensed grams (needs reliable weight signal)
 
 - settings menu to easy-change in dedicated menu:
   - duration of button/relay press (<-> quantity)
@@ -34,8 +54,6 @@ ninja
   - gain?
   - duration of confirm tare
   - calibration data ?
-
-- logs of weight change, of eat and dispense events
 
 - disable dpi scaling on linux side for emacs and CatPi
 
@@ -86,3 +104,4 @@ do gpio from c -> relay before weight
 - logic "weight goes down <=> eat event"
 - logic "dispense when eaten and/or dispense > 10 minutes away"
 - NO: weight graphic widget: progress bar or circular dial?
+- libhx711: catch all exceptions same as samples: TimeOut, see all bins
