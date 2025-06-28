@@ -114,15 +114,19 @@ void Logic::update(std::optional<double> weightTarred, double tare) {
     impl->dispense();
   }
 
-  // TODO dispense: button set enabled false
-  // TODO bug: the waitwidgets are pushed offscreen when tare progress bar is shown (pi only)
-  // TODO delay: dont change seconds but print minutes: it's not WYSIWYG
   // TODO calibration dial is too small
+  // TODO bug: the waitwidgets are pushed offscreen when tare progress bar is shown (pi only)
+
+  // TODO dispense: button set enabled false
+
   // TODO hysteresis: when eating, weight will peak way below zero and dispense while eating
   // TODO hysteresis: dont dispense right after eating, have a delay
+
   // TODO bug sometimes dispense zero: detect and dispense again
-  // TODO disable dpi scaling on linux side
+
   // TODO also long-press-protect the Now! button ?
+
+  // TODO disable dpi scaling on linux side
 }
 
 void LogicImpl::logEvent(QString const& event) {
@@ -136,6 +140,9 @@ void LogicImpl::logEvent(QString const& event) {
 int Logic::timeToDispense() { return std::max(0, impl->delaySeconds - (int)impl->elapsed); }
 
 void Logic::changeDelay(int delta) {
+  if (impl->delaySeconds >= 60) {
+    delta *= 10;
+  }
   impl->delaySeconds += delta;
   impl->delaySeconds = std::max(10, impl->delaySeconds);
   Settings::instance().setValue(impl->delayKey, impl->delaySeconds);

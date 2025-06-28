@@ -24,6 +24,7 @@ WaitWidgetsImpl* impl = nullptr;
 WaitWidgets::WaitWidgets(int delaySeconds) {
   AssertSingleton();
   delayDial = new DeltaDial;
+  delayDial->setMaximum(10);
   impl = new WaitWidgetsImpl(this);
   setDelay(delaySeconds);
 }
