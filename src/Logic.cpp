@@ -114,7 +114,6 @@ void Logic::update(std::optional<double> weightTarred, double tare) {
     impl->dispense();
   }
 
-  // TODO calibration dial is too small
   // TODO bug: the waitwidgets are pushed offscreen when tare progress bar is shown (pi only)
 
   // TODO dispense: button set enabled false

@@ -93,8 +93,9 @@ Calibration::Calibration() {
     auto widgetLayout = new QVBoxLayout;
     widget->setLayout(widgetLayout);
 
-    widgetLayout->addWidget(widgetAlignCentered(new QLabel(title)));
-    widgetLayout->addWidget(widgetAlignCentered(new QLabel(QString{prompt} + "\nAnd press Ready")));
+    widgetLayout->addWidget(widgetFontSized(widgetAlignCentered(new QLabel(title)), 15));
+    widgetLayout->addWidget(
+        widgetAlignCentered(widgetFontSized(new QLabel(QString{prompt} + "\nAnd press Ready"), 15)));
 
     if (button == buttons.step2) {  // known weight screen
       auto parent = new QWidget;
