@@ -1,0 +1,1 @@
+src/scripts/watcher.sh
