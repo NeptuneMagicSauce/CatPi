@@ -51,36 +51,37 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
     // GAIN 64
     // calib1 200tare -452, -22906
 
-    auto refUnit = 0;
-    auto offset = 0;
+    auto const defaultData =
+        map<Gain, pair<int, int>>{
+            {Gain::GAIN_128, {-902, -47069}},
+            {Gain::GAIN_64, {-452, -22906}},
+        }
+            .at(gain);
 
     auto keyPrefix = QString{gain == Gain::GAIN_64 ? "CalibrationGain64" : "CalibrationGain128"};
     auto keyRefUnit = keyPrefix + "RefUnit";
     auto keyOffset = keyPrefix + "Offset";
 
+    auto refUnit = 0;
+    auto offset = 0;
+
     if (newCalibrationData.has_value()) {
       refUnit = newCalibrationData->first;
       offset = newCalibrationData->second;
-      Settings::instance().setValue(keyRefUnit, refUnit);
-      Settings::instance().setValue(keyOffset, offset);
     } else {
-      auto const defaultData =
-          map<Gain, pair<int, int>>{
-              {Gain::GAIN_128, {-902, -47069}},
-              {Gain::GAIN_64, {-452, -22906}},
-          }
-              .at(gain);
-
       refUnit = Settings::instance().value(keyRefUnit, defaultData.first).toInt();
       offset = Settings::instance().value(keyOffset, defaultData.second).toInt();
-
-      if (refUnit == 0) {  // INFs and NANs
-        std::cout << "Invalid calibration: " << refUnit << " " << offset << ", using defaults" << std::endl;
-
-        refUnit = defaultData.first;
-        offset = defaultData.second;
-      }
     }
+
+    if (refUnit == 0) {  // INFs and NANs
+      std::cout << "Invalid calibration: " << refUnit << " " << offset << ", using defaults" << std::endl;
+
+      refUnit = defaultData.first;
+      offset = defaultData.second;
+    }
+    Settings::instance().setValue(keyRefUnit, refUnit);
+    Settings::instance().setValue(keyOffset, offset);
+
     std::cout << "Calibration Ref " << refUnit << " Offset " << offset << std::endl;
     // with 5th parameter non-default Rate::HZ_80 -> same results
     auto ret = new AdvancedHX711(5, 6, refUnit, offset, Rate::HZ_80);
