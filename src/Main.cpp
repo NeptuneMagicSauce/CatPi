@@ -86,9 +86,11 @@ void Main::connectSignals() {
     if (auto data = loadcell->read()) {
       weight->update(data->value);
       calibration->update(data->reading);
+      logic->update(data->value, weight->tare());
     } else {
       weight->update({});
       calibration->update({});
+      logic->update({}, weight->tare());
     }
   });
 
@@ -116,5 +118,6 @@ void Main::connectSignals() {
 
   // Logic
   logic->connect();
-  QObject::connect(logic->timer, &QTimer::timeout, [&] { central->dispenseButton()->setEnabled(true); });
+  QObject::connect(logic->timerEndDispense(), &QTimer::timeout,
+                   [&] { central->dispenseButton()->setEnabled(true); });
 }

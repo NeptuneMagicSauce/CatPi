@@ -33,13 +33,13 @@ WeightProgram::~WeightProgram() {
   }
 }
 
-void WeightProgram::callback(Instance* instance) {
+void WeightProgram::callback(Instance* /*instance*/) {
   auto file = QFile("/home/pi/weights.measures");
   if (file.exists() == false) {
     return;
   }
   file.open(QIODeviceBase::ReadOnly);
   auto str = file.readAll().trimmed();
-  instance->weight.label->setText(str + "\ngrams");
+  // instance->weight.label->setText(str + "\ngrams");
   // std::cout << weight.measure.toStdString() << endl;
 }

@@ -11,4 +11,5 @@ class Weight : public QWidget {
 
   void connect();
   void update(std::optional<double> value);
+  double tare();
 };

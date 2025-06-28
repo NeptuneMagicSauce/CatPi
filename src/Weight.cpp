@@ -8,7 +8,6 @@
 #include <QVBoxLayout>
 #include <iomanip>
 #include <iostream>
-#include <map>
 
 #include "LoadCell.hpp"
 #include "Settings.hpp"
@@ -68,6 +67,8 @@ WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
 }
 
 void Weight::connect() { impl->connect(); }
+
+double Weight::tare() { return impl->tare.value; }
 
 void Weight::update(std::optional<double> value) {
   if (value.has_value() == false) {

@@ -1,7 +1,6 @@
 #include "Calibration.hpp"
 
 #include <QDial>
-#include <QFile>
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
