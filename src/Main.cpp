@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QLabel>
 #include <QShortcut>
+#include <QStatusBar>
 #include <QTimer>
 #include <iostream>
 
@@ -45,7 +46,7 @@ Main::Main(int& argc, char** argv)
       central(new CentralWidget(weight, calibration)),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
-  app->setStyleSheet("QLabel{font-size: 48pt;} QAbstractButton{font-size: 48pt;} ");
+  app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
   connectSignals();  // must be after all members are constructed
@@ -75,7 +76,7 @@ void Main::connectSignals() {
 
   // Dispense
   QObject::connect(central->dispenseButton(), &QAbstractButton::released, [this]() {
-    std::cout << "released" << std::endl;
+    // std::cout << "released" << std::endl;
     // pinctrl("-p");
     pinctrl("set 17 op dh");
     central->dispenseButton()->setEnabled(false);
@@ -105,12 +106,16 @@ void Main::connectSignals() {
   QObject::connect(calibration->buttons.step1, &QAbstractButton::released,
                    [&] { calibration->callbacks.step1(loadcell->readPreciseRaw()); });
   QObject::connect(calibration->buttons.step2, &QAbstractButton::released, [&] {
+    QString status;
     if (auto readingKnown = loadcell->readPreciseRaw()) {
       if (auto calibrationData = calibration->callbacks.step2(*readingKnown)) {
-        loadcell->recalibrate(*calibrationData);
+        loadcell->recalibrate(*calibrationData, status);
       }
+    } else {
+      status = "Failed to read the weight";
     }
     central->setPage(CentralWidget::Page::Main);
+    central->statusMessage(status);
   });
   calibration->connect();
 }

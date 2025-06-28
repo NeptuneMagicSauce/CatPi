@@ -12,4 +12,6 @@ struct CentralWidget : public QWidget {
 
   enum struct Page { Main, Calibration };
   void setPage(Page page);
+
+  void statusMessage(const QString&);
 };

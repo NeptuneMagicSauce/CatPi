@@ -1,5 +1,6 @@
 #pragma once
 
+struct QString;
 #include <QTimer>
 #include <optional>
 
@@ -14,7 +15,7 @@ struct LoadCell {
   std::optional<Data> read() noexcept;
   std::optional<double> readPreciseRaw() noexcept;
 
-  void recalibrate(std::pair<int, int>);
+  void recalibrate(std::pair<int, int> calibration, QString& status);
 
   QTimer* timer = nullptr;
 };

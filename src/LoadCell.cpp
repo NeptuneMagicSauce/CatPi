@@ -20,7 +20,7 @@ struct LoadCellImpl {
 
   AdvancedHX711 *hx711 = createHX711(nullopt);
 
-  static AdvancedHX711 *createHX711(optional<pair<int, int>> calibration);
+  static AdvancedHX711 *createHX711(optional<pair<int, int>> calibration, QString *status = nullptr);
   optional<double> valueGrams(const Options &options) const noexcept;
 };
 
@@ -39,7 +39,7 @@ LoadCell::LoadCell() {
   timer->start(value);
 }
 
-AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibrationData) {
+AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibrationData, QString *status) {
   try {
     auto const gain = Gain::GAIN_128;
     // auto const gain = Gain::GAIN_64;
@@ -71,6 +71,14 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
     } else {
       refUnit = Settings::instance().value(keyRefUnit, defaultData.first).toInt();
       offset = Settings::instance().value(keyOffset, defaultData.second).toInt();
+    }
+
+    if (status != nullptr) {
+      if (refUnit == 0) {
+        *status = "Invalid: similar measures";
+      } else {
+        *status = "Calibration OK";
+      }
     }
 
     if (refUnit == 0) {  // INFs and NANs
@@ -142,7 +150,7 @@ optional<double> LoadCellImpl::valueGrams(const Options &options) const noexcept
   return {};
 }
 
-void LoadCell::recalibrate(std::pair<int, int> calibration) {
+void LoadCell::recalibrate(std::pair<int, int> calibration, QString &status) {
   delete (impl->hx711);
-  impl->hx711 = impl->createHX711(calibration);
+  impl->hx711 = impl->createHX711(calibration, &status);
 }
