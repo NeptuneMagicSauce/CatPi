@@ -61,7 +61,6 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
     if (newCalibrationData.has_value()) {
       refUnit = newCalibrationData->first;
       offset = newCalibrationData->second;
-      std::cout << "Calibration Data Ref " << refUnit << " Offset " << offset << std::endl;
       Settings::instance().setValue(keyRefUnit, refUnit);
       Settings::instance().setValue(keyOffset, offset);
     } else {
@@ -74,7 +73,15 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
 
       refUnit = Settings::instance().value(keyRefUnit, defaultData.first).toInt();
       offset = Settings::instance().value(keyOffset, defaultData.second).toInt();
+
+      if (refUnit == 0) {  // INFs and NANs
+        std::cout << "Invalid calibration: " << refUnit << " " << offset << ", using defaults" << std::endl;
+
+        refUnit = defaultData.first;
+        offset = defaultData.second;
+      }
     }
+    std::cout << "Calibration Ref " << refUnit << " Offset " << offset << std::endl;
     // with 5th parameter non-default Rate::HZ_80 -> same results
     auto ret = new AdvancedHX711(5, 6, refUnit, offset, Rate::HZ_80);
     ret->setConfig(Channel::A, gain);
