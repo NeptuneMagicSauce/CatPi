@@ -99,9 +99,13 @@ void Logic::update(std::optional<double> weightGrams, double tare) {
   impl->elapsed = elapsed;
 
   auto log = QString{};
+  auto weightTarred = optional<double>{};
+  if (weightGrams.has_value()) {
+    weightTarred = *weightGrams - tare;
+  }
   for (auto toLog : vector<QString>{
            now.time().toString(),
-           weightGrams.has_value() ? QString::number(*weightGrams) : QString{"no weight"},
+           weightTarred.has_value() ? QString::number(*weightTarred) : QString{"no weight"},
            QString{"tare: "} + QString::number(tare),
            QString{"dispense: "} + (dispenseTime.has_value() ? dispenseTime->time().toString() : QString{""}),
            QString{"elapsed: "} + QString::number(elapsed),
