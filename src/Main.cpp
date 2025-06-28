@@ -8,6 +8,7 @@
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
+#include "DeltaDial.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
 #include "MainWindow.hpp"
@@ -26,11 +27,11 @@ struct Main {
   LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
   Calibration* calibration = nullptr;
+  Logic* logic = nullptr;
   WaitWidgets* waitwidgets = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
-  Logic* logic = nullptr;
 };
 
 QSettings& Settings::instance() {
@@ -45,11 +46,11 @@ Main::Main(int& argc, char** argv)
       loadcell(new LoadCell),
       weight(new Weight(loadcell)),
       calibration(new Calibration),
-      waitwidgets(new WaitWidgets),
+      logic(new Logic(loadcell->hasGPIO())),
+      waitwidgets(new WaitWidgets(logic->delaySeconds())),
       central(new CentralWidget(weight, calibration, waitwidgets)),
       toolbar(new ToolBar),
-      window(new MainWindow(central, toolbar)),
-      logic(new Logic(loadcell->hasGPIO())) {
+      window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
@@ -97,7 +98,7 @@ void Main::connectSignals() {
       logic->update(loadcell->hasGPIO() ? optional<double>{} : 0.0, weight->tare());
     }
 
-    waitwidgets->timeToDispense->setText(logic->timeToDispense());
+    waitwidgets->setTimeToDispense(logic->timeToDispense());
   });
 
   // Weight
@@ -126,4 +127,11 @@ void Main::connectSignals() {
   logic->connect();
   QObject::connect(logic->timerEndDispense(), &QTimer::timeout,
                    [&] { central->dispenseButton()->setEnabled(true); });
+
+  // Wait Widgets
+  waitwidgets->connect();
+  QObject::connect(waitwidgets->delayDial, &DeltaDial::valueChanged, [&] {
+    logic->changeDelay(waitwidgets->delayDial->delta);
+    waitwidgets->setDelay(logic->delaySeconds());
+  });
 }

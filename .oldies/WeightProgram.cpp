@@ -24,7 +24,7 @@ WeightProgram::WeightProgram() {
 
 WeightProgram::~WeightProgram() {
   std::cout << __PRETTY_FUNCTION__ << endl;
-  // TODO do this clean-up when Ctrl-C
+  // todo do this clean-up when Ctrl-C
   if (pid != 0) {
     QProcess killProcess;
     killProcess.setProgram("kill");

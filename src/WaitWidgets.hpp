@@ -1,12 +1,15 @@
 #pragma once
 
 struct QLabel;
+struct DeltaDial;
 #include <QWidget>
 
 struct WaitWidgets : public QWidget {
-  WaitWidgets();
+  WaitWidgets(int delaySeconds);
 
-  QLabel* timeToDispense = nullptr;
+  DeltaDial* delayDial = nullptr;
 
   void connect();
+  void setDelay(int delaySeconds);
+  void setTimeToDispense(int seconds);
 };

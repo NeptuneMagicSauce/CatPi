@@ -40,6 +40,7 @@ Logic::Logic(bool hasGPIO) {
 }
 
 QTimer* Logic::timerEndDispense() { return impl->timerEndDispense; }
+int Logic::delaySeconds() { return impl->delaySeconds; }
 
 LogicImpl::LogicImpl()
     : logFile(
@@ -54,7 +55,6 @@ LogicImpl::LogicImpl()
   std::filesystem::create_directories(logDirectory);
 
   delaySeconds = Settings::instance().value(delayKey, 15 * 60).toInt();
-  delaySeconds = 10;  // debug
 
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
@@ -110,8 +110,7 @@ void Logic::update(std::optional<double> weightGrams, double tare) {
   }
   impl->logEvent(log);
 
-  // TODO
-  // dispense: button set enabled false
+  // TODO dispense: button set enabled false
   if (timeAboveThreshold && weightAboveThreshold) {
     impl->dispense();
   }
@@ -125,13 +124,10 @@ void LogicImpl::logEvent(QString const& event) {
   file.close();
 }
 
-QString Logic::timeToDispense() {
-  auto timeTo = std::max(0, impl->delaySeconds - (int)impl->elapsed);
+int Logic::timeToDispense() { return std::max(0, impl->delaySeconds - (int)impl->elapsed); }
 
-  if (timeTo >= 60) {
-    auto minutes = std::round((double)timeTo / 60);
-    return QString::number(minutes) + " minute" + (minutes > 1 ? "s" : "");
-  }
-
-  return QString::number(timeTo) + " second" + (timeTo > 1 ? "s" : "");
+void Logic::changeDelay(int delta) {
+  impl->delaySeconds += delta;
+  impl->delaySeconds = std::max(10, impl->delaySeconds);
+  Settings::instance().setValue(impl->delayKey, impl->delaySeconds);
 }

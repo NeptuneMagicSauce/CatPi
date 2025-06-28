@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 // #include <iostream>
 
+#include "DeltaDial.hpp"
 #include "MainWindow.hpp"
 #include "Settings.hpp"
 #include "System.hpp"
@@ -25,44 +26,17 @@ using std::pair;
 
 namespace {
 
-struct QDeltaDial;
-
 QStackedLayout* screens = nullptr;
 int knownWeight = 0;
 const QString knownWeightKey = "KnownWeight";
 QLabel* knownWeightLabel = nullptr;
 QLabel* readingLabel = nullptr;
-QDeltaDial* deltaDial = nullptr;
+DeltaDial* deltaDial = nullptr;
 
 double readingZero = 0;
 
 auto const minWeight = 10;
 auto const maxWeight = 1000;
-
-// a dial to input small deltas, wrapping
-// @member delta: the difference in value when it changed
-struct QDeltaDial : public QDial {
-  int oldValue = 0;
-  int delta = 0;
-  QDeltaDial(QWidget* parent = nullptr) : QDial(parent) {
-    setMaximum(30);
-    setWrapping(true);
-  }
-  void connect() {
-    QObject::connect(this, &QAbstractSlider::valueChanged, [&](auto value) {
-      delta = value - oldValue;
-      auto const firstQuarter = maximum() / 4;
-      auto const lastQuarter = (maximum() * 3) / 4;
-      if ((oldValue < firstQuarter && value > lastQuarter) ||
-          (oldValue > lastQuarter && value < firstQuarter)) {
-        // just wrapped on the other size of zero <-> delta is invalid
-        delta = 0;
-      }
-
-      oldValue = value;
-    });
-  }
-};
 
 struct Callbacks {
   void knowWeightChanged(int value);
@@ -131,7 +105,7 @@ Calibration::Calibration() {
       knownWeightLabel = widgetAlignCentered(new QLabel);
       ::callbacks.knowWeightChanged(knownWeight);
 
-      deltaDial = new QDeltaDial();
+      deltaDial = new DeltaDial;
 
       auto group = new QGroupBox;
       auto groupLayout = new QHBoxLayout;
@@ -173,9 +147,6 @@ Calibration::Calibration() {
     layout->addWidget(readingLabel);
     return ret;
   }();
-
-  // TODO
-  // give visual feedback, simple ok or ko
 
   auto layout = new QVBoxLayout();
   setLayout(layout);
