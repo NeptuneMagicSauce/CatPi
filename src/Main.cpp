@@ -39,7 +39,15 @@ QSettings& Settings::instance() {
   return ret;
 }
 
-int main(int argc, char** argv) { return Main{argc, argv}.app->exec(); }
+int main(int argc, char** argv) {
+  auto main = Main{argc, argv};
+
+  auto ret = main.app->exec();
+
+  main.logic->reset();
+
+  return ret;
+}
 
 Main::Main(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
