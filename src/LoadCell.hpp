@@ -12,7 +12,9 @@ struct LoadCell {
   };
 
   std::optional<Data> read() noexcept;
-  std::optional<Data> readPrecise() noexcept;
+  std::optional<double> readPreciseRaw() noexcept;
+
+  void recalibrate(std::pair<int, int>);
 
   QTimer* timer = nullptr;
 };

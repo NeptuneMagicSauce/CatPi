@@ -18,9 +18,9 @@ struct LoadCellImpl {
   const std::chrono::milliseconds pollingInterval{100};
   const QString intervalSettingName = "WeightPollIntervalMilliseconds";
 
-  AdvancedHX711 *hx711 = tryCreateHX711();
+  AdvancedHX711 *hx711 = createHX711(nullopt);
 
-  static AdvancedHX711 *tryCreateHX711();
+  static AdvancedHX711 *createHX711(optional<pair<int, int>> calibration);
   optional<double> valueGrams(const Options &options) const noexcept;
 };
 
@@ -39,7 +39,7 @@ LoadCell::LoadCell() {
   timer->start(value);
 }
 
-AdvancedHX711 *LoadCellImpl::tryCreateHX711() {
+AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibrationData) {
   try {
     auto const gain = Gain::GAIN_128;
     // auto const gain = Gain::GAIN_64;
@@ -50,13 +50,33 @@ AdvancedHX711 *LoadCellImpl::tryCreateHX711() {
     // calib 3 200tare -902, -47069
     // GAIN 64
     // calib1 200tare -452, -22906
-    auto const calibrationData = map<Gain, pair<int, int>>{
-        {Gain::GAIN_128, {-902, -47069}},
-        {Gain::GAIN_64, {-452, -22906}},
-    };
-    auto const calibration = calibrationData.at(gain);
+
+    auto refUnit = 0;
+    auto offset = 0;
+
+    auto keyPrefix = QString{gain == Gain::GAIN_64 ? "CalibrationGain64" : "CalibrationGain128"};
+    auto keyRefUnit = keyPrefix + "RefUnit";
+    auto keyOffset = keyPrefix + "Offset";
+
+    if (newCalibrationData.has_value()) {
+      refUnit = newCalibrationData->first;
+      offset = newCalibrationData->second;
+      std::cout << "Calibration Data Ref " << refUnit << " Offset " << offset << std::endl;
+      Settings::instance().setValue(keyRefUnit, refUnit);
+      Settings::instance().setValue(keyOffset, offset);
+    } else {
+      auto const defaultData =
+          map<Gain, pair<int, int>>{
+              {Gain::GAIN_128, {-902, -47069}},
+              {Gain::GAIN_64, {-452, -22906}},
+          }
+              .at(gain);
+
+      refUnit = Settings::instance().value(keyRefUnit, defaultData.first).toInt();
+      offset = Settings::instance().value(keyOffset, defaultData.second).toInt();
+    }
     // with 5th parameter non-default Rate::HZ_80 -> same results
-    auto ret = new AdvancedHX711(5, 6, calibration.first, calibration.second, Rate::HZ_80);
+    auto ret = new AdvancedHX711(5, 6, refUnit, offset, Rate::HZ_80);
     ret->setConfig(Channel::A, gain);
     ret->samplesInTimeOutMode = 1;  // this is my patch to libhx711: no busy wait
                                     // see more comments in install-libhx711.sh
@@ -89,9 +109,12 @@ optional<LoadCell::Data> LoadCell::read() noexcept {
   return readInMode(Options{impl->pollingInterval});
 };
 
-optional<LoadCell::Data> LoadCell::readPrecise() noexcept {
+optional<double> LoadCell::readPreciseRaw() noexcept {
   // fixed number of samples, no timeout, busy wait
-  return readInMode(Options{15});
+  if (auto ret = readInMode(Options{15})) {
+    return ret->reading;
+  }
+  return {};
 }
 
 optional<double> LoadCellImpl::valueGrams(const Options &options) const noexcept {
@@ -110,3 +133,5 @@ optional<double> LoadCellImpl::valueGrams(const Options &options) const noexcept
   }
   return {};
 }
+
+void LoadCell::recalibrate(std::pair<int, int> calibration) { impl->hx711 = impl->createHX711(calibration); }

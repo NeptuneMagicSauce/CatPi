@@ -5,6 +5,7 @@ struct QShowEvent;
 
 #include <QWidget>
 #include <optional>
+#include <utility>
 
 struct Calibration : public QWidget {
   Calibration();
@@ -17,7 +18,7 @@ struct Calibration : public QWidget {
 
   struct Callbacks {
     void step1(std::optional<double> rawPrecise);
-    void step2(std::optional<double> rawPrecise);
+    std::optional<std::pair<int, int>> step2(std::optional<double> rawPrecise);
   } callbacks;
 
   void showEvent(QShowEvent* e) override;

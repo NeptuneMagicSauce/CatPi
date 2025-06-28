@@ -102,13 +102,14 @@ void Main::connectSignals() {
   // Calibration
   QObject::connect(calibration->buttons.back, &QAbstractButton::released,
                    [&] { central->setPage(CentralWidget::Page::Main); });
-  QObject::connect(calibration->buttons.step1, &QAbstractButton::released, [&] {
-    auto readingZero = loadcell->readPrecise();
-    calibration->callbacks.step1(readingZero.has_value() ? readingZero->reading : optional<double>{});
-  });
+  QObject::connect(calibration->buttons.step1, &QAbstractButton::released,
+                   [&] { calibration->callbacks.step1(loadcell->readPreciseRaw()); });
   QObject::connect(calibration->buttons.step2, &QAbstractButton::released, [&] {
-    auto readingKnown = loadcell->readPrecise();
-    calibration->callbacks.step2(readingKnown.has_value() ? readingKnown->reading : optional<double>{});
+    if (auto readingKnown = loadcell->readPreciseRaw()) {
+      if (auto calibrationData = calibration->callbacks.step2(*readingKnown)) {
+        loadcell->recalibrate(*calibrationData);
+      }
+    }
     central->setPage(CentralWidget::Page::Main);
   });
   calibration->connect();

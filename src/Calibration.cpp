@@ -14,6 +14,9 @@
 #include "MainWindow.hpp"
 #include "System.hpp"
 
+using std::optional;
+using std::pair;
+
 // auto spacer = []() {
 //   auto spacer = new QWidget;
 //   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -31,7 +34,6 @@ QLabel* readingLabel = nullptr;
 QDeltaDial* deltaDial = nullptr;
 
 double readingZero = 0;
-double readingKnown = 0;
 
 auto const minWeight = 10;
 auto const maxWeight = 1000;
@@ -186,21 +188,25 @@ void Calibration::showEvent(QShowEvent* e) {
   screens->setCurrentIndex(0);
   QWidget::showEvent(e);
 }
-void Calibration::Callbacks::step1(std::optional<double> rawPrecise) {
+void Calibration::Callbacks::step1(optional<double> rawPrecise) {
   if (rawPrecise.has_value()) {
     readingZero = *rawPrecise;
   }
   screens->setCurrentIndex(1);
 }
-void Calibration::Callbacks::step2(std::optional<double> rawPrecise) {
-  if (rawPrecise.has_value()) {
-    readingKnown = *rawPrecise;
+optional<pair<int, int>> Calibration::Callbacks::step2(optional<double> rawPrecise) {
+  if (rawPrecise.has_value() == false) {
+    return {};
   }
 
+  auto readingKnown = *rawPrecise;
   if (readingZero && readingKnown) {
-    auto ref = (readingKnown - readingZero) / knownWeight;
-    std::cout << "Ref " << std::round(ref) << " Offset " << readingZero << std::endl;
+    auto ref = round(readingKnown - readingZero) / knownWeight;
+    auto offset = round(readingZero);
+
+    return pair{ref, offset};
   }
+  return {};
 }
 void ::Callbacks::knowWeightChanged(int value) {
   knownWeight = value;
@@ -217,7 +223,7 @@ void Calibration::connect() {
   deltaDial->connect();
 }
 
-void Calibration::update(std::optional<double> reading) {
+void Calibration::update(optional<double> reading) {
   readingLabel->setText("Raw reading: " +
                         (reading.has_value() ? QString::number(*reading) : QString{"error"}));
 }
