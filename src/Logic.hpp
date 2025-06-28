@@ -12,7 +12,7 @@ struct Logic {
 
   void connect();
   void manualDispense();
-  void update(std::optional<double> weightTarred, double tare);
+  void update(std::optional<double> weightTarred, double tare, bool& dispensed);
   void changeDelay(int delta);
 
   int timeToDispense();
