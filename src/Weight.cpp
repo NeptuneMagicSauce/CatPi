@@ -20,6 +20,7 @@ struct WeightImpl {
   void connect();
 
   QLabel *label = new QLabel;
+  QLabel *labelFooter = new QLabel;
   double massGrams = 0;
   LoadCell *loadcell;
   struct {
@@ -45,6 +46,9 @@ WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
   AssertSingleton();
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  labelFooter->setText("grams");
+  labelFooter->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  labelFooter->setStyleSheet("QWidget{font-size: 30pt;}");
 
   tare.button->setText(tare.buttonText);
   tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
@@ -56,11 +60,13 @@ WeightImpl::WeightImpl(auto parent, LoadCell *loadcell) : loadcell(loadcell) {
   tare.buttonPressedTimer->setInterval(tare.interval);
   tare.progress->setMaximum(tare.maxTicks);
   tare.progress->setTextVisible(false);
+  tare.progress->setMaximumHeight(15);
   tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
   auto layout = new QVBoxLayout();
   parent->setLayout(layout);
   layout->addWidget(label);
+  layout->addWidget(labelFooter);
   layout->addWidget(tare.progress);
   tare.progress->setVisible(false);
   layout->addWidget(tare.button);
@@ -79,7 +85,7 @@ double Weight::update(std::optional<double> value) {
   ostringstream massSs;
   auto weightTarred = *value - impl->tare.value;
   massSs << fixed << setprecision(1) << weightTarred;
-  impl->label->setText(QString::fromStdString(massSs.str()) + "\ngrams");
+  impl->label->setText(QString::fromStdString(massSs.str()));
 
   impl->massGrams = *value;
 

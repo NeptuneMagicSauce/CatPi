@@ -114,8 +114,6 @@ void Logic::update(std::optional<double> weightTarred, double tare) {
     impl->dispense();
   }
 
-  // TODO bug: the waitwidgets are pushed offscreen when tare progress bar is shown (pi only)
-
   // TODO dispense: button set enabled false
 
   // TODO hysteresis: when eating, weight will peak way below zero and dispense while eating

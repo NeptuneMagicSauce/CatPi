@@ -42,8 +42,8 @@ CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWid
 
   auto layoutMain = new QVBoxLayout;
   main->setLayout(layoutMain);
-  layoutMain->addLayout(layoutMainTop);
-  layoutMain->addWidget(waitwidgets);
+  layoutMain->addLayout(layoutMainTop, 2);
+  layoutMain->addWidget(waitwidgets, 1);
 
   pages = new QStackedLayout;
   pages->insertWidget(indices.at(CentralWidget::Page::Main), main);
