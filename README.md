@@ -7,6 +7,12 @@ ninja
 
 # TODO
 
+- problem: the screen is too bright in the night
+  test screen saver shuts off screen:
+  can it be waken up with a touch?
+  can we control the screen brigthness in-app?
+  IR motion detector: can it do auto on/off of the screen?
+
 - rename wait widgets
 
 - better gui layout
