@@ -18,12 +18,6 @@
 using std::optional;
 using std::pair;
 
-// auto spacer = []() {
-//   auto spacer = new QWidget;
-//   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//   return spacer;
-// };
-
 namespace {
 
 QStackedLayout* screens = nullptr;
@@ -55,7 +49,7 @@ Calibration::Calibration() {
   buttons.back = new QPushButton;
   buttons.back->setSizePolicy(buttons.back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
 
-  buttons.back->setIcon(MainWindow::StandardIcon(QStyle::StandardPixmap::SP_MediaSeekBackward));
+  buttons.back->setIcon(QIcon{QPixmap{"://back.png"}});
 
   auto widgetAlignCentered = [](auto widget) {
     widget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

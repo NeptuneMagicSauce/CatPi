@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include "Emojis.hpp"
 #include "LoadCell.hpp"
 #include "Settings.hpp"
 #include "System.hpp"
@@ -33,7 +34,7 @@ struct WeightImpl {
     int buttonPressedTicks = 0;
     const int maxTicks = 40;
     const int interval = 20;
-    QString const buttonText = "⚖️ Tare";
+    QString const buttonText = " Tare";
     QProgressBar *progress = new QProgressBar();
   } tare;
 };
@@ -42,7 +43,7 @@ namespace {
 WeightImpl *impl = nullptr;
 }
 
-Weight::Weight(LoadCell *loadcell) : messageFinished("✌️✌️✌️") {
+Weight::Weight(LoadCell *loadcell) : messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns)) {
   impl = new WeightImpl(loadcell);
   setLayout(impl->layout);
 }
@@ -57,6 +58,8 @@ WeightImpl::WeightImpl(LoadCell *loadcell) : loadcell(loadcell) {
 
   tare.button->setText(tare.buttonText);
   tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
+  tare.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
+  tare.button->setIconSize({40, 40});
 
   tare.value = Settings::instance().value(tare.key, 0.0).toDouble();
   // // debug

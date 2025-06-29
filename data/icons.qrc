@@ -1,20 +1,20 @@
 <RCC>
     <qresource>
-        <file>gear.png</file>
+        <file>exitfullscreen.png</file>
     </qresource>
     <qresource>
-        <file>gearSmaller.png</file>
+        <file>fullscreen.png</file>
     </qresource>
     <qresource>
-        <file>iconArrowDown.png</file>
+        <file>settings.png</file>
     </qresource>
     <qresource>
-        <file>iconExit.png</file>
+        <file>quit.png</file>
     </qresource>
     <qresource>
-        <file>iconLeft.png</file>
+        <file>back.png</file>
     </qresource>
     <qresource>
-        <file>iconSettings.png</file>
+        <file>weightbalance.png</file>
     </qresource>
 </RCC>

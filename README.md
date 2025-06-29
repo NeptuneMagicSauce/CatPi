@@ -24,8 +24,6 @@ ninja
   but you put your finger on the scale
   then it's in a state with bad calibration data
 
-- icons: nicer
-
 - signal of weight is noisy
   it easily goes over threshold because of spikes
   average, median: research a bit
@@ -122,3 +120,4 @@ do gpio from c -> relay before weight
 - logic "dispense when eaten and/or dispense > 10 minutes away"
 - NO: weight graphic widget: progress bar or circular dial?
 - libhx711: catch all exceptions same as samples: TimeOut, see all bins
+- icons: nicer
