@@ -7,6 +7,10 @@ ninja
 
 # TODO
 
+- optional: use value() not operator * because it checks
+
+- icon back: bigger, nicer
+
 - problem: the screen is too bright in the night
   test screen saver shuts off screen:
   can it be waken up with a touch?
