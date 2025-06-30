@@ -42,7 +42,7 @@ Calibration::Calibration() {
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
-  knownWeight = Settings::getInt(knownWeightKey, 200);
+  knownWeight = Settings::get(knownWeightKey, 200).toInt();
 
   buttons.step1 = new QPushButton;
   buttons.step2 = new QPushButton;
@@ -179,7 +179,7 @@ optional<pair<int, int>> Calibration::Callbacks::step2(optional<double> rawPreci
 void ::Callbacks::knownWeightChanged(int value) {
   knownWeight = value;
   knownWeightLabel->setText(QString::number(knownWeight) + " grams");
-  Settings::setInt(knownWeightKey, knownWeight);
+  Settings::set(knownWeightKey, knownWeight);
 }
 void Calibration::connect() {
   QObject::connect(deltaDial, &QAbstractSlider::valueChanged, [&] {

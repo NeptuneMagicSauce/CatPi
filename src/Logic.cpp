@@ -54,7 +54,7 @@ LogicImpl::LogicImpl()
   auto logDirectory = logFile.filesystemFileName().parent_path();
   std::filesystem::create_directories(logDirectory);
 
-  delaySeconds = Settings::getInt(delayKey, 15 * 60);
+  delaySeconds = Settings::get(delayKey, 15 * 60).toInt();
 
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
@@ -136,5 +136,5 @@ void Logic::changeDelay(int delta) {
   }
   impl->delaySeconds += delta;
   impl->delaySeconds = std::max(10, impl->delaySeconds);
-  Settings::setInt(impl->delayKey, impl->delaySeconds);
+  Settings::set(impl->delayKey, impl->delaySeconds);
 }

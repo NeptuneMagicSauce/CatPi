@@ -61,7 +61,7 @@ WeightImpl::WeightImpl(LoadCell *loadcell) : loadcell(loadcell) {
   tare.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
   tare.button->setIconSize({40, 40});
 
-  tare.value = Settings::getDouble(tare.key, 0.0);
+  tare.value = Settings::get(tare.key, 0.0).toDouble();
   // // debug
   // std::cout << "Tare " << tare.value << endl;
   tare.buttonPressedTimer->setSingleShot(true);
@@ -126,7 +126,7 @@ void WeightImpl::connect() {
       tare.progress->setVisible(false);
       // cout << "long press " << massGrams << endl;
       tare.value = massGrams;
-      Settings::setDouble(tare.key, tare.value);
+      Settings::set(tare.key, tare.value);
       eventTareFinished->start();
     }
   });

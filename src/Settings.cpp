@@ -1,6 +1,7 @@
 #include "Settings.hpp"
 
 #include <QSettings>
+#include <iostream>
 
 namespace {
 QSettings& instance() {
@@ -9,21 +10,15 @@ QSettings& instance() {
 }
 }  // namespace
 
-int Settings::getInt(const QString& key, int defaultValue) {
+QVariant Settings::get(const QString& key, const QVariant& defaultValue) {
   if (instance().contains(key) == false) {
     // when missing, set the default key
     // so that the instance always contains all keys
     instance().setValue(key, defaultValue);
   }
-  return instance().value(key).toInt();
-}
-void Settings::setInt(const QString& key, int value) { instance().setValue(key, value); }
-
-double Settings::getDouble(const QString& key, double defaultValue) {
-  if (instance().contains(key) == false) {
-    instance().setValue(key, defaultValue);
-  }
-  return instance().value(key).toDouble();
+  std::cout << "Setting: " << key.toStdString() << " = " << instance().value(key).toString().toStdString()
+            << std::endl;
+  return instance().value(key);
 }
 
-void Settings::setDouble(const QString& key, double value) { instance().setValue(key, value); }
+void Settings::set(const QString& key, const QVariant& value) { instance().setValue(key, value); }
