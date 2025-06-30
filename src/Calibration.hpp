@@ -13,7 +13,6 @@ struct Calibration : public QWidget {
   struct {
     QAbstractButton* step1 = nullptr;
     QAbstractButton* step2 = nullptr;
-    QAbstractButton* back = nullptr;
   } buttons;
 
   struct Callbacks {

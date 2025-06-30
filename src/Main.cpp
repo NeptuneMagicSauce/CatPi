@@ -13,6 +13,7 @@
 #include "LoadCell.hpp"
 #include "Logic.hpp"
 #include "MainWindow.hpp"
+#include "SubScreen.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
 
@@ -50,7 +51,7 @@ Main::Main(int& argc, char** argv)
       calibration(new Calibration),
       logic(new Logic(loadcell->hasGPIO())),
       delay(new Delay(logic->delaySeconds())),
-      central(new CentralWidget(weight, calibration, delay)),
+      central(new CentralWidget(weight, new SubScreen("Calibration", calibration), delay)),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
@@ -115,9 +116,10 @@ void Main::connectSignals() {
   QObject::connect(weight->eventTareFinished(), &QTimer::timeout,
                    [&] { central->statusMessage(weight->messageFinished); });
 
+  // SubScreens
+  SubScreen::connect([&] { central->setPage(CentralWidget::Page::Main); });
+
   // Calibration
-  QObject::connect(calibration->buttons.back, &QAbstractButton::released,
-                   [&] { central->setPage(CentralWidget::Page::Main); });
   QObject::connect(calibration->buttons.step1, &QAbstractButton::released,
                    [&] { calibration->callbacks.step1(loadcell->readPreciseRaw()); });
   QObject::connect(calibration->buttons.step2, &QAbstractButton::released, [&] {
