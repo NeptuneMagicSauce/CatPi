@@ -6,6 +6,7 @@ sudo apt install -y \
         clang-19 \
         clangd-19 \
         clang-format-19 \
+        libxkbcommon-dev \
         qt6-base-dev \
         qt6-wayland
 
