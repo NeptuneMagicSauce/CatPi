@@ -7,11 +7,26 @@ ninja
 
 # TODO
 
+- settings menu to easy-change in dedicated menu:
+  - in a subscreen same as calibration
+  - display the values
+  - change the values: widget and callback
+
+- list of debug settings
+  - duration of button/relay press (<-> quantity)
+  - load cell polling timeout, for cpu consumption when unplugged
+  - minimum weight for bowl is empty
+  - two pins of HX711
+  - gain?
+  - duration of confirm tare
+  - calibration data
+
 - button to reset calibration to factory defaults
   because if you go through the calibration screens
   but you don't have the known weight
   but you put your finger on the scale
   then it's in a state with bad calibration data
+  in the debug menu?
 
 - problem: the screen is too bright in the night
   test screen saver shuts off screen:
@@ -58,15 +73,6 @@ ninja
   eat events
   dispense events
   dispensed grams (needs reliable weight signal)
-
-- settings menu to easy-change in dedicated menu:
-  - duration of button/relay press (<-> quantity)
-  - load cell polling timeout, for cpu consumption when unplugged
-  - minimum weight for bowl is empty
-  - two pins of HX711
-  - gain?
-  - duration of confirm tare
-  - calibration data ?
 
 - disable dpi scaling on linux side for emacs and CatPi
 
