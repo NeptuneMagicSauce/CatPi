@@ -34,7 +34,7 @@ LoadCell::LoadCell() {
   impl = new LoadCellImpl;
 
   timer = new QTimer;
-  auto value = Settings::instance().value(impl->intervalSettingName, 1000).toInt();
+  auto value = Settings::getInt(impl->intervalSettingName, 1000);
   timer->setSingleShot(false);
   timer->start(value);
 }
@@ -71,8 +71,8 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
       refUnit = newCalibrationData.value().first;
       offset = newCalibrationData.value().second;
     } else {
-      refUnit = Settings::instance().value(keyRefUnit, defaultData.first).toInt();
-      offset = Settings::instance().value(keyOffset, defaultData.second).toInt();
+      refUnit = Settings::getInt(keyRefUnit, defaultData.first);
+      offset = Settings::getInt(keyOffset, defaultData.second);
     }
 
     if (status != nullptr) {
@@ -89,8 +89,8 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
       refUnit = defaultData.first;
       offset = defaultData.second;
     }
-    Settings::instance().setValue(keyRefUnit, refUnit);
-    Settings::instance().setValue(keyOffset, offset);
+    Settings::setInt(keyRefUnit, refUnit);
+    Settings::setInt(keyOffset, offset);
 
     std::cout << "Calibration Ref " << refUnit << " Offset " << offset << std::endl;
     // with 5th parameter non-default Rate::HZ_80 -> same results

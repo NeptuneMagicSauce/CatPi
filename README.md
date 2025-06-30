@@ -7,6 +7,12 @@ ninja
 
 # TODO
 
+- button to reset calibration to factory defaults
+  because if you go through the calibration screens
+  but you don't have the known weight
+  but you put your finger on the scale
+  then it's in a state with bad calibration data
+
 - problem: the screen is too bright in the night
   test screen saver shuts off screen:
   can it be waken up with a touch?
@@ -15,12 +21,6 @@ ninja
 
 - better gui layout
   frequent buttons bigger
-
-- button to reset calibration to factory defaults
-  because if you go through the calibration screens
-  but you don't have the known weight
-  but you put your finger on the scale
-  then it's in a state with bad calibration data
 
 - signal of weight is noisy
   it easily goes over threshold because of spikes

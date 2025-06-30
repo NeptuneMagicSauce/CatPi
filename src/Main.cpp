@@ -13,7 +13,6 @@
 #include "LoadCell.hpp"
 #include "Logic.hpp"
 #include "MainWindow.hpp"
-#include "Settings.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
 
@@ -33,11 +32,6 @@ struct Main {
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
 };
-
-QSettings& Settings::instance() {
-  static auto ret = QSettings{"no-organization", "CatPi"};
-  return ret;
-}
 
 int main(int argc, char** argv) {
   auto main = Main{argc, argv};

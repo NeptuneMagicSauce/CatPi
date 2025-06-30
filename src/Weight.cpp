@@ -27,7 +27,7 @@ struct WeightImpl {
   double massGrams = 0;
   LoadCell *loadcell;
   struct {
-    const QString key = "tare";
+    const QString key = "Tare";
     double value = 0;
     QPushButton *button = new QPushButton();
     QTimer *buttonPressedTimer = new QTimer();
@@ -61,7 +61,7 @@ WeightImpl::WeightImpl(LoadCell *loadcell) : loadcell(loadcell) {
   tare.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
   tare.button->setIconSize({40, 40});
 
-  tare.value = Settings::instance().value(tare.key, 0.0).toDouble();
+  tare.value = Settings::getDouble(tare.key, 0.0);
   // // debug
   // std::cout << "Tare " << tare.value << endl;
   tare.buttonPressedTimer->setSingleShot(true);
@@ -126,7 +126,7 @@ void WeightImpl::connect() {
       tare.progress->setVisible(false);
       // cout << "long press " << massGrams << endl;
       tare.value = massGrams;
-      Settings::instance().setValue(tare.key, tare.value);
+      Settings::setDouble(tare.key, tare.value);
       eventTareFinished->start();
     }
   });
