@@ -157,7 +157,7 @@ void Calibration::showEvent(QShowEvent* e) {
 }
 void Calibration::Callbacks::step1(optional<double> rawPrecise) {
   if (rawPrecise.has_value()) {
-    readingZero = *rawPrecise;
+    readingZero = rawPrecise.value();
   }
   screens->setCurrentIndex(1);
 }
@@ -166,7 +166,7 @@ optional<pair<int, int>> Calibration::Callbacks::step2(optional<double> rawPreci
     return {};
   }
 
-  auto readingKnown = *rawPrecise;
+  auto readingKnown = rawPrecise.value();
   if (readingZero && readingKnown) {
     auto ref = round(readingKnown - readingZero) / knownWeight;
     auto offset = round(readingZero);
@@ -193,5 +193,5 @@ void Calibration::connect() {
 
 void Calibration::update(optional<double> reading) {
   readingLabel->setText("Raw reading: " +
-                        (reading.has_value() ? QString::number(*reading) : QString{"error"}));
+                        (reading.has_value() ? QString::number(reading.value()) : QString{"error"}));
 }

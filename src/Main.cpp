@@ -101,8 +101,8 @@ void Main::connectSignals() {
     auto tare = weight->tare();
     auto weightTarred = 0.0;
     if (auto data = loadcell->read()) {
-      weight->update(data->value, weightTarred);
-      calibration->update(data->reading);
+      weight->update(data.value().value, weightTarred);
+      calibration->update(data.value().reading);
       logic->update(weightTarred, tare, dispensed);
       if (dispensed) {
         central->dispenseButton()->setEnabled(false);
@@ -129,8 +129,8 @@ void Main::connectSignals() {
   QObject::connect(calibration->buttons.step2, &QAbstractButton::released, [&] {
     QString status;
     if (auto readingKnown = loadcell->readPreciseRaw()) {
-      if (auto calibrationData = calibration->callbacks.step2(*readingKnown)) {
-        loadcell->recalibrate(*calibrationData, status);
+      if (auto calibrationData = calibration->callbacks.step2(readingKnown.value())) {
+        loadcell->recalibrate(calibrationData.value(), status);
       }
     } else {
       status = "Failed to read the weight";

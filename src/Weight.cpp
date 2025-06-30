@@ -96,11 +96,11 @@ void Weight::update(std::optional<double> value, double &weightTarred) {
   }
 
   ostringstream massSs;
-  weightTarred = *value - impl->tare.value;
+  weightTarred = value.value() - impl->tare.value;
   massSs << fixed << setprecision(1) << weightTarred;
   impl->label->setText(QString::fromStdString(massSs.str()));
 
-  impl->massGrams = *value;
+  impl->massGrams = value.value();
 
   // // debug
   // cout << "mass " << value << " tare " << impl->tare.value << endl;

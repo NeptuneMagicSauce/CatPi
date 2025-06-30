@@ -68,8 +68,8 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
     auto offset = 0;
 
     if (newCalibrationData.has_value()) {
-      refUnit = newCalibrationData->first;
-      offset = newCalibrationData->second;
+      refUnit = newCalibrationData.value().first;
+      offset = newCalibrationData.value().second;
     } else {
       refUnit = Settings::instance().value(keyRefUnit, defaultData.first).toInt();
       offset = Settings::instance().value(keyOffset, defaultData.second).toInt();
@@ -115,7 +115,7 @@ optional<LoadCell::Data> readInMode(const Options &options) noexcept {
     return {};
   }
 
-  auto value = *mass;
+  auto value = mass.value();
   // un-normalize
   auto reading = (value * impl->hx711->getReferenceUnit()) + impl->hx711->getOffset();
 
@@ -130,7 +130,7 @@ optional<LoadCell::Data> LoadCell::read() noexcept {
 optional<double> LoadCell::readPreciseRaw() noexcept {
   // fixed number of samples, no timeout, busy wait
   if (auto ret = readInMode(Options{15})) {
-    return ret->reading;
+    return ret.value().reading;
   }
   return {};
 }

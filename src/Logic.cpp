@@ -84,7 +84,7 @@ void LogicImpl::dispense() {
   auto now = QDateTime::currentDateTime();
 
   auto log = QString{">> Dispense, elapsed "};
-  log += QString::number(previousDispense.has_value() ? previousDispense->secsTo(now) : -1);
+  log += QString::number(previousDispense.has_value() ? previousDispense.value().secsTo(now) : -1);
   log += QString{", "} + now.toString();
   logEvent(log);
 
@@ -95,8 +95,8 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   auto& dispenseTime = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
-  auto weightAboveThreshold = weightTarred.has_value() ? (weightTarred < 0.8) : false;
-  auto& start = dispenseTime.has_value() ? *dispenseTime : impl->startTime;
+  auto weightAboveThreshold = weightTarred.has_value() ? (weightTarred.value() < 0.8) : false;
+  auto& start = dispenseTime.has_value() ? dispenseTime.value() : impl->startTime;
   auto elapsed = start.secsTo(now);
   auto timeAboveThreshold = elapsed > impl->delaySeconds;
   impl->elapsed = elapsed;
@@ -104,9 +104,10 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   auto log = QString{};
   for (auto toLog : vector<QString>{
            now.time().toString(),
-           weightTarred.has_value() ? QString::number(*weightTarred) : QString{"no weight"},
+           weightTarred.has_value() ? QString::number(weightTarred.value()) : QString{"no weight"},
            QString{"tare: "} + QString::number(tare),
-           QString{"dispense: "} + (dispenseTime.has_value() ? dispenseTime->time().toString() : QString{""}),
+           QString{"dispense: "} +
+               (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
            QString{"elapsed: "} + QString::number(elapsed),
        }) {
     log += toLog + ", ";

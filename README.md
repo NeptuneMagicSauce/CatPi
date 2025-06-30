@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- optional: use value() not operator * because it checks
-
 - icon back: bigger, nicer
 
 - problem: the screen is too bright in the night
@@ -125,3 +123,4 @@ do gpio from c -> relay before weight
 - NO: weight graphic widget: progress bar or circular dial?
 - libhx711: catch all exceptions same as samples: TimeOut, see all bins
 - icons: nicer
+- optional: use value() because it checks, not operators * or -> because they don't check
