@@ -50,6 +50,7 @@ Calibration::Calibration() {
   buttons.back->setSizePolicy(buttons.back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
 
   buttons.back->setIcon(QIcon{QPixmap{"://back.png"}});
+  buttons.back->setIconSize({48, 48});
 
   auto widgetAlignCentered = [](auto widget) {
     widget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

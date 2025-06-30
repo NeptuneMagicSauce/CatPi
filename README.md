@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- icon back: bigger, nicer
-
 - problem: the screen is too bright in the night
   test screen saver shuts off screen:
   can it be waken up with a touch?
@@ -124,3 +122,4 @@ do gpio from c -> relay before weight
 - libhx711: catch all exceptions same as samples: TimeOut, see all bins
 - icons: nicer
 - optional: use value() because it checks, not operators * or -> because they don't check
+- icon back: bigger, nicer
