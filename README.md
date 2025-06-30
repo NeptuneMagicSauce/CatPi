@@ -13,8 +13,6 @@ ninja
   can we control the screen brigthness in-app?
   IR motion detector: can it do auto on/off of the screen?
 
-- rename wait widgets
-
 - better gui layout
   frequent buttons bigger
 
@@ -123,3 +121,4 @@ do gpio from c -> relay before weight
 - icons: nicer
 - optional: use value() because it checks, not operators * or -> because they don't check
 - icon back: bigger, nicer
+- rename wait widgets
