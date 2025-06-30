@@ -28,11 +28,11 @@ struct Main {
   LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
   Calibration* calibration = nullptr;
-  Debug* debug = nullptr;
   Logic* logic = nullptr;
   Delay* delay = nullptr;
-  CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
+  Debug* debug = nullptr;  // after all settings are loaded
+  CentralWidget* central = nullptr;
   MainWindow* window = nullptr;
 };
 
@@ -51,12 +51,12 @@ Main::Main(int& argc, char** argv)
       loadcell(new LoadCell),
       weight(new Weight(loadcell)),
       calibration(new Calibration),
-      debug(new Debug),
       logic(new Logic(loadcell->hasGPIO())),
       delay(new Delay(logic->delaySeconds())),
+      toolbar(new ToolBar),
+      debug(new Debug),
       central(new CentralWidget(weight, delay,
                                 {new SubScreen("Calibration", calibration), new SubScreen("Debug", debug)})),
-      toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
 

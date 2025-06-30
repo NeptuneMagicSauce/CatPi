@@ -7,10 +7,7 @@ ninja
 
 # TODO
 
-- settings menu to easy-change in dedicated menu:
-  - in a subscreen same as calibration
-  - display the values
-  - change the values: widget and callback
+- settings menu to easy-change in dedicated menu
 
 - list of debug settings
   - duration of button/relay press (<-> quantity)

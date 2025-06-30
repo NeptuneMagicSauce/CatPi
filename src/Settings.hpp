@@ -6,4 +6,6 @@ struct QString;
 struct Settings {
   static QVariant get(const QString& key, const QVariant& defaultValue);
   static void set(const QString& key, const QVariant& value);
+
+  static QStringList keys();
 };
