@@ -13,6 +13,7 @@
 #include "DeltaDial.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
+#include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
@@ -32,6 +33,7 @@ struct Main {
   Delay* delay = nullptr;
   ToolBar* toolbar = nullptr;
   Debug* debug = nullptr;  // after all settings are loaded
+  MainScreen* mainscreen = nullptr;
   CentralWidget* central = nullptr;
   MainWindow* window = nullptr;
 };
@@ -55,13 +57,15 @@ Main::Main(int& argc, char** argv)
       delay(new Delay),
       toolbar(new ToolBar),
       debug(new Debug),
-      central(new CentralWidget(weight, delay,
-                                {new SubScreen("Calibration", calibration), new SubScreen("Debug", debug)})),
+      mainscreen(new MainScreen(weight, delay)),
+      central(new CentralWidget({new SubScreen("Main", mainscreen), new SubScreen("Calibration", calibration),
+                                 new SubScreen("Debug", debug)})),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
   // set up initial values
   delay->setDelay(logic->delaySeconds());
+  // TODO no need for getter and setters when fully decoupled
   logic->hasGPIO = loadcell->hasGPIO();
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
@@ -93,8 +97,8 @@ void Main::connectSignals() {
   QObject::connect(toolbar->debug, &QAction::triggered, [&] { central->setPage(debug); });
 
   // Dispense
-  QObject::connect(central->dispenseButton(), &QAbstractButton::released, [this]() {
-    central->dispenseButton()->setEnabled(false);
+  QObject::connect(mainscreen->dispenseButton, &QAbstractButton::released, [this]() {
+    mainscreen->dispenseButton->setEnabled(false);
     logic->manualDispense();
   });
 
@@ -110,7 +114,7 @@ void Main::connectSignals() {
       calibration->update(data.value().reading);
       logic->update(weightTarred, tare, dispensed);
       if (dispensed) {
-        central->dispenseButton()->setEnabled(false);
+        mainscreen->dispenseButton->setEnabled(false);
       }
     } else {
       weight->update({}, weightTarred);
@@ -127,7 +131,7 @@ void Main::connectSignals() {
                    [&] { central->statusMessage(weight->messageFinished); });
 
   // SubScreens
-  SubScreen::connect([&] { central->setPage(nullptr); });
+  SubScreen::connect([&] { central->setPage(mainscreen); });
 
   // Calibration
   QObject::connect(calibration->buttons.step1, &QAbstractButton::released,
@@ -149,7 +153,7 @@ void Main::connectSignals() {
   // Logic
   logic->connect();
   QObject::connect(logic->timerEndDispense(), &QTimer::timeout,
-                   [&] { central->dispenseButton()->setEnabled(true); });
+                   [&] { mainscreen->dispenseButton->setEnabled(true); });
 
   // Delay
   delay->connect();

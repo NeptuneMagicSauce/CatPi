@@ -4,13 +4,10 @@
 #include <QWidget>
 
 struct QAbstractButton;
-struct QWidget;
 struct SubScreen;
 
 struct CentralWidget : public QWidget {
-  CentralWidget(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens);
-
-  QAbstractButton* dispenseButton();
+  CentralWidget(QList<SubScreen*> subScreens);
 
   void setPage(QWidget* page);
 

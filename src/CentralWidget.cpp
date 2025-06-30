@@ -11,9 +11,8 @@
 #include "System.hpp"
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens);
+  CentralWidgetImpl(QList<SubScreen*> subScreens);
   QStackedLayout* pages = nullptr;
-  QPushButton* dispense = nullptr;
   QVBoxLayout* layout = nullptr;
   QLabel* statusMessage = nullptr;
   std::map<const QWidget*, int> subScreenIndices;
@@ -23,30 +22,15 @@ namespace {
 CentralWidgetImpl* impl = nullptr;
 }
 
-CentralWidget::CentralWidget(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens) {
-  impl = new CentralWidgetImpl(weight, delay, subScreens);
+CentralWidget::CentralWidget(QList<SubScreen*> subScreens) {
+  impl = new CentralWidgetImpl(subScreens);
   setLayout(impl->layout);
 }
 
-QAbstractButton* CentralWidget::dispenseButton() { return impl->dispense; }
-
-CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens) {
+CentralWidgetImpl::CentralWidgetImpl(QList<SubScreen*> subScreens) {
   AssertSingleton();
-  auto main = new QWidget;
-
-  auto layoutMainTop = new QHBoxLayout;
-  dispense = new QPushButton("Now!");
-  dispense->setSizePolicy({dispense->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
-  layoutMainTop->addWidget(weight);
-  layoutMainTop->addWidget(dispense);
-
-  auto layoutMain = new QVBoxLayout;
-  main->setLayout(layoutMain);
-  layoutMain->addLayout(layoutMainTop, 2);
-  layoutMain->addWidget(delay, 1);
 
   pages = new QStackedLayout;
-  pages->addWidget(main);
 
   for (auto subScreen : subScreens) {
     subScreenIndices[subScreen->contents] = pages->count();
@@ -62,10 +46,7 @@ CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* delay, QList<SubS
   statusMessage->hide();
 }
 
-void CentralWidget::setPage(QWidget* page) {
-  auto index = (page == nullptr) ? 0 : impl->subScreenIndices.at(page);
-  impl->pages->setCurrentIndex(index);
-}
+void CentralWidget::setPage(QWidget* page) { impl->pages->setCurrentIndex(impl->subScreenIndices.at(page)); }
 
 void CentralWidget::statusMessage(const QString& message) {
   impl->statusMessage->setText(message);
