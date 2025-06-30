@@ -113,7 +113,7 @@ void Main::connectSignals() {
       logic->update({}, tare, dispensed);
     }
 
-    delay->setTimeToDispense(logic->timeToDispense());
+    delay->setRemaining(logic->timeToDispense());
   });
 
   // Weight

@@ -10,7 +10,7 @@
 struct DelayImpl {
   DelayImpl(Delay* parent);
 
-  QLabel* timeToDispense = nullptr;
+  QLabel* remaining = nullptr;
   QLabel* delayLabel = new QLabel;
   QProgressBar* progress = new QProgressBar;
 
@@ -40,12 +40,11 @@ DelayImpl::DelayImpl(Delay* parent) {
   auto layoutTimes = new QVBoxLayout;
   times->setLayout(layoutTimes);
 
-  auto& timeTo = timeToDispense;
-  timeTo = new QLabel;
-  timeTo->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-  delayLabel->setAlignment(timeTo->alignment());
+  remaining = new QLabel;
+  remaining->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  delayLabel->setAlignment(remaining->alignment());
 
-  layoutTimes->addWidget(timeTo);
+  layoutTimes->addWidget(remaining);
   layoutTimes->addWidget(delayLabel);
   layoutTimes->addWidget(progress);
 
@@ -64,12 +63,12 @@ QString DelayImpl::FormatTime(int seconds) {
   return QString::number(seconds) + " second" + (seconds > 1 ? "s" : "");
 }
 
-void Delay::setDelay(int delaySeconds) {
-  impl->delayLabel->setText(QString{"Delay: "} + impl->FormatTime(delaySeconds));
-  impl->progress->setMaximum(delaySeconds);
+void Delay::setDelay(int seconds) {
+  impl->delayLabel->setText(QString{"Delay: "} + impl->FormatTime(seconds));
+  impl->progress->setMaximum(seconds);
 }
 
-void Delay::setTimeToDispense(int seconds) {
-  impl->timeToDispense->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
+void Delay::setRemaining(int seconds) {
+  impl->remaining->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
   impl->progress->setValue(impl->progress->maximum() - seconds);
 }
