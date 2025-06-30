@@ -3,16 +3,31 @@
 #include <QApplication>
 #include <QGuiApplication>
 #include <QScreen>
-#include <iostream>
+
+#include "System.hpp"
+// #include <iostream>
+
+namespace {
+auto isFullscreen = false;
+}
 
 MainWindow::MainWindow(QWidget* centralWidget, QToolBar* toolbar)
     : isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
+  AssertSingleton();
+
   addToolBar(Qt::LeftToolBarArea, toolbar);
   setCentralWidget(centralWidget);
 }
 
-void MainWindow::toggleFullscreen(bool checked) {
-  if (checked) {
+void MainWindow::toggleFullscreen() {
+  ::isFullscreen = !::isFullscreen;
+  setAutomaticSize();
+}
+
+bool MainWindow::isFullscreen() { return ::isFullscreen; }
+
+void MainWindow::setAutomaticSize() {
+  if (::isFullscreen) {
     showFullScreen();
   } else {
     showNormal();

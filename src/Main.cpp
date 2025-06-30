@@ -64,9 +64,11 @@ Main::Main(int& argc, char** argv)
   window->show();    // must be after window is  finished constructing and after setStyleSheet
   connectSignals();  // must be after all members are constructed
 
-  auto startFullscreen = window->isSmallScreen;
-  toolbar->fullscreen->setChecked(startFullscreen);
-  window->toggleFullscreen(startFullscreen);
+  if (window->isSmallScreen) {
+    toolbar->fullscreen->trigger();
+  } else {
+    window->setAutomaticSize();
+  }
 }
 
 void Main::connectSignals() {
@@ -76,13 +78,13 @@ void Main::connectSignals() {
   QObject::connect(quitShortcut, &QShortcut::activated, app, &QApplication::quit);
   auto fullscreenShortcut = new QShortcut(QKeySequence(Qt::Key_F11), window);
   fullscreenShortcut->setContext(Qt::ApplicationShortcut);
-  QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::toggle);
+  QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::trigger);
 
   // ToolBar
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
-  QObject::connect(toolbar->fullscreen, &QAction::toggled, [&](bool checked) {
-    window->toggleFullscreen(checked);
-    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(checked));
+  QObject::connect(toolbar->fullscreen, &QAction::triggered, [&] {
+    window->toggleFullscreen();
+    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(window->isFullscreen()));
   });
   QObject::connect(toolbar->calibration, &QAction::triggered,
                    [&]() { central->setPage(CentralWidget::Page::Calibration); });

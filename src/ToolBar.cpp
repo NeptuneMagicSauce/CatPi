@@ -5,7 +5,6 @@
 #include <QStyle>
 #include <QTransform>
 // #include <iostream>
-#include <optional>
 
 #include "MainWindow.hpp"
 
@@ -30,7 +29,6 @@ ToolBar::ToolBar() {
   fullscreen = new QAction();
   fullscreen->setIcon(fullScreenIcon(false));
   fullscreen->setText("Fullscreen");
-  fullscreen->setCheckable(true);
 
   calibration = new QAction();
   calibration->setIcon(QIcon{QPixmap("://settings.png")});
