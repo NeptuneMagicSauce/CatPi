@@ -1,4 +1,9 @@
-auto debugFormat = [](auto filename, auto widget) {
+#include <QIcon>
+#include <QImage>
+#include <QWidget>
+#include <iostream>
+
+auto debugFormat(auto filename, auto widget) {
   auto file = QFile(filename);
   std::cout << filename << " " << file.exists() << std::endl;
   if (file.exists()) {
@@ -10,10 +15,11 @@ auto debugFormat = [](auto filename, auto widget) {
     }
   }
   return widget;
-};
+}
 
 auto rotateIcon() {
-  static auto iconYes = MainWindow::StandardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
+  static auto iconYes =
+      QIcon{};  // MainWindow::StandardIcon(QStyle::StandardPixmap::SP_ToolBarVerticalExtensionButton);
   static auto iconNo = std::optional<QIcon>{};
   if (iconNo.has_value() == false) {
     QTransform transform;
@@ -48,7 +54,7 @@ auto grayscaleQIcon(const QIcon& icon, const QSize& size) {
   return QIcon{pixmap};
 }
 
-auto spacer = []() {
+auto spacer() {
   auto spacer = new QWidget;
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   return spacer;
