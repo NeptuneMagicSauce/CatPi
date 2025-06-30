@@ -92,7 +92,7 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
     Settings::set(keyRefUnit, refUnit);
     Settings::set(keyOffset, offset);
 
-    std::cout << "Calibration: Ref " << refUnit << " Offset " << offset << std::endl;
+    // std::cout << "Calibration: Ref " << refUnit << " Offset " << offset << std::endl;
     // with 5th parameter non-default Rate::HZ_80 -> same results
     auto ret = new AdvancedHX711(5, 6, refUnit, offset, Rate::HZ_80);
     ret->setConfig(Channel::A, gain);
