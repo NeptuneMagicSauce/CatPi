@@ -7,30 +7,30 @@
 #include <QTimer>
 #include <map>
 
+#include "SubScreen.hpp"
 #include "System.hpp"
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* delay);
+  CentralWidgetImpl(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens);
   QStackedLayout* pages = nullptr;
   QPushButton* dispense = nullptr;
   QVBoxLayout* layout = nullptr;
   QLabel* statusMessage = nullptr;
-  const std::map<CentralWidget::Page, int> indices = {{CentralWidget::Page::Main, 0},
-                                                      {CentralWidget::Page::Calibration, 1}};
+  std::map<const QWidget*, int> subScreenIndices;
 };
 
 namespace {
 CentralWidgetImpl* impl = nullptr;
 }
 
-CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration, QWidget* delay) {
-  impl = new CentralWidgetImpl(weight, calibration, delay);
+CentralWidget::CentralWidget(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens) {
+  impl = new CentralWidgetImpl(weight, delay, subScreens);
   setLayout(impl->layout);
 }
 
 QAbstractButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
-CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* delay) {
+CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens) {
   AssertSingleton();
   auto main = new QWidget;
 
@@ -46,8 +46,12 @@ CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWid
   layoutMain->addWidget(delay, 1);
 
   pages = new QStackedLayout;
-  pages->insertWidget(indices.at(CentralWidget::Page::Main), main);
-  pages->insertWidget(indices.at(CentralWidget::Page::Calibration), calibration);
+  pages->addWidget(main);
+
+  for (auto subScreen : subScreens) {
+    subScreenIndices[subScreen->contents] = pages->count();
+    pages->addWidget(subScreen);
+  }
 
   layout = new QVBoxLayout;
   statusMessage = new QLabel;
@@ -58,7 +62,10 @@ CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWid
   statusMessage->hide();
 }
 
-void CentralWidget::setPage(Page page) { impl->pages->setCurrentIndex(impl->indices.at(page)); }
+void CentralWidget::setPage(QWidget* page) {
+  auto index = (page == nullptr) ? 0 : impl->subScreenIndices.at(page);
+  impl->pages->setCurrentIndex(index);
+}
 
 void CentralWidget::statusMessage(const QString& message) {
   impl->statusMessage->setText(message);

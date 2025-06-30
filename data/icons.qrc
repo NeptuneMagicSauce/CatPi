@@ -17,4 +17,7 @@
     <qresource>
         <file>weightbalance.png</file>
     </qresource>
+    <qresource>
+        <file>bug.png</file>
+    </qresource>
 </RCC>

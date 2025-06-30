@@ -22,10 +22,6 @@ ToolBar::ToolBar() {
   setFixedWidth(90);
   setIconSize({90, 90});
 
-  quit = new QAction();
-  quit->setIcon(QIcon{QPixmap("://quit.png")});
-  quit->setText("Quit");
-
   fullscreen = new QAction();
   fullscreen->setIcon(fullScreenIcon(false));
   fullscreen->setText("Fullscreen");
@@ -34,8 +30,17 @@ ToolBar::ToolBar() {
   calibration->setIcon(QIcon{QPixmap("://settings.png")});
   calibration->setText("Weight Calibration");
 
+  debug = new QAction();
+  debug->setIcon(QIcon{QPixmap("://bug.png")});
+  debug->setText("Debug");
+
+  quit = new QAction();
+  quit->setIcon(QIcon{QPixmap("://quit.png")});
+  quit->setText("Quit");
+
   addAction(fullscreen);
   addAction(calibration);
+  addAction(debug);
   auto spacer = new QWidget;
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   addWidget(spacer);

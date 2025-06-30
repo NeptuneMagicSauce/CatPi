@@ -1,17 +1,18 @@
 #pragma once
 
+#include <QList>
 #include <QWidget>
 
 struct QAbstractButton;
 struct QWidget;
+struct SubScreen;
 
 struct CentralWidget : public QWidget {
-  CentralWidget(QWidget* weight, QWidget* calibration, QWidget* delay);
+  CentralWidget(QWidget* weight, QWidget* delay, QList<SubScreen*> subScreens);
 
   QAbstractButton* dispenseButton();
 
-  enum struct Page { Main, Calibration };
-  void setPage(Page page);
+  void setPage(QWidget* page);
 
   void statusMessage(const QString&);
 };

@@ -8,6 +8,7 @@
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
+#include "Debug.hpp"
 #include "Delay.hpp"
 #include "DeltaDial.hpp"
 #include "LoadCell.hpp"
@@ -27,6 +28,7 @@ struct Main {
   LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
   Calibration* calibration = nullptr;
+  Debug* debug = nullptr;
   Logic* logic = nullptr;
   Delay* delay = nullptr;
   CentralWidget* central = nullptr;
@@ -49,9 +51,11 @@ Main::Main(int& argc, char** argv)
       loadcell(new LoadCell),
       weight(new Weight(loadcell)),
       calibration(new Calibration),
+      debug(new Debug),
       logic(new Logic(loadcell->hasGPIO())),
       delay(new Delay(logic->delaySeconds())),
-      central(new CentralWidget(weight, new SubScreen("Calibration", calibration), delay)),
+      central(new CentralWidget(weight, delay,
+                                {new SubScreen("Calibration", calibration), new SubScreen("Debug", debug)})),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
@@ -81,8 +85,8 @@ void Main::connectSignals() {
     window->toggleFullscreen();
     toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(window->isFullscreen()));
   });
-  QObject::connect(toolbar->calibration, &QAction::triggered,
-                   [&]() { central->setPage(CentralWidget::Page::Calibration); });
+  QObject::connect(toolbar->calibration, &QAction::triggered, [&]() { central->setPage(calibration); });
+  QObject::connect(toolbar->debug, &QAction::triggered, [&] { central->setPage(debug); });
 
   // Dispense
   QObject::connect(central->dispenseButton(), &QAbstractButton::released, [this]() {
@@ -117,7 +121,7 @@ void Main::connectSignals() {
                    [&] { central->statusMessage(weight->messageFinished); });
 
   // SubScreens
-  SubScreen::connect([&] { central->setPage(CentralWidget::Page::Main); });
+  SubScreen::connect([&] { central->setPage(nullptr); });
 
   // Calibration
   QObject::connect(calibration->buttons.step1, &QAbstractButton::released,
@@ -131,7 +135,7 @@ void Main::connectSignals() {
     } else {
       status = "Failed to read the weight";
     }
-    central->setPage(CentralWidget::Page::Main);
+    central->setPage(nullptr);
     central->statusMessage(status);
   });
   calibration->connect();

@@ -4,14 +4,15 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+// #include <iostream>
 
 #include "Widget.hpp"
 
 namespace {
 QList<SubScreen*> instances;
-}
+}  // namespace
 
-SubScreen::SubScreen(const QString& title, QWidget* contents) {
+SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(contents) {
   back = new QPushButton;
   back->setSizePolicy(back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
   static auto backIcon = QIcon{QPixmap{"://back.png"}};
