@@ -5,7 +5,9 @@ struct QTimer;
 #include <optional>
 
 struct Logic {
-  Logic(bool hasGPIO);
+  Logic();
+
+  bool hasGPIO = false;
 
   QTimer* timerEndDispense();
   int delaySeconds();

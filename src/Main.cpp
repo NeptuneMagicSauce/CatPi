@@ -49,16 +49,20 @@ int main(int argc, char** argv) {
 Main::Main(int& argc, char** argv)
     : app(new QApplication(argc, argv)),
       loadcell(new LoadCell),
-      weight(new Weight(loadcell)),
+      weight(new Weight),
       calibration(new Calibration),
-      logic(new Logic(loadcell->hasGPIO())),
-      delay(new Delay(logic->delaySeconds())),
+      logic(new Logic),
+      delay(new Delay),
       toolbar(new ToolBar),
       debug(new Debug),
       central(new CentralWidget(weight, delay,
                                 {new SubScreen("Calibration", calibration), new SubScreen("Debug", debug)})),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
+
+  // set up initial values
+  delay->setDelay(logic->delaySeconds());
+  logic->hasGPIO = loadcell->hasGPIO();
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
   connectSignals();  // must be after all members are constructed
@@ -96,6 +100,8 @@ void Main::connectSignals() {
 
   // LoadCell
   QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
+    // TODO decouple logic loop from sampling loop
+    // TODO tick right away, dont wait a first interval
     auto dispensed = false;
     auto tare = weight->tare();
     auto weightTarred = 0.0;

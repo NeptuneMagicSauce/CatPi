@@ -11,7 +11,7 @@
 struct DelayImpl {
   DelayImpl(Delay* parent);
 
-  QLabel* remaining = nullptr;
+  QLabel* remainingLabel = new QLabel;
   QLabel* delayLabel = new QLabel;
   QProgressBar* progress = new QProgressBar;
 
@@ -22,12 +22,11 @@ namespace {
 DelayImpl* impl = nullptr;
 }
 
-Delay::Delay(int delaySeconds) {
+Delay::Delay() {
   AssertSingleton();
   delayDial = new DeltaDial;
   delayDial->setMaximum(10);
   impl = new DelayImpl(this);
-  setDelay(delaySeconds);
 }
 
 void Delay::connect() { delayDial->connect(); }
@@ -41,11 +40,10 @@ DelayImpl::DelayImpl(Delay* parent) {
   auto layoutTimes = new QVBoxLayout;
   times->setLayout(layoutTimes);
 
-  remaining = new QLabel;
-  remaining->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-  delayLabel->setAlignment(remaining->alignment());
+  remainingLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  delayLabel->setAlignment(remainingLabel->alignment());
 
-  layoutTimes->addWidget(remaining);
+  layoutTimes->addWidget(remainingLabel);
   layoutTimes->addWidget(delayLabel);
   layoutTimes->addWidget(progress);
 
@@ -70,6 +68,6 @@ void Delay::setDelay(int seconds) {
 }
 
 void Delay::setRemaining(int seconds) {
-  impl->remaining->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
+  impl->remainingLabel->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
   impl->progress->setValue(impl->progress->maximum() - seconds);
 }

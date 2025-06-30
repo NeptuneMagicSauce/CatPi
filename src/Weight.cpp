@@ -17,7 +17,7 @@
 using namespace std;
 
 struct WeightImpl {
-  WeightImpl(LoadCell *loadcell);
+  WeightImpl();
   void connect();
 
   QLabel *label = new QLabel;
@@ -25,7 +25,6 @@ struct WeightImpl {
   QTimer *eventTareFinished = new QTimer;
   QLayout *layout = nullptr;
   double massGrams = 0;
-  LoadCell *loadcell;
   struct {
     const QString key = "Tare";
     double value = 0;
@@ -43,12 +42,12 @@ namespace {
 WeightImpl *impl = nullptr;
 }
 
-Weight::Weight(LoadCell *loadcell) : messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns)) {
-  impl = new WeightImpl(loadcell);
+Weight::Weight() : messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns)) {
+  impl = new WeightImpl();
   setLayout(impl->layout);
 }
 
-WeightImpl::WeightImpl(LoadCell *loadcell) : loadcell(loadcell) {
+WeightImpl::WeightImpl() {
   AssertSingleton();
   label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

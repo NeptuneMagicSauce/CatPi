@@ -1,6 +1,5 @@
 #pragma once
 
-struct LoadCell;
 struct QTimer;
 
 #include <QString>
@@ -9,7 +8,7 @@ struct QTimer;
 
 class Weight : public QWidget {
  public:
-  Weight(LoadCell*);
+  Weight();
 
   const QString messageFinished;
   QTimer* eventTareFinished();

@@ -5,7 +5,7 @@ struct DeltaDial;
 #include <QWidget>
 
 struct Delay : public QWidget {
-  Delay(int delaySeconds);
+  Delay();
 
   DeltaDial* delayDial = nullptr;
 

@@ -24,19 +24,17 @@ struct LogicImpl {
   const QString delayKey = "Delay";
   int delaySeconds = 0;
   qint64 elapsed = 0;
-  bool hasGPIO = false;
 
-  void dispense();
+  void dispense(bool hasGPIO);
   void logEvent(QString const& event);
 };
 namespace {
 LogicImpl* impl = nullptr;
 }
 
-Logic::Logic(bool hasGPIO) {
+Logic::Logic() {
   AssertSingleton();
   impl = new LogicImpl;
-  impl->hasGPIO = hasGPIO;
 }
 
 QTimer* Logic::timerEndDispense() { return impl->timerEndDispense; }
@@ -62,7 +60,7 @@ LogicImpl::LogicImpl()
 }
 
 void Logic::reset() {
-  if (impl->hasGPIO) {
+  if (hasGPIO) {
     pinctrl("set 17 op dl");
   }
 }
@@ -71,12 +69,12 @@ void Logic::connect() {
   QObject::connect(impl->timerEndDispense, &QTimer::timeout, [&] { reset(); });
 }
 
-void Logic::manualDispense() { impl->dispense(); }
+void Logic::manualDispense() { impl->dispense(hasGPIO); }
 
-void LogicImpl::dispense() {
+void LogicImpl::dispense(bool hasGPIO) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
   // pinctrl("-p");
-  if (impl->hasGPIO) {
+  if (hasGPIO) {
     pinctrl("set 17 op dh");
   }
   timerEndDispense->start();
@@ -115,7 +113,7 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   impl->logEvent(log);
 
   if (timeAboveThreshold && weightAboveThreshold) {
-    impl->dispense();
+    impl->dispense(hasGPIO);
     dispensed = true;
   }
 }
