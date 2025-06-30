@@ -1,4 +1,4 @@
-#include "WaitWidgets.hpp"
+#include "Delay.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -7,8 +7,8 @@
 #include "DeltaDial.hpp"
 #include "System.hpp"
 
-struct WaitWidgetsImpl {
-  WaitWidgetsImpl(WaitWidgets* parent);
+struct DelayImpl {
+  DelayImpl(Delay* parent);
 
   QLabel* timeToDispense = nullptr;
   QLabel* delayLabel = new QLabel;
@@ -18,20 +18,20 @@ struct WaitWidgetsImpl {
 };
 
 namespace {
-WaitWidgetsImpl* impl = nullptr;
+DelayImpl* impl = nullptr;
 }
 
-WaitWidgets::WaitWidgets(int delaySeconds) {
+Delay::Delay(int delaySeconds) {
   AssertSingleton();
   delayDial = new DeltaDial;
   delayDial->setMaximum(10);
-  impl = new WaitWidgetsImpl(this);
+  impl = new DelayImpl(this);
   setDelay(delaySeconds);
 }
 
-void WaitWidgets::connect() { delayDial->connect(); }
+void Delay::connect() { delayDial->connect(); }
 
-WaitWidgetsImpl::WaitWidgetsImpl(WaitWidgets* parent) {
+DelayImpl::DelayImpl(Delay* parent) {
   auto layout = new QHBoxLayout;
   parent->setLayout(layout);
 
@@ -56,7 +56,7 @@ WaitWidgetsImpl::WaitWidgetsImpl(WaitWidgets* parent) {
   layout->addWidget(parent->delayDial);
 }
 
-QString WaitWidgetsImpl::FormatTime(int seconds) {
+QString DelayImpl::FormatTime(int seconds) {
   if (seconds >= 60) {
     auto minutes = std::round((double)seconds / 60);
     return QString::number(minutes) + " minute" + (minutes > 1 ? "s" : "");
@@ -64,12 +64,12 @@ QString WaitWidgetsImpl::FormatTime(int seconds) {
   return QString::number(seconds) + " second" + (seconds > 1 ? "s" : "");
 }
 
-void WaitWidgets::setDelay(int delaySeconds) {
+void Delay::setDelay(int delaySeconds) {
   impl->delayLabel->setText(QString{"Delay: "} + impl->FormatTime(delaySeconds));
   impl->progress->setMaximum(delaySeconds);
 }
 
-void WaitWidgets::setTimeToDispense(int seconds) {
+void Delay::setTimeToDispense(int seconds) {
   impl->timeToDispense->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
   impl->progress->setValue(impl->progress->maximum() - seconds);
 }

@@ -10,7 +10,7 @@
 #include "System.hpp"
 
 struct CentralWidgetImpl {
-  CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* waitwidgets);
+  CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* delay);
   QStackedLayout* pages = nullptr;
   QPushButton* dispense = nullptr;
   QVBoxLayout* layout = nullptr;
@@ -23,14 +23,14 @@ namespace {
 CentralWidgetImpl* impl = nullptr;
 }
 
-CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration, QWidget* waitwidgets) {
-  impl = new CentralWidgetImpl(weight, calibration, waitwidgets);
+CentralWidget::CentralWidget(QWidget* weight, QWidget* calibration, QWidget* delay) {
+  impl = new CentralWidgetImpl(weight, calibration, delay);
   setLayout(impl->layout);
 }
 
 QAbstractButton* CentralWidget::dispenseButton() { return impl->dispense; }
 
-CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* waitwidgets) {
+CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWidget* delay) {
   AssertSingleton();
   auto main = new QWidget;
 
@@ -43,7 +43,7 @@ CentralWidgetImpl::CentralWidgetImpl(QWidget* weight, QWidget* calibration, QWid
   auto layoutMain = new QVBoxLayout;
   main->setLayout(layoutMain);
   layoutMain->addLayout(layoutMainTop, 2);
-  layoutMain->addWidget(waitwidgets, 1);
+  layoutMain->addWidget(delay, 1);
 
   pages = new QStackedLayout;
   pages->insertWidget(indices.at(CentralWidget::Page::Main), main);

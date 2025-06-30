@@ -8,13 +8,13 @@
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
+#include "Delay.hpp"
 #include "DeltaDial.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
 #include "MainWindow.hpp"
 #include "Settings.hpp"
 #include "ToolBar.hpp"
-#include "WaitWidgets.hpp"
 #include "Weight.hpp"
 
 using namespace std;
@@ -28,7 +28,7 @@ struct Main {
   Weight* weight = nullptr;
   Calibration* calibration = nullptr;
   Logic* logic = nullptr;
-  WaitWidgets* waitwidgets = nullptr;
+  Delay* delay = nullptr;
   CentralWidget* central = nullptr;
   ToolBar* toolbar = nullptr;
   MainWindow* window = nullptr;
@@ -55,8 +55,8 @@ Main::Main(int& argc, char** argv)
       weight(new Weight(loadcell)),
       calibration(new Calibration),
       logic(new Logic(loadcell->hasGPIO())),
-      waitwidgets(new WaitWidgets(logic->delaySeconds())),
-      central(new CentralWidget(weight, calibration, waitwidgets)),
+      delay(new Delay(logic->delaySeconds())),
+      central(new CentralWidget(weight, calibration, delay)),
       toolbar(new ToolBar),
       window(new MainWindow(central, toolbar)) {
   app->setStyleSheet("QWidget{font-size: 48pt;} ");
@@ -113,7 +113,7 @@ void Main::connectSignals() {
       logic->update({}, tare, dispensed);
     }
 
-    waitwidgets->setTimeToDispense(logic->timeToDispense());
+    delay->setTimeToDispense(logic->timeToDispense());
   });
 
   // Weight
@@ -145,10 +145,10 @@ void Main::connectSignals() {
   QObject::connect(logic->timerEndDispense(), &QTimer::timeout,
                    [&] { central->dispenseButton()->setEnabled(true); });
 
-  // Wait Widgets
-  waitwidgets->connect();
-  QObject::connect(waitwidgets->delayDial, &DeltaDial::valueChanged, [&] {
-    logic->changeDelay(waitwidgets->delayDial->delta);
-    waitwidgets->setDelay(logic->delaySeconds());
+  // Delay
+  delay->connect();
+  QObject::connect(delay->delayDial, &DeltaDial::valueChanged, [&] {
+    logic->changeDelay(delay->delayDial->delta);
+    delay->setDelay(logic->delaySeconds());
   });
 }

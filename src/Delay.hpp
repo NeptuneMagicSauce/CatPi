@@ -4,8 +4,8 @@ struct QLabel;
 struct DeltaDial;
 #include <QWidget>
 
-struct WaitWidgets : public QWidget {
-  WaitWidgets(int delaySeconds);
+struct Delay : public QWidget {
+  Delay(int delaySeconds);
 
   DeltaDial* delayDial = nullptr;
 
