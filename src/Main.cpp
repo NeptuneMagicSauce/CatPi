@@ -4,6 +4,7 @@
 #include <QShortcut>
 #include <QStatusBar>
 #include <QTimer>
+// no need for the qt includes
 // #include <iostream>
 
 #include "Calibration.hpp"
@@ -24,7 +25,7 @@ using namespace std;
 struct Main {
   Main(int& argc, char** argv);
   void connectSignals();
-
+// no need to both declare and define
   QApplication* app = nullptr;
   LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
@@ -145,6 +146,7 @@ void Main::connectSignals() {
     } else {
       status = "Failed to read the weight";
     }
+#error here
     central->setPage(nullptr);
     central->statusMessage(status);
   });
