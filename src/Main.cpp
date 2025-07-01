@@ -63,7 +63,6 @@ Main::Main(int& argc, char** argv)
 
   // set up initial values
   delay->setDelay(logic->delaySeconds());
-  // TODO no need for getter and setters when fully decoupled
   logic->hasGPIO = loadcell->hasGPIO();
 
   window->show();    // must be after window is  finished constructing and after setStyleSheet
@@ -88,8 +87,9 @@ void Main::connectSignals() {
   // ToolBar
   QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
   QObject::connect(toolbar->fullscreen, &QAction::triggered, [&] {
-    window->toggleFullscreen();
-    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(window->isFullscreen()));
+    auto isFullscreen = false;
+    window->toggleFullscreen(isFullscreen);
+    toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(isFullscreen));
   });
   QObject::connect(toolbar->calibration, &QAction::triggered, [&]() { central->setPage(calibration); });
   QObject::connect(toolbar->debug, &QAction::triggered, [&] { central->setPage(debug); });

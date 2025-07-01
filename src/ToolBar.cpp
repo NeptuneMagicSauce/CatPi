@@ -6,7 +6,6 @@
 #include <QTransform>
 // #include <iostream>
 
-#include "MainWindow.hpp"
 #include "Widget.hpp"
 
 QIcon& ToolBar::fullScreenIcon(bool isFullScreen) {

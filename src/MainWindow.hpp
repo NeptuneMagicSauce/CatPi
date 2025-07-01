@@ -11,9 +11,8 @@ struct MainWindow : public QMainWindow {
   MainWindow(QWidget* centralWidget, QToolBar* toolbar);
 
   bool const isSmallScreen;
-  void toggleFullscreen();
+  void toggleFullscreen(bool& isFullscreen);
   void setAutomaticSize();
-  bool isFullscreen();
 
   static QIcon StandardIcon(QStyle::StandardPixmap);
 };

@@ -19,12 +19,11 @@ MainWindow::MainWindow(QWidget* centralWidget, QToolBar* toolbar)
   setCentralWidget(centralWidget);
 }
 
-void MainWindow::toggleFullscreen() {
+void MainWindow::toggleFullscreen(bool& isFullscreen) {
   ::isFullscreen = !::isFullscreen;
   setAutomaticSize();
+  isFullscreen = ::isFullscreen;
 }
-
-bool MainWindow::isFullscreen() { return ::isFullscreen; }
 
 void MainWindow::setAutomaticSize() {
   if (::isFullscreen) {
