@@ -5,7 +5,6 @@ struct QShowEvent;
 
 #include <QWidget>
 #include <optional>
-#include <utility>
 
 struct Calibration : public QWidget {
   Calibration();

@@ -1,10 +1,6 @@
 #include <QAbstractButton>
 #include <QApplication>
-#include <QLabel>
 #include <QShortcut>
-#include <QStatusBar>
-#include <QTimer>
-// no need for the qt includes
 // #include <iostream>
 
 #include "Calibration.hpp"
@@ -25,7 +21,7 @@ using namespace std;
 struct Main {
   Main(int& argc, char** argv);
   void connectSignals();
-// no need to both declare and define
+  // TODO no need to both declare and define
   QApplication* app = nullptr;
   LoadCell* loadcell = nullptr;
   Weight* weight = nullptr;
@@ -59,6 +55,7 @@ Main::Main(int& argc, char** argv)
       toolbar(new ToolBar),
       debug(new Debug),
       mainscreen(new MainScreen(weight, delay)),
+      // do not have a title for the main screen
       central(new CentralWidget({new SubScreen("Main", mainscreen), new SubScreen("Calibration", calibration),
                                  new SubScreen("Debug", debug)})),
       window(new MainWindow(central, toolbar)) {
@@ -146,8 +143,7 @@ void Main::connectSignals() {
     } else {
       status = "Failed to read the weight";
     }
-#error here
-    central->setPage(nullptr);
+    central->setPage(mainscreen);
     central->statusMessage(status);
   });
   calibration->connect();

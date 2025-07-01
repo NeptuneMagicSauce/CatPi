@@ -18,6 +18,12 @@ ninja
   - duration of confirm tare
   - calibration data
 
+- clang format:
+  - no // namespace at closure
+  - maybe width smaller
+  - why is the QList<SubScreen> so bizarrely indented?
+  - include cleaner: warn on unused includes
+
 - button to reset calibration to factory defaults
   because if you go through the calibration screens
   but you don't have the known weight
