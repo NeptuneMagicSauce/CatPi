@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
   auto ret = app->exec();
 
   // Clean Up
-  logic->reset();
+  logic->closeRelay();
 
   return ret;
 }

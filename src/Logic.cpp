@@ -58,14 +58,14 @@ LogicImpl::LogicImpl()
   timerEndDispense->setInterval(4000);
 }
 
-void Logic::reset() {
+void Logic::closeRelay() {
   if (hasGPIO) {
     pinctrl("set 17 op dl");
   }
 }
 
 void Logic::connect() {
-  QObject::connect(impl->timerEndDispense, &QTimer::timeout, [&] { reset(); });
+  QObject::connect(impl->timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
 }
 
 void Logic::manualDispense() { impl->dispense(hasGPIO); }

@@ -16,7 +16,7 @@ struct Logic {
   void manualDispense();
   void update(std::optional<double> weightTarred, double tare, bool& dispensed);
   void changeDelay(int delta);
-  void reset();
+  void closeRelay();
 
   int timeToDispense();
 };
