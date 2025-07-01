@@ -6,9 +6,12 @@ CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 compile_commands.json
+experiments/standardicons/standardicons
+experiments/standardicons/standardicons_autogen/
+experiments/widgetsgallery/
+experiments/widgetsgallery/widgetsgallery
+experiments/widgetsgallery/widgetsgallery_autogen/
 .ninja_deps
 .ninja_log
 .qt/
 src/pipins
-experiments/standardicons/standardicons
-experiments/standardicons/standardicons_autogen/
