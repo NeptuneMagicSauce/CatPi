@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QWidget>
+#include <QScrollArea>
 
-struct Debug : public QWidget {
+struct Debug : public QScrollArea {
   Debug();
   static bool Populated();
 };
