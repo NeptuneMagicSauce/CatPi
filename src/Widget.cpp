@@ -19,3 +19,9 @@ QWidget* Widget::AlignCentered(QLabel* widget) {
   widget->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   return widget;
 }
+
+QWidget* Widget::Spacer() {
+  auto spacer = new QWidget;
+  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  return spacer;
+}

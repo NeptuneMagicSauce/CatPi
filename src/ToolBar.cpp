@@ -7,6 +7,7 @@
 // #include <iostream>
 
 #include "MainWindow.hpp"
+#include "Widget.hpp"
 
 QIcon& ToolBar::fullScreenIcon(bool isFullScreen) {
   static auto iconYes = QIcon{QPixmap{"://exitfullscreen.png"}};
@@ -41,8 +42,6 @@ ToolBar::ToolBar() {
   addAction(fullscreen);
   addAction(calibration);
   addAction(debug);
-  auto spacer = new QWidget;
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  addWidget(spacer);
+  addWidget(Widget::Spacer());
   addAction(quit);
 }
