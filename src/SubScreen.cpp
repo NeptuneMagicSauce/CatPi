@@ -13,29 +13,31 @@ QList<SubScreen*> instances;
 }  // namespace
 
 SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(contents) {
-  back = new QPushButton;
-  back->setSizePolicy(back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
-  static auto backIcon = QIcon{QPixmap{"://back.png"}};
-  back->setIcon(backIcon);
-  back->setIconSize({48, 48});
-
   auto topbar = [&] {
-    // auto ret = new QWidget;
     auto ret = new QGroupBox;
     auto layout = new QHBoxLayout;
     ret->setLayout(layout);
+
+    back = new QPushButton;
+    back->setSizePolicy(back->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    static auto backIcon = QIcon{QPixmap{"://back.png"}};
+    back->setIcon(backIcon);
+    back->setIconSize({48, 48});
     layout->addWidget(back, 1);
+
     auto titleLabel = new QLabel(title);
     Widget::AlignCentered(titleLabel);
     Widget::FontSized(titleLabel, 28);
     layout->addWidget(titleLabel, 4);
     ret->setMaximumHeight(80);
     return ret;
-  }();
+  };
 
   auto layout = new QVBoxLayout;
   setLayout(layout);
-  layout->addWidget(topbar);
+  if (title.isEmpty() == false) {
+    layout->addWidget(topbar());
+  }
   layout->addWidget(contents);
 
   instances.append(this);

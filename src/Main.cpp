@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
   Debug* debug = new Debug;
   MainScreen* mainscreen = new MainScreen{weight, delay};
   CentralWidget* central =
-      new CentralWidget{{new SubScreen("Main", mainscreen), new SubScreen("Calibration", calibration),
+      new CentralWidget{{new SubScreen("", mainscreen), new SubScreen("Calibration", calibration),
                          new SubScreen("Debug", debug)}};
   MainWindow* window = new MainWindow{central, toolbar};
 
