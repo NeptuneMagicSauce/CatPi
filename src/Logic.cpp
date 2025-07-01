@@ -54,7 +54,6 @@ LogicImpl::LogicImpl()
 
   delaySeconds = Settings::get(delayKey, 15 * 60).toInt();
 
-  timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
   timerEndDispense->setInterval(4000);
 }

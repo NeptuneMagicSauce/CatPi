@@ -23,7 +23,7 @@ struct WeightImpl {
   QLabel *label = new QLabel;
   QLabel *labelFooter = new QLabel;
   QTimer *eventTareFinished = new QTimer;
-  QLayout *layout = nullptr;
+  QLayout *layout = new QVBoxLayout;
   double massGrams = 0;
   struct {
     const QString key = "Tare";
@@ -70,14 +70,12 @@ WeightImpl::WeightImpl() {
   tare.progress->setMaximumHeight(15);
   tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
-  layout = new QVBoxLayout();
   layout->addWidget(label);
   layout->addWidget(labelFooter);
   layout->addWidget(tare.progress);
   tare.progress->setVisible(false);
   layout->addWidget(tare.button);
 
-  eventTareFinished = new QTimer;
   eventTareFinished->setSingleShot(true);
   eventTareFinished->setInterval(1);
 }

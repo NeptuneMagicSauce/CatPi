@@ -12,9 +12,9 @@
 
 struct CentralWidgetImpl {
   CentralWidgetImpl(QList<SubScreen*> subScreens);
-  QStackedLayout* pages = nullptr;
-  QVBoxLayout* layout = nullptr;
-  QLabel* statusMessage = nullptr;
+  QStackedLayout* pages = new QStackedLayout;
+  QVBoxLayout* layout = new QVBoxLayout;
+  QLabel* statusMessage = new QLabel;
   std::map<const QWidget*, int> subScreenIndices;
 };
 
@@ -29,16 +29,12 @@ CentralWidget::CentralWidget(QList<SubScreen*> subScreens) {
 
 CentralWidgetImpl::CentralWidgetImpl(QList<SubScreen*> subScreens) {
   AssertSingleton();
-  // TODO call new on every member at declaration
-  pages = new QStackedLayout;
 
   for (auto subScreen : subScreens) {
     subScreenIndices[subScreen->contents] = pages->count();
     pages->addWidget(subScreen);
   }
 
-  layout = new QVBoxLayout;
-  statusMessage = new QLabel;
   statusMessage->setStyleSheet("QWidget{font-size: 25pt;}");
   statusMessage->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   layout->addLayout(pages);
