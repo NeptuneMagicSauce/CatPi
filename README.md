@@ -18,6 +18,8 @@ ninja
   - duration of confirm tare
   - calibration data
 
+- base widget: maybe QSlider is better than DeltaDial ?
+
 - clang format:
   - no // namespace at closure
   - maybe width smaller
