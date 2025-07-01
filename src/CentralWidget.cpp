@@ -29,7 +29,7 @@ CentralWidget::CentralWidget(QList<SubScreen*> subScreens) {
 
 CentralWidgetImpl::CentralWidgetImpl(QList<SubScreen*> subScreens) {
   AssertSingleton();
-
+  // call new on every member at declaration 
   pages = new QStackedLayout;
 
   for (auto subScreen : subScreens) {
