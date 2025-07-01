@@ -13,7 +13,10 @@ QSettings& instance() {
 }  // namespace
 
 QVariant Settings::get(const QString& key, const QVariant& defaultValue) {
+  // settings must be loaded on startup
+  // so that widget Debug can consume them all
   assert(Debug::Populated() == false);
+
   if (instance().contains(key) == false) {
     // when missing, set the default key
     // so that the instance always contains all keys
