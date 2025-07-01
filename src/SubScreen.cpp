@@ -45,6 +45,9 @@ SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(content
 
 void SubScreen::connect(std::function<void()> callback) {
   for (auto screen : instances) {
+    if (screen->back == nullptr) {
+      continue;
+    }
     QObject::connect(screen->back, &QAbstractButton::released, callback);
   }
 }
