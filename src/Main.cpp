@@ -129,6 +129,9 @@ int main(int argc, char** argv) {
       logic->changeDelay(delay->delayDial->delta);
       delay->setDelay(logic->delaySeconds());
     });
+
+    // Debug
+    debug->connect([&] { central->setPage(debug); }, [&](QWidget* item) { central->setSettingPage(item); });
   }
 
   // Initializing that needs the signals connected

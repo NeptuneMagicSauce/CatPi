@@ -42,7 +42,18 @@ CentralWidgetImpl::CentralWidgetImpl(QList<SubScreen*> subScreens) {
   statusMessage->hide();
 }
 
-void CentralWidget::setPage(QWidget* page) { impl->pages->setCurrentIndex(impl->subScreenIndices.at(page)); }
+void CentralWidget::setPage(QWidget* page) {
+  assert(impl->subScreenIndices.at(page) < impl->pages->count());
+  impl->pages->setCurrentIndex(impl->subScreenIndices.at(page));
+}
+
+void CentralWidget::setSettingPage(QWidget* page) {
+  if (impl->subScreenIndices.contains(page) == false) {
+    impl->subScreenIndices[page] = impl->pages->count();
+    impl->pages->addWidget(page);
+  }
+  setPage(page);
+}
 
 void CentralWidget::statusMessage(const QString& message) {
   impl->statusMessage->setText(message);

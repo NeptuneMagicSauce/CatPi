@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QScrollArea>
+#include <QWidget>
 
-struct Debug : public QScrollArea {
+struct Debug : public QWidget {
   Debug();
   static bool Populated();
+  void connect(std::function<void()> goBackCallback, std::function<void(QWidget*)> goToSettingCallback);
 };
