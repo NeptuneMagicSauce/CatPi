@@ -71,15 +71,17 @@ struct QLabelScaledDownFontFont : public QLabel {
     auto textSize = computeTextSize();
     qDebug() << text() << contents;
     qDebug() << metaObject()->className() << textSize << theFont.family() << theFont.pointSize();
-    while (contents.width() < textSize.width() + 100 || contents.height() < textSize.height() + 10) {
+    while (contents.width() < textSize.width() || contents.height() < textSize.height()) {
       if (theFont.pointSize() <= 1) {
         qDebug() << "internal error" << __PRETTY_FUNCTION__;
         break;
       }
-      theFont.setPointSize(theFont.pointSize() / 2);  // -1);
+      theFont.setPointSize(theFont.pointSize() - 1);
       textSize = computeTextSize();
       qDebug() << metaObject()->className() << textSize << theFont.family() << theFont.pointSize();
-      setFont(theFont);  // this does not work!
+      setFont(theFont);  // this does not work! ...
+      // the size is correctly computed
+      // but I do not see the new size being applied after setFont()
     }
   }
 };
