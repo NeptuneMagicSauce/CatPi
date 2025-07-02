@@ -80,11 +80,12 @@ Debug::Debug() {
     auto row = index / itemsPerRow;
     auto column = index % itemsPerRow;
     auto button = new QPushButton{name};
+    button->setMinimumHeight(80);
     layout->addWidget(button, row, column);
     buttons[key] = button;
 
     auto screenContents = new QWidget;  // todo
-    auto screen = new SubScreen{name, screenContents};
+    auto screen = new SubScreen{name.replace("\n", ""), screenContents};
     screens[key] = screen;
 
     ++index;
