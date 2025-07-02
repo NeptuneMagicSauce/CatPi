@@ -37,7 +37,7 @@ auto formatKey(QString key) {
     lineLength += word.length() + 1;
   }
 
-  return ret;
+  return ret.trimmed();
 }
 }  // namespace
 
@@ -59,6 +59,7 @@ struct Setting : public QWidget {
     // per item:
     //  value
     //  is default ?
+    //  unit (milliseconds, ...)
     //  reset = set default (QToolButton)
     //  support for callback on change
     //  custom value with dial

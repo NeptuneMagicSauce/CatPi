@@ -1,5 +1,6 @@
 #include <QIcon>
 #include <QImage>
+#include <QLabel>
 #include <QWidget>
 #include <iostream>
 
@@ -58,4 +59,27 @@ auto spacer() {
   auto spacer = new QWidget;
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   return spacer;
+};
+
+struct QLabelScaledDownFontFont : public QLabel {
+  QLabelScaledDownFontFont(const QString& text) : QLabel(text) {}
+  void resizeEvent(QResizeEvent* e) override {
+    QLabel::resizeEvent(e);
+    auto contents = contentsRect();
+    auto theFont = font();
+    auto computeTextSize = [&] { return QFontMetrics(theFont).boundingRect(text()); };
+    auto textSize = computeTextSize();
+    qDebug() << text() << contents;
+    qDebug() << metaObject()->className() << textSize << theFont.family() << theFont.pointSize();
+    while (contents.width() < textSize.width() + 100 || contents.height() < textSize.height() + 10) {
+      if (theFont.pointSize() <= 1) {
+        qDebug() << "internal error" << __PRETTY_FUNCTION__;
+        break;
+      }
+      theFont.setPointSize(theFont.pointSize() / 2);  // -1);
+      textSize = computeTextSize();
+      qDebug() << metaObject()->className() << textSize << theFont.family() << theFont.pointSize();
+      setFont(theFont);  // this does not work!
+    }
+  }
 };

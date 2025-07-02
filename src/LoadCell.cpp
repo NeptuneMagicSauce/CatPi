@@ -16,7 +16,7 @@ using namespace std;
 
 struct LoadCellImpl {
   const std::chrono::milliseconds pollingInterval{100};
-  const QString intervalSettingName = "WeightPollIntervalMilliseconds";
+  const QString intervalSettingName = "WeightPollInterval";
 
   AdvancedHX711 *hx711 = createHX711(nullopt);
 
@@ -60,9 +60,10 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
         }
             .at(gain);
 
-    auto keyPrefix = QString{gain == Gain::GAIN_64 ? "CalibrationGain64" : "CalibrationGain128"};
-    auto keyRefUnit = keyPrefix + "RefUnit";
-    auto keyOffset = keyPrefix + "Offset";
+    auto keyPrefix = QString{"Calibration"};
+    // QString{gain == Gain::GAIN_64 ? "CalibrationGain64" : "CalibrationGain128"};
+    auto keyRefUnit = keyPrefix + "Zero";
+    auto keyOffset = keyPrefix + "Scale";
 
     auto refUnit = 0;
     auto offset = 0;
