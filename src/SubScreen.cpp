@@ -26,6 +26,7 @@ SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(content
     layout->addWidget(back, 1);
 
     auto titleLabel = new QLabel(title);
+    titleLabel->setMaximumWidth(580);  // otherwise it does not fit
     Widget::AlignCentered(titleLabel);
     Widget::FontSized(titleLabel, 28);
     layout->addWidget(titleLabel, 4);
