@@ -9,6 +9,11 @@ ninja
 
 - settings menu to easy-change in dedicated menu
 
+- close relay even on crash
+  needs crash handler
+  so then just port all features
+  handle control-c: also close relay
+
 - list of debug settings
   - duration of button/relay press (<-> quantity)
   - load cell polling timeout, for cpu consumption when unplugged
