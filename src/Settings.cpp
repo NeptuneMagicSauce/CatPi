@@ -51,3 +51,7 @@ const Settings::Load& Settings::Load::get(const QString& key) {
   assert(loads.contains(key));
   return loads[key];
 }
+
+bool Settings::isLoaded(const QString& key) { return loads.contains(key); }
+
+void Settings::remove(const QString& key) { instance().remove(key); }

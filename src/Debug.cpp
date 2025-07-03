@@ -64,11 +64,6 @@ struct Setting : public QWidget {
   Setting(const Settings::Load& load)
       : key(load.key), defaultValue(load.defaultValue), callback(load.callback) {
     Widget::FontSized(this, 20);
-    // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
-    // TODO discard obsoletes:
-    //   if Settings key-value is loaded from disk but not at runtime ::get()
-    //   then it's an obsolete one: remove it
-    //   in this Debug class, not in Settings class that does not know when it's ready
 
     for (auto widget : QList<QLabel*>{value, unit, description}) {
       Widget::AlignCentered(widget);
@@ -111,7 +106,13 @@ Debug::Debug() {
   auto const itemsPerRow = 3;
   int index = 0;
   // TODO sort keys, most interesting first
+  QList<QString> obsoleteKeys;
   for (auto key : Settings::keys()) {
+    if (Settings::isLoaded(key) == false) {
+      obsoleteKeys.append(key);
+      continue;
+    }
+
     std::cout << "Setting: " << key.toStdString() << " = " << Settings::get(key).toString().toStdString()
               << std::endl;
 
@@ -129,6 +130,10 @@ Debug::Debug() {
     button->setMinimumHeight(100);
 
     ++index;
+  }
+
+  for (auto obsoleteKey : obsoleteKeys) {
+    Settings::remove(obsoleteKey);
   }
 
   valueChangedTimer = new QTimer;

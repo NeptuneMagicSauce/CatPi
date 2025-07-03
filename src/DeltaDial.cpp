@@ -1,6 +1,7 @@
 #include "DeltaDial.hpp"
 
 DeltaDial::DeltaDial() {
+  // TODO bigger maximum for smooth rotate, then divide delta
   setMaximum(30);
   setWrapping(true);
 }
