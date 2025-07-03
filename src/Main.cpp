@@ -132,6 +132,11 @@ int main(int argc, char** argv) {
 
     // Debug
     debug->connect([&] { central->setPage(debug); }, [&](QWidget* item) { central->setSettingPage(item); });
+    QObject::connect(debug->valueChangedTimer, &QTimer::timeout, [&] {
+      // update the widgets that show a value changed by the debug settings screen
+      calibration->updateLabel();
+      delay->setDelay(logic->delaySeconds());
+    });
   }
 
   // Initializing that needs the signals connected

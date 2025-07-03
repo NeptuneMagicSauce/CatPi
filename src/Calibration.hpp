@@ -22,4 +22,5 @@ struct Calibration : public QWidget {
   void showEvent(QShowEvent* e) override;
   void connect();
   void update(std::optional<double> reading);
+  void updateLabel();
 };

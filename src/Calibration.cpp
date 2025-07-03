@@ -33,9 +33,6 @@ double readingZero = 0;
 auto const minWeight = 10;
 auto const maxWeight = 1000;
 
-struct Callbacks {
-  void knownWeightChanged(int value);
-} callbacks;
 }  // namespace
 
 Calibration::Calibration() {
@@ -70,7 +67,7 @@ Calibration::Calibration() {
 
       knownWeightLabel = new QLabel;
       Widget::AlignCentered(knownWeightLabel);
-      ::callbacks.knownWeightChanged(knownWeight);  // updates the label
+      updateLabel();
 
       deltaDial = new DeltaDial;
 
@@ -145,18 +142,18 @@ optional<pair<int, int>> Calibration::Callbacks::step2(optional<double> rawPreci
   }
   return {};
 }
-void ::Callbacks::knownWeightChanged(int value) {
-  knownWeight = value;
-  knownWeightLabel->setText(QString::number(knownWeight) + " grams");
-  Settings::set(knownWeightKey, knownWeight);
-}
+
+void Calibration::updateLabel() { knownWeightLabel->setText(QString::number(knownWeight) + " grams"); }
+
 void Calibration::connect() {
   QObject::connect(deltaDial, &QAbstractSlider::valueChanged, [&] {
     auto newWeight = knownWeight + deltaDial->delta;
     if (newWeight > maxWeight || newWeight < minWeight) {
       return;
     }
-    ::callbacks.knownWeightChanged(newWeight);
+    knownWeight = newWeight;
+    Settings::set(knownWeightKey, knownWeight);
+    updateLabel();
   });
   deltaDial->connect();
 }
