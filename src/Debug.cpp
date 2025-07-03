@@ -61,6 +61,9 @@ struct Setting : public QWidget {
   Setting(QString key) : key(key) {
     Widget::FontSized(this, 15);
     // TODO here:
+    // if Settings key-value is loaded from disk but not at runtime ::get()
+    // then it's an obsolete one: remove it
+    // in this Debug class, not in Settings class that does not know when it's ready
     //   pass init values to Settings::load() rather than get()
     //   support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
