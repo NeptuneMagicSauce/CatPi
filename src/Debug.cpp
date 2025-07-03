@@ -62,6 +62,7 @@ struct Setting : public QWidget {
     //   support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
     description->setText(lineBreaked(
+// TODO do not add blank spaces after upper case or digit here!
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore "
         "et dolore magna aliqua.",
         20));
