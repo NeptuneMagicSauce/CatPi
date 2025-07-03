@@ -132,6 +132,12 @@ int main(int argc, char** argv) {
     debug->connect([&] { central->setPage(debug); }, [&](QWidget* item) { central->setSettingPage(item); });
     QObject::connect(debug->valueChangedTimer, &QTimer::timeout, [&] {
       // update the widgets that show a value changed by the debug settings screen
+      // it is needed because Debug does not see the other widgets of the gui
+      // it only is coupled with the class holding the value
+      // which may not be the class displaying it
+
+      // TODO remove the call for calibration: it handles the widget
+      // TODO can it also be done for Delay/Logic ?
       calibration->updateLabel();
       delay->setDelay(logic->delaySeconds());
     });
