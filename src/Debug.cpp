@@ -46,6 +46,7 @@ bool Debug::Populated() { return populated; }
 struct Setting : public QWidget {
   const QString key;
   const QVariant defaultValue;
+  const std::function<void(QVariant)> callback;
   QLabel* description = new QLabel;
   QLabel* value = new QLabel;
   QLabel* unit = new QLabel;
@@ -59,7 +60,8 @@ struct Setting : public QWidget {
     resetButton->setEnabled(newValue != defaultValue);
   }
 
-  Setting(const Settings::Load& load) : key(load.key), defaultValue(load.defaultValue) {
+  Setting(const Settings::Load& load)
+      : key(load.key), defaultValue(load.defaultValue), callback(load.callback) {
     Widget::FontSized(this, 20);
     // TODO support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
@@ -134,5 +136,13 @@ void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWi
   for (const auto& item : items) {
     QObject::connect(item.screen->back, &QAbstractButton::released, [&] { goBackCallback(); });
     QObject::connect(item.button, &QAbstractButton::released, [&] { goToSettingCallback(item.screen); });
+    QObject::connect(item.setting->resetButton, &QAbstractButton::released, [&] {
+      auto newValue = item.setting->defaultValue;
+      Settings::set(item.setting->key, newValue);
+      item.setting->callback(newValue);
+      item.setting->updateValue();
+      // TODO set guiCallback for gui items in Main
+    });
+    // TODO update Debug widget when value is changed
   }
 }

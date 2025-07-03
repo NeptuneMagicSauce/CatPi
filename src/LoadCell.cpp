@@ -34,10 +34,10 @@ LoadCell::LoadCell() {
   impl = new LoadCellImpl;
 
   timer = new QTimer;
-  auto value =
-      Settings::load({impl->intervalSettingName, "Période Balance",
-                      "Temps d'attente entre les mesures du poids de la balance", "Millisecondes", 1000})
-          .toInt();
+  auto value = 0;
+  Settings::load({impl->intervalSettingName, "Période Balance",
+                  "Temps d'attente entre les mesures du poids de la balance", "Millisecondes", 1000,
+                  [&](QVariant v) { value = v.toInt(); }});
   timer->setSingleShot(false);
   timer->start(value);
 }
@@ -75,14 +75,12 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
       refUnit = newCalibrationData.value().first;
       offset = newCalibrationData.value().second;
     } else {
-      refUnit = Settings::load({keyRefUnit, "Calibration RefUnit",
-                                "Données de calibration, remettre à defaut si on a une mauvaise calibration",
-                                "", defaultData.first})
-                    .toInt();
-      offset = Settings::load({keyOffset, "Calibration Offest",
-                               "Données de calibration, remettre à defaut si on a une mauvaise calibration",
-                               "", defaultData.second})
-                   .toInt();
+      Settings::load({keyRefUnit, "Calibration RefUnit",
+                      "Données de calibration, remettre à defaut si on a une mauvaise calibration", "",
+                      defaultData.first, [&](QVariant v) { refUnit = v.toInt(); }});
+      Settings::load({keyOffset, "Calibration Offest",
+                      "Données de calibration, remettre à defaut si on a une mauvaise calibration", "",
+                      defaultData.second, [&](QVariant v) { offset = v.toInt(); }});
     }
 
     if (status != nullptr) {

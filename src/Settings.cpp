@@ -24,7 +24,7 @@ void Settings::set(const QString& key, const QVariant& value) { instance().setVa
 
 QStringList Settings::keys() { return instance().allKeys(); }
 
-QVariant Settings::load(Load load) {
+void Settings::load(Load load) {
   // settings must be loaded on startup
   // so that widget Debug can consume them all
   assert(Debug::Populated() == false);
@@ -38,7 +38,7 @@ QVariant Settings::load(Load load) {
     // so that the instance always contains all keys
     instance().setValue(load.key, load.defaultValue);
   }
-  return instance().value(load.key);
+  load.callback(instance().value(load.key));
 }
 
 const Settings::Load& Settings::Load::get(const QString& key) {
