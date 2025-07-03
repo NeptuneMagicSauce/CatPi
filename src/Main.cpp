@@ -72,8 +72,6 @@ int main(int argc, char** argv) {
 
     // LoadCell
     QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
-      // TODO decouple logic loop from sampling loop
-      // TODO tick right away, dont wait a first interval
       auto dispensed = false;
       auto tare = weight->tare();
       auto weightTarred = 0.0;

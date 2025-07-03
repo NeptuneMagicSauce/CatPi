@@ -53,8 +53,8 @@ LogicImpl::LogicImpl()
   std::filesystem::create_directories(logDirectory);
 
   Settings::load({delayKey, "Attente Ouverture",
-                  "Temps d'attente entre chaque ouverture TODO basé sur la derniere ouverture ou "
-                  "la dernière fois que c'était vide?",
+                  "Temps d'attente entre chaque ouverture (basé sur la derniere ouverture ou "
+                  "la dernière fois que c'était vide?)",
                   "Secondes", 15 * 60, [&](QVariant v) { delaySeconds = v.toInt(); }});
 
   timerEndDispense->setSingleShot(true);

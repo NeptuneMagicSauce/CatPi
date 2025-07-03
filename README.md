@@ -7,29 +7,34 @@ ninja
 
 # TODO
 
-- settings menu to easy-change in dedicated menu
 
-- close relay even on crash
-  needs crash handler
-  so then just port all features
-  handle control-c: also close relay
-
-- list of debug settings
-  - duration of button/relay press (<-> quantity)
-  - load cell polling timeout, for cpu consumption when unplugged
-  - minimum weight for bowl is empty
-  - two pins of HX711
-  - gain?
-  - duration of confirm tare
-  - calibration data
-
-- base widget: maybe QSlider is better than DeltaDial ?
+- Dial: bigger maximum for smooth rotate, then divide delta
 
 - clang format:
   - no // namespace at closure
   - maybe width smaller
   - why is the QList<SubScreen> so bizarrely indented?
   - include cleaner: warn on unused includes
+
+- decouple logic loop from sampling loop
+
+- tick right away, dont wait a first interval
+  so that data is displayed right away
+
+- close relay even on crash
+  needs crash handler
+  so then just port all features
+  handle control-c: also close relay
+
+- more debug settings:
+  - duration of button/relay press (<-> quantity)
+  - load cell polling timeout, for cpu consumption when unplugged: to test
+  - minimum weight for bowl is empty
+  - two pins of HX711
+  - gain?
+  - duration of confirm tare
+
+- base widget: maybe QSlider is better than DeltaDial ?
 
 - button to reset calibration to factory defaults
   because if you go through the calibration screens
@@ -138,3 +143,4 @@ do gpio from c -> relay before weight
 - optional: use value() because it checks, not operators * or -> because they don't check
 - icon back: bigger, nicer
 - rename wait widgets
+- settings menu to easy-change in dedicated menu

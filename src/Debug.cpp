@@ -105,7 +105,6 @@ Debug::Debug() {
   setLayout(layout);
   auto const itemsPerRow = 3;
   int index = 0;
-  // TODO sort keys, most interesting first
   QList<QString> obsoleteKeys;
   for (auto key : Settings::keys()) {
     if (Settings::isLoaded(key) == false) {
