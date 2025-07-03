@@ -43,7 +43,9 @@ Calibration::Calibration() {
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
-  knownWeight = Settings::load({knownWeightKey, "description", "unit", 200}).toInt();
+  knownWeight = Settings::load({knownWeightKey, "Poids de référence",
+                                "Poids de référence pour la calibration", "Grammes", 200})
+                    .toInt();
 
   buttons.step1 = new QPushButton;
   buttons.step2 = new QPushButton;

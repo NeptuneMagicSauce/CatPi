@@ -64,7 +64,6 @@ struct Setting : public QWidget {
     //   if Settings key-value is loaded from disk but not at runtime ::get()
     //   then it's an obsolete one: remove it
     //   in this Debug class, not in Settings class that does not know when it's ready
-    // TODO pass init values to Settings::load() rather than get()
     // TODO support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
     description->setText(breakLines(

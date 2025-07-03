@@ -6,6 +6,7 @@
 struct Settings {
   struct Load {
     QString key;
+    QString name;
     QString description;
     QString unit;
     QVariant defaultValue;
