@@ -17,7 +17,7 @@ auto populated = false;
 auto buttons = QMap<QString, QPushButton*>{};
 auto screens = QMap<QString, SubScreen*>{};
 
-auto lineBreaked(const QString& line, auto maxLength) {
+auto separateWords(auto line) {
   auto asWords = QString{};
   auto prev = QChar{' '};
   for (auto c : line) {
@@ -27,10 +27,13 @@ auto lineBreaked(const QString& line, auto maxLength) {
     asWords += c;
     prev = c;
   }
+  return asWords;
+}
 
+auto breakLines(const QString& line, auto maxLength) {
   auto ret = QString{};
   auto lineLength = 0;
-  for (auto word : asWords.split(" ")) {
+  for (auto word : line.split(" ")) {
     auto lineBreak = lineLength + word.length() > maxLength;
     if (lineBreak) {
       ret += "\n";
@@ -61,8 +64,7 @@ struct Setting : public QWidget {
     //   pass init values to Settings::load() rather than get()
     //   support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
-    description->setText(lineBreaked(
-// TODO do not add blank spaces after upper case or digit here!
+    description->setText(breakLines(
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore "
         "et dolore magna aliqua.",
         20));
@@ -90,7 +92,7 @@ Debug::Debug() {
     std::cout << "Setting: " << key.toStdString() << " = " << Settings::get(key, 0).toString().toStdString()
               << std::endl;
 
-    auto name = lineBreaked(key, 12);
+    auto name = breakLines(separateWords(key), 12);
     auto row = index / itemsPerRow;
     auto column = index % itemsPerRow;
     auto button = new QPushButton{name};
