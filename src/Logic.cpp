@@ -52,7 +52,7 @@ LogicImpl::LogicImpl()
   auto logDirectory = logFile.filesystemFileName().parent_path();
   std::filesystem::create_directories(logDirectory);
 
-  delaySeconds = Settings::get(delayKey, 15 * 60).toInt();
+  delaySeconds = Settings::load({delayKey, "description", "unit", 15 * 60}).toInt();
 
   timerEndDispense->setSingleShot(true);
   timerEndDispense->setInterval(4000);

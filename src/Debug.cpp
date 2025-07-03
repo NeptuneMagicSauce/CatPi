@@ -60,12 +60,12 @@ struct Setting : public QWidget {
 
   Setting(QString key) : key(key) {
     Widget::FontSized(this, 15);
-    // TODO here:
-    // if Settings key-value is loaded from disk but not at runtime ::get()
-    // then it's an obsolete one: remove it
-    // in this Debug class, not in Settings class that does not know when it's ready
-    //   pass init values to Settings::load() rather than get()
-    //   support for callback on change
+    // TODO discard obsoletes:
+    //   if Settings key-value is loaded from disk but not at runtime ::get()
+    //   then it's an obsolete one: remove it
+    //   in this Debug class, not in Settings class that does not know when it's ready
+    // TODO pass init values to Settings::load() rather than get()
+    // TODO support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
     description->setText(breakLines(
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore "
@@ -92,7 +92,7 @@ Debug::Debug() {
   int index = 0;
   // TODO sort keys, most interesting first
   for (auto key : Settings::keys()) {
-    std::cout << "Setting: " << key.toStdString() << " = " << Settings::get(key, 0).toString().toStdString()
+    std::cout << "Setting: " << key.toStdString() << " = " << Settings::get(key).toString().toStdString()
               << std::endl;
 
     auto name = breakLines(separateWords(key), 12);

@@ -12,19 +12,24 @@ QSettings& instance() {
 }
 }  // namespace
 
-QVariant Settings::get(const QString& key, const QVariant& defaultValue) {
-  // settings must be loaded on startup
-  // so that widget Debug can consume them all
-  assert(Debug::Populated() == false);
-
-  if (instance().contains(key) == false) {
-    // when missing, set the default key
-    // so that the instance always contains all keys
-    instance().setValue(key, defaultValue);
-  }
+QVariant Settings::get(const QString& key) {
+  assert(instance().contains(key));
   return instance().value(key);
 }
 
 void Settings::set(const QString& key, const QVariant& value) { instance().setValue(key, value); }
 
 QStringList Settings::keys() { return instance().allKeys(); }
+
+QVariant Settings::load(Load load) {
+  // settings must be loaded on startup
+  // so that widget Debug can consume them all
+  assert(Debug::Populated() == false);
+
+  if (instance().contains(load.key) == false) {
+    // when missing, set the default key
+    // so that the instance always contains all keys
+    instance().setValue(load.key, load.defaultValue);
+  }
+  return instance().value(load.key);
+}

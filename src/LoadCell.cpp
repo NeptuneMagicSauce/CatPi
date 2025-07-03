@@ -34,7 +34,7 @@ LoadCell::LoadCell() {
   impl = new LoadCellImpl;
 
   timer = new QTimer;
-  auto value = Settings::get(impl->intervalSettingName, 1000).toInt();
+  auto value = Settings::load({impl->intervalSettingName, "description", "unit", 1000}).toInt();
   timer->setSingleShot(false);
   timer->start(value);
 }
@@ -72,8 +72,8 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
       refUnit = newCalibrationData.value().first;
       offset = newCalibrationData.value().second;
     } else {
-      refUnit = Settings::get(keyRefUnit, defaultData.first).toInt();
-      offset = Settings::get(keyOffset, defaultData.second).toInt();
+      refUnit = Settings::load({keyRefUnit, "description", "unit", defaultData.first}).toInt();
+      offset = Settings::load({keyOffset, "description", "unit", defaultData.second}).toInt();
     }
 
     if (status != nullptr) {
