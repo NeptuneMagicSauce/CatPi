@@ -85,3 +85,32 @@ struct QLabelScaledDownFontFont : public QLabel {
     }
   }
 };
+
+auto separateWords(auto line) {
+  auto asWords = QString{};
+  auto prev = QChar{' '};
+  for (auto c : line) {
+    if (c.isUpper() || (c.isDigit() && prev.isDigit() == false)) {
+      asWords += " ";
+    }
+    asWords += c;
+    prev = c;
+  }
+  return asWords;
+}
+
+auto breakLines(const QString& line, auto maxLength) {
+  auto ret = QString{};
+  auto lineLength = 0;
+  for (auto word : line.split(" ")) {
+    auto lineBreak = lineLength + word.length() > maxLength;
+    if (lineBreak) {
+      ret += "\n";
+      lineLength = 0;
+    }
+    ret += word + " ";
+    lineLength += word.length() + 1;
+  }
+
+  return ret.trimmed();
+}

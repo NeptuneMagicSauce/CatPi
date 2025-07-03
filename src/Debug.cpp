@@ -11,40 +11,17 @@
 #include "SubScreen.hpp"
 #include "Widget.hpp"
 
+struct Setting;
+
 namespace {
 
 auto populated = false;
-auto buttons = QMap<QString, QPushButton*>{};
-auto screens = QMap<QString, SubScreen*>{};
-
-auto separateWords(auto line) {
-  auto asWords = QString{};
-  auto prev = QChar{' '};
-  for (auto c : line) {
-    if (c.isUpper() || (c.isDigit() && prev.isDigit() == false)) {
-      asWords += " ";
-    }
-    asWords += c;
-    prev = c;
-  }
-  return asWords;
-}
-
-auto breakLines(const QString& line, auto maxLength) {
-  auto ret = QString{};
-  auto lineLength = 0;
-  for (auto word : line.split(" ")) {
-    auto lineBreak = lineLength + word.length() > maxLength;
-    if (lineBreak) {
-      ret += "\n";
-      lineLength = 0;
-    }
-    ret += word + " ";
-    lineLength += word.length() + 1;
-  }
-
-  return ret.trimmed();
-}
+struct Item {
+  Setting* setting = nullptr;
+  QPushButton* button = nullptr;
+  SubScreen* screen = nullptr;
+};
+auto items = QMap<QString, Item>{};
 }  // namespace
 
 bool Debug::Populated() { return populated; }
@@ -66,14 +43,12 @@ struct Setting : public QWidget {
     //   in this Debug class, not in Settings class that does not know when it's ready
     // TODO support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
-    description->setText(breakLines(
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore "
-        "et dolore magna aliqua.",
-        20));
+    description->setText("");  // load.description);
     value->setText("1.23456");
     unit->setText("Milliseconds");
     isDefault->setText("Yes");
     resetButton->setText("Reset");
+    // changeButton
 
     auto layout = new QHBoxLayout;
     setLayout(layout);
@@ -94,17 +69,16 @@ Debug::Debug() {
     std::cout << "Setting: " << key.toStdString() << " = " << Settings::get(key).toString().toStdString()
               << std::endl;
 
-    auto name = breakLines(separateWords(key), 12);
+    const auto& load = Settings::Load::get(key);
+
+    auto setting = new Setting{key};
+    auto button = new QPushButton{load.name};
+    auto screen = new SubScreen{load.name, setting};
+    items[key] = {setting, button, screen};
+
     auto row = index / itemsPerRow;
     auto column = index % itemsPerRow;
-    auto button = new QPushButton{name};
-    button->setMinimumHeight(80);
     layout->addWidget(button, row, column);
-    buttons[key] = button;
-
-    auto screenContents = new Setting{key};
-    auto screen = new SubScreen{name.replace("\n", ""), screenContents};
-    screens[key] = screen;
 
     ++index;
   }
@@ -113,10 +87,8 @@ Debug::Debug() {
 }
 
 void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWidget*)> goToSettingCallback) {
-  for (auto [key, value] : buttons.asKeyValueRange()) {
-    QObject::connect(value, &QAbstractButton::released, [&] { goToSettingCallback(screens[key]); });
-  }
-  for (auto screen : screens) {
-    QObject::connect(screen->back, &QAbstractButton::released, [&] { goBackCallback(); });
+  for (const auto& item : items) {
+    QObject::connect(item.screen->back, &QAbstractButton::released, [&] { goBackCallback(); });
+    QObject::connect(item.button, &QAbstractButton::released, [&] { goToSettingCallback(item.screen); });
   }
 }

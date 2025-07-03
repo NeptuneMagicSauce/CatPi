@@ -1,5 +1,6 @@
 #include "Settings.hpp"
 
+#include <QMap>
 #include <QSettings>
 // #include <iostream>
 
@@ -10,6 +11,8 @@ QSettings& instance() {
   static auto ret = QSettings{"CatPi", "CatPi"};
   return ret;
 }
+
+QMap<QString, Settings::Load> loads;
 }  // namespace
 
 QVariant Settings::get(const QString& key) {
@@ -26,10 +29,19 @@ QVariant Settings::load(Load load) {
   // so that widget Debug can consume them all
   assert(Debug::Populated() == false);
 
+  // settings should be loaded only once each
+  assert(loads.contains(load.key) == false);
+  loads[load.key] = load;
+
   if (instance().contains(load.key) == false) {
     // when missing, set the default key
     // so that the instance always contains all keys
     instance().setValue(load.key, load.defaultValue);
   }
   return instance().value(load.key);
+}
+
+const Settings::Load& Settings::Load::get(const QString& key) {
+  assert(loads.contains(key));
+  return loads[key];
 }

@@ -10,6 +10,8 @@ struct Settings {
     QString description;
     QString unit;
     QVariant defaultValue;
+
+    static const Load& get(const QString& key);
   };
 
   static QVariant load(Load);
