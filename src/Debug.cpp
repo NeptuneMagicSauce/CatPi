@@ -64,7 +64,6 @@ struct Setting : public QWidget {
   Setting(const Settings::Load& load)
       : key(load.key), defaultValue(load.defaultValue), callback(load.callback) {
     Widget::FontSized(this, 20);
-    // TODO support for callback on change
     // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
     // TODO discard obsoletes:
     //   if Settings key-value is loaded from disk but not at runtime ::get()
@@ -126,6 +125,8 @@ Debug::Debug() {
     auto row = index / itemsPerRow;
     auto column = index % itemsPerRow;
     layout->addWidget(button, row, column);
+
+    button->setMinimumHeight(100);
 
     ++index;
   }
