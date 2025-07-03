@@ -98,19 +98,3 @@ auto separateWords(auto line) {
   }
   return asWords;
 }
-
-auto breakLines(const QString& line, auto maxLength) {
-  auto ret = QString{};
-  auto lineLength = 0;
-  for (auto word : line.split(" ")) {
-    auto lineBreak = lineLength + word.length() > maxLength;
-    if (lineBreak) {
-      ret += "\n";
-      lineLength = 0;
-    }
-    ret += word + " ";
-    lineLength += word.length() + 1;
-  }
-
-  return ret.trimmed();
-}

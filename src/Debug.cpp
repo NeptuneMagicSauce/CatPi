@@ -1,6 +1,7 @@
 #include "Debug.hpp"
 
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QToolButton>
@@ -22,39 +23,82 @@ struct Item {
   SubScreen* screen = nullptr;
 };
 auto items = QMap<QString, Item>{};
+
+auto breakLines(const QString& line, auto maxLength) {
+  auto ret = QString{};
+  auto lineLength = 0;
+  for (auto word : line.split(" ")) {
+    auto lineBreak = lineLength + word.length() > maxLength;
+    if (lineBreak) {
+      ret += "\n";
+      lineLength = 0;
+    }
+    ret += word + " ";
+    lineLength += word.length() + 1;
+  }
+
+  return ret.trimmed();
+}
 }  // namespace
 
 bool Debug::Populated() { return populated; }
 
 struct Setting : public QWidget {
   const QString key;
+  const QVariant defaultValue;
   QLabel* description = new QLabel;
   QLabel* value = new QLabel;
   QLabel* unit = new QLabel;
-  QLabel* isDefault = new QLabel;
   QToolButton* resetButton = new QToolButton;
   DeltaDial* changeButton = new DeltaDial;
+  QString previousValue;
 
-  Setting(QString key) : key(key) {
-    Widget::FontSized(this, 15);
+  void updateValue() {
+    auto newValue = Settings::get(key);
+    value->setText(newValue.toString());
+    resetButton->setEnabled(newValue != defaultValue);
+  }
+
+  Setting(const Settings::Load& load) : key(load.key), defaultValue(load.defaultValue) {
+    Widget::FontSized(this, 20);
+    // TODO support for callback on change
+    // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
     // TODO discard obsoletes:
     //   if Settings key-value is loaded from disk but not at runtime ::get()
     //   then it's an obsolete one: remove it
     //   in this Debug class, not in Settings class that does not know when it's ready
-    // TODO support for callback on change
-    // TODO DeltaDial: bigger maximum for smooth rotate, then divide delta
-    description->setText("");  // load.description);
-    value->setText("1.23456");
-    unit->setText("Milliseconds");
-    isDefault->setText("Yes");
-    resetButton->setText("Reset");
-    // changeButton
 
-    auto layout = new QHBoxLayout;
-    setLayout(layout);
-    for (auto widget : QList<QWidget*>{description, value, unit, isDefault, resetButton, changeButton}) {
-      layout->addWidget(widget);
+    for (auto widget : QList<QLabel*>{value, unit, description}) {
+      Widget::AlignCentered(widget);
     }
+    Widget::FontSized(value, 30);
+
+    description->setText(breakLines(load.description, 30));
+    updateValue();
+    unit->setText(load.unit);
+    resetButton->setText("Reset");
+    resetButton->setIcon(QIcon{QPixmap{"://reset.png"}});
+    resetButton->setIconSize({100, 100});
+
+    auto valueWithUnit = new QWidget;
+    auto valueLayout = new QVBoxLayout;
+    valueWithUnit->setLayout(valueLayout);
+    valueLayout->addWidget(value);
+    if (load.unit.isEmpty() == false) {
+      valueLayout->addWidget(unit);
+    }
+
+    auto bottom = new QGroupBox;
+    auto bottomLayout = new QHBoxLayout;
+    bottom->setLayout(bottomLayout);
+    bottomLayout->addWidget(valueWithUnit);
+    bottomLayout->addWidget(changeButton);
+    bottomLayout->addWidget(resetButton);
+
+    auto layout = new QVBoxLayout;
+    setLayout(layout);
+    layout->addWidget(description, 1);
+    layout->addWidget(bottom, 2);
   }
 };
 
@@ -71,7 +115,7 @@ Debug::Debug() {
 
     const auto& load = Settings::Load::get(key);
 
-    auto setting = new Setting{key};
+    auto setting = new Setting{load};
     auto button = new QPushButton{load.name};
     auto screen = new SubScreen{load.name, setting};
     items[key] = {setting, button, screen};

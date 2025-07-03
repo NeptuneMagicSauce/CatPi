@@ -52,11 +52,12 @@ LogicImpl::LogicImpl()
   auto logDirectory = logFile.filesystemFileName().parent_path();
   std::filesystem::create_directories(logDirectory);
 
-  delaySeconds = Settings::load({delayKey, "Attente Ouverture",
-                                 "Temps d'attente entre chaque ouverture TODO basé la derniere ouverture ou "
-                                 "la dernière fois que c'était vide?",
-                                 "Minutes", 15 * 60})
-                     .toInt();
+  delaySeconds =
+      Settings::load({delayKey, "Attente Ouverture",
+                      "Temps d'attente entre chaque ouverture TODO basé sur la derniere ouverture ou "
+                      "la dernière fois que c'était vide?",
+                      "Secondes", 15 * 60})
+          .toInt();
 
   timerEndDispense->setSingleShot(true);
   timerEndDispense->setInterval(4000);
