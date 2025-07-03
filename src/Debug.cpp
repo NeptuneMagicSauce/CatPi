@@ -138,11 +138,20 @@ void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWi
     QObject::connect(item.button, &QAbstractButton::released, [&] { goToSettingCallback(item.screen); });
     QObject::connect(item.setting->resetButton, &QAbstractButton::released, [&] {
       auto newValue = item.setting->defaultValue;
-      Settings::set(item.setting->key, newValue);
+      Settings::set(item.setting->key, newValue, false);
       item.setting->callback(newValue);
       item.setting->updateValue();
-      // TODO set guiCallback for gui items in Main
+      // TODO update gui widget when value is changed from Debug widget
     });
-    // TODO update Debug widget when value is changed
   }
+}
+
+void Debug::changeFromOtherScreen(const QString& key) {
+  if (Populated() == false) {
+    // that's the initial load
+    // we're not populated <-> items is empty
+    return;
+  }
+  assert(items.contains(key));
+  items[key].setting->updateValue();
 }

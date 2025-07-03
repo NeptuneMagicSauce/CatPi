@@ -20,7 +20,13 @@ QVariant Settings::get(const QString& key) {
   return instance().value(key);
 }
 
-void Settings::set(const QString& key, const QVariant& value) { instance().setValue(key, value); }
+void Settings::set(const QString& key, const QVariant& value, bool updateDebugScreen) {
+  instance().setValue(key, value);
+
+  if (updateDebugScreen) {
+    Debug::changeFromOtherScreen(key);
+  }
+}
 
 QStringList Settings::keys() { return instance().allKeys(); }
 

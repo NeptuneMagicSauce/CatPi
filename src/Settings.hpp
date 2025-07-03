@@ -17,7 +17,7 @@ struct Settings {
 
   static void load(Load);
   static QVariant get(const QString& key);
-  static void set(const QString& key, const QVariant& value);
+  static void set(const QString& key, const QVariant& value, bool updateDebugScreen = true);
 
   static QStringList keys();
 };
