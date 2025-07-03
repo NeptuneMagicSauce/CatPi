@@ -47,6 +47,8 @@ bool Debug::Populated() { return populated; }
 struct Setting : public QWidget {
   const QString key;
   const QVariant defaultValue;
+  const std::optional<int> minimum;
+  const std::optional<int> maximum;
   const std::function<void(QVariant)> callback;
   QLabel* description = new QLabel;
   QLabel* value = new QLabel;
@@ -62,7 +64,11 @@ struct Setting : public QWidget {
   }
 
   Setting(const Settings::Load& load)
-      : key(load.key), defaultValue(load.defaultValue), callback(load.callback) {
+      : key(load.key),
+        defaultValue(load.defaultValue),
+        minimum(load.minimum),
+        maximum(load.maximum),
+        callback(load.callback) {
     Widget::FontSized(this, 20);
 
     for (auto widget : QList<QLabel*>{value, unit, description}) {
@@ -143,16 +149,28 @@ Debug::Debug() {
 }
 
 void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWidget*)> goToSettingCallback) {
+  static auto itemChanged = [&](auto& item, auto newValue) {
+    Settings::set(item.setting->key, newValue, false);
+    item.setting->callback(newValue);
+    item.setting->updateValue();
+    valueChangedTimer->start();
+  };
+
   for (const auto& item : items) {
     QObject::connect(item.screen->back, &QAbstractButton::released, [&] { goBackCallback(); });
     QObject::connect(item.button, &QAbstractButton::released, [&] { goToSettingCallback(item.screen); });
-    QObject::connect(item.setting->resetButton, &QAbstractButton::released, [&] {
-      auto newValue = item.setting->defaultValue;
-
-      Settings::set(item.setting->key, newValue, false);
-      item.setting->callback(newValue);
-      item.setting->updateValue();
-      valueChangedTimer->start();
+    QObject::connect(item.setting->resetButton, &QAbstractButton::released,
+                     [&] { itemChanged(item, item.setting->defaultValue); });
+    item.setting->changeButton->connect();
+    QObject::connect(item.setting->changeButton, &QAbstractSlider::valueChanged, [&] {
+      auto newValue = Settings::get(item.setting->key).toInt() + item.setting->changeButton->delta;
+      auto& minimum = item.setting->minimum;
+      auto& maximum = item.setting->maximum;
+      if ((minimum.has_value() && (newValue < minimum.value())) ||
+          (maximum.has_value() && (newValue > maximum.value()))) {
+        return;
+      }
+      itemChanged(item, newValue);
     });
   }
 }

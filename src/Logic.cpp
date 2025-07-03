@@ -56,6 +56,7 @@ LogicImpl::LogicImpl()
                   "Temps d'attente entre chaque ouverture (basé sur la derniere ouverture ou "
                   "la dernière fois que c'était vide?)",
                   "Secondes", 15 * 60, [&](QVariant v) { delaySeconds = v.toInt(); }});
+  Settings::setMin(delayKey, 10);
 
   timerEndDispense->setSingleShot(true);
   timerEndDispense->setInterval(4000);

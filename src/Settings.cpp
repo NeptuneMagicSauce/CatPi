@@ -55,3 +55,13 @@ const Settings::Load& Settings::Load::get(const QString& key) {
 bool Settings::isLoaded(const QString& key) { return loads.contains(key); }
 
 void Settings::remove(const QString& key) { instance().remove(key); }
+
+void Settings::setMin(const QString& key, int minimum) {
+  assert(loads.contains(key));
+  loads[key].minimum = minimum;
+}
+
+void Settings::setMax(const QString& key, int maximum) {
+  assert(loads.contains(key));
+  loads[key].maximum = maximum;
+}

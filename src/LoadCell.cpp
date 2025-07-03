@@ -38,6 +38,7 @@ LoadCell::LoadCell() {
   Settings::load({impl->intervalSettingName, "Période Balance",
                   "Temps d'attente entre les mesures du poids de la balance", "Millisecondes", 1000,
                   [&](QVariant v) { value = v.toInt(); }});
+  Settings::setMin(impl->intervalSettingName, 20);
   timer->setSingleShot(false);
   timer->start(value);
 }
