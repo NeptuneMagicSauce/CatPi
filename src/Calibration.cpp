@@ -40,8 +40,12 @@ Calibration::Calibration() {
 
   setStyleSheet("QWidget{font-size: 20pt; } ");
 
+  knownWeightLabel = new QLabel;
   Settings::load({knownWeightKey, "Poids de référence", "Poids de référence pour la calibration", "Grammes",
-                  200, [&](QVariant v) { knownWeight = v.toInt(); }});
+                  200, [&](QVariant v) {
+                    knownWeight = v.toInt();
+                    updateLabel();
+                  }});
 
   buttons.step1 = new QPushButton;
   buttons.step2 = new QPushButton;
@@ -65,9 +69,7 @@ Calibration::Calibration() {
       parent->setLayout(layout);
       layout->addWidget(widget);
 
-      knownWeightLabel = new QLabel;
       Widget::AlignCentered(knownWeightLabel);
-      updateLabel();
 
       deltaDial = new DeltaDial;
 

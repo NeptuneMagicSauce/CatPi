@@ -27,6 +27,7 @@ struct LogicImpl {
 
   void dispense(bool hasGPIO);
   void logEvent(QString const& event);
+  std::function<void(int)> updateGuiCallback = nullptr;
 };
 namespace {
 LogicImpl* impl = nullptr;
@@ -55,7 +56,12 @@ LogicImpl::LogicImpl()
   Settings::load({delayKey, "Attente Ouverture",
                   "Temps d'attente entre chaque ouverture (basé sur la derniere ouverture ou "
                   "la dernière fois que c'était vide?)",
-                  "Secondes", 15 * 60, [&](QVariant v) { delaySeconds = v.toInt(); }});
+                  "Secondes", 15 * 60, [&](QVariant v) {
+                    delaySeconds = v.toInt();
+                    if (updateGuiCallback != nullptr) {
+                      updateGuiCallback(delaySeconds);
+                    }
+                  }});
   Settings::setMin(delayKey, 10);
 
   timerEndDispense->setSingleShot(true);
@@ -68,7 +74,11 @@ void Logic::closeRelay() {
   }
 }
 
-void Logic::connect() {
+void Logic::connect(std::function<void(int)> updateGuiCallback) {
+  impl->updateGuiCallback = updateGuiCallback;
+  updateGuiCallback(impl->delaySeconds);
+  // call it right away because it was not available earlier, in the constructor
+
   QObject::connect(impl->timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
 }
 

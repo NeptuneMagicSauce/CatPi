@@ -9,6 +9,4 @@ struct Debug : public QWidget {
                std::function<void(QWidget*)> goToSettingCallback  // go to individual setting screen
   );
   static void changeFromOtherScreen(const QString& key);
-
-  QTimer* valueChangedTimer = nullptr;
 };

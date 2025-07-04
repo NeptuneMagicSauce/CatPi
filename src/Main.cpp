@@ -37,8 +37,6 @@ int main(int argc, char** argv) {
   {
     app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
-    // set up initial values
-    delay->setDelay(logic->delaySeconds());
     logic->hasGPIO = loadcell->hasGPIO();
 
     window->show();  // must be after window is  finished constructing and after setStyleSheet
@@ -117,7 +115,7 @@ int main(int argc, char** argv) {
     calibration->connect();
 
     // Logic
-    logic->connect();
+    logic->connect([&](int newDelay) { delay->setDelay(newDelay); });
     QObject::connect(logic->timerEndDispense(), &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
 
@@ -130,17 +128,6 @@ int main(int argc, char** argv) {
 
     // Debug
     debug->connect([&] { central->setPage(debug); }, [&](QWidget* item) { central->setSettingPage(item); });
-    QObject::connect(debug->valueChangedTimer, &QTimer::timeout, [&] {
-      // update the widgets that show a value changed by the debug settings screen
-      // it is needed because Debug does not see the other widgets of the gui
-      // it only is coupled with the class holding the value
-      // which may not be the class displaying it
-
-      // TODO remove the call for calibration: it handles the widget
-      // TODO can it also be done for Delay/Logic ?
-      calibration->updateLabel();
-      delay->setDelay(logic->delaySeconds());
-    });
   }
 
   // Initializing that needs the signals connected

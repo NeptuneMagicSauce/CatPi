@@ -141,10 +141,6 @@ Debug::Debug() {
     Settings::remove(obsoleteKey);
   }
 
-  valueChangedTimer = new QTimer;
-  valueChangedTimer->setSingleShot(true);
-  valueChangedTimer->setInterval(1);
-
   populated = true;
 }
 
@@ -153,7 +149,6 @@ void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWi
     Settings::set(item.setting->key, newValue, false);
     item.setting->callback(newValue);
     item.setting->updateValue();
-    valueChangedTimer->start();
   };
 
   for (const auto& item : items) {
