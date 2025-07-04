@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- Dial: bigger maximum for smooth rotate, then divide delta
-
 - clang format:
   - no // namespace at closure
   - maybe width smaller
@@ -45,6 +43,12 @@ ninja
 
 - better gui layout
   frequent buttons bigger
+
+- Dial: bigger maximum for smooth rotate, then divide delta
+  does not work: some composers of Dial change the maximum after construction
+  lower-than-default maximum (for Delay) is more precise but very not smooth
+  -> use the default maximum that is quite smooth
+  give more screen space to the Delay dial: is it smooth now?
 
 - signal of weight is noisy
   it easily goes over threshold because of spikes

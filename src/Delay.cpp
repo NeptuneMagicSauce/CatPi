@@ -25,7 +25,6 @@ DelayImpl* impl = nullptr;
 Delay::Delay() {
   AssertSingleton();
   delayDial = new DeltaDial;
-  delayDial->setMaximum(10);
   impl = new DelayImpl(this);
 }
 
