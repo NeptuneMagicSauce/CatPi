@@ -7,6 +7,7 @@ ninja
 
 # TODO
 
+- Dial: do the connect in the constructor
 
 - Dial: bigger maximum for smooth rotate, then divide delta
 
@@ -27,21 +28,16 @@ ninja
   handle control-c: also close relay
 
 - more debug settings:
+  - refresh frequency of the load cell polling: to test
   - duration of button/relay press (<-> quantity)
-  - load cell polling timeout, for cpu consumption when unplugged: to test
+  - load cell polling timeout, for cpu consumption when unplugged
+  - refresh frequency of the main loop
   - minimum weight for bowl is empty
   - two pins of HX711
   - gain?
   - duration of confirm tare
 
 - base widget: maybe QSlider is better than DeltaDial ?
-
-- button to reset calibration to factory defaults
-  because if you go through the calibration screens
-  but you don't have the known weight
-  but you put your finger on the scale
-  then it's in a state with bad calibration data
-  in the debug menu?
 
 - problem: the screen is too bright in the night
   test screen saver shuts off screen:
@@ -144,3 +140,9 @@ do gpio from c -> relay before weight
 - icon back: bigger, nicer
 - rename wait widgets
 - settings menu to easy-change in dedicated menu
+- button to reset calibration to factory defaults
+  because if you go through the calibration screens
+  but you don't have the known weight
+  but you put your finger on the scale
+  then it's in a state with bad calibration data
+  in the debug menu?
