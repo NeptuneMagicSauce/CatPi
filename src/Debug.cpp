@@ -66,8 +66,8 @@ struct Setting : public QWidget {
   Setting(const Settings::Load& load)
       : key(load.key),
         defaultValue(load.defaultValue),
-        minimum(load.minimum),
-        maximum(load.maximum),
+        minimum(load.limits.minimum),
+        maximum(load.limits.maximum),
         callback(load.callback) {
     Widget::FontSized(this, 20);
 

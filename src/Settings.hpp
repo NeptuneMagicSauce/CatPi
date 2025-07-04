@@ -12,8 +12,10 @@ struct Settings {
     QString unit;
     QVariant defaultValue;
     std::function<void(QVariant)> callback;
-    std::optional<int> minimum = {};
-    std::optional<int> maximum = {};
+    struct {
+      std::optional<int> minimum = {};
+      std::optional<int> maximum = {};
+    } limits;
 
     static const Load& get(const QString& key);
   };
@@ -25,9 +27,6 @@ struct Settings {
 
   static bool isLoaded(const QString& key);  // if it exists but it's not loaded, it is obsolete
   static void remove(const QString& key);
-
-  static void setMin(const QString& key, int minimum);
-  static void setMax(const QString& key, int maximum);
 
   static QStringList keys();
 };
