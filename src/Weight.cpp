@@ -60,8 +60,13 @@ WeightImpl::WeightImpl() {
   tare.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
   tare.button->setIconSize({40, 40});
 
-  Settings::load(
-      {tare.key, "Tare", "Tare de la balance", "Grammes", 0.0, [&](QVariant v) { tare.value = v.toInt(); }});
+  Settings::load({tare.key,
+                  "Tare",
+                  "Tare de la balance",
+                  "Grammes",
+                  0.0,
+                  [&](QVariant v) { tare.value = v.toInt(); },
+                  {{}, {}}});
   // // debug
   // std::cout << "Tare " << tare.value << endl;
   tare.buttonPressedTimer->setSingleShot(true);
