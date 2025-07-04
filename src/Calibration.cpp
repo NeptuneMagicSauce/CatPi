@@ -162,7 +162,6 @@ void Calibration::connect() {
     Settings::set(knownWeightKey, knownWeight);
     updateLabel();
   });
-  deltaDial->connect();
 }
 
 void Calibration::update(optional<double> reading) {

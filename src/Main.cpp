@@ -120,7 +120,6 @@ int main(int argc, char** argv) {
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
 
     // Delay
-    delay->connect();
     QObject::connect(delay->delayDial, &DeltaDial::valueChanged, [&] {
       logic->changeDelay(delay->delayDial->delta);
       delay->setDelay(logic->delaySeconds());

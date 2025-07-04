@@ -3,9 +3,7 @@
 DeltaDial::DeltaDial() {
   setMaximum(30);
   setWrapping(true);
-}
 
-void DeltaDial::connect() {
   QObject::connect(this, &QAbstractSlider::valueChanged, [&](auto value) {
     delta = value - oldValue;
     auto const firstQuarter = maximum() / 4;

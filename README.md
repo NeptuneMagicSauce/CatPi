@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- Dial: do the connect in the constructor
-
 - Dial: bigger maximum for smooth rotate, then divide delta
 
 - clang format:

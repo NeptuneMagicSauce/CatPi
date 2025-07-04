@@ -29,8 +29,6 @@ Delay::Delay() {
   impl = new DelayImpl(this);
 }
 
-void Delay::connect() { delayDial->connect(); }
-
 DelayImpl::DelayImpl(Delay* parent) {
   auto layout = new QHBoxLayout;
   parent->setLayout(layout);

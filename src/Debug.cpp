@@ -156,7 +156,6 @@ void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWi
     QObject::connect(item.button, &QAbstractButton::released, [&] { goToSettingCallback(item.screen); });
     QObject::connect(item.setting->resetButton, &QAbstractButton::released,
                      [&] { itemChanged(item, item.setting->defaultValue); });
-    item.setting->changeButton->connect();
     QObject::connect(item.setting->changeButton, &QAbstractSlider::valueChanged, [&] {
       auto newValue = Settings::get(item.setting->key).toInt() + item.setting->changeButton->delta;
       auto& minimum = item.setting->minimum;

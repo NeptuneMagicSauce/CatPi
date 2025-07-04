@@ -9,7 +9,6 @@ struct Delay : public QWidget {
 
   DeltaDial* delayDial = nullptr;
 
-  void connect();
   void setDelay(int seconds);
   void setRemaining(int seconds);
 };
