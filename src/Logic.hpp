@@ -9,7 +9,7 @@ struct Logic {
 
   bool hasGPIO = false;
 
-  QTimer* timerEndDispense();
+  QTimer* timerEndDispense = nullptr;
 
   int delaySeconds();
   void connect(std::function<void(int)> updateGuiCallback);

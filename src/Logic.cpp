@@ -17,7 +17,6 @@ using PinCtrl::pinctrl;
 struct LogicImpl {
   LogicImpl();
 
-  QTimer* timerEndDispense = new QTimer;
   optional<QDateTime> previousDispense;
   QFile logFile;
   const QDateTime startTime = QDateTime::currentDateTime();
@@ -25,7 +24,7 @@ struct LogicImpl {
   int delaySeconds = 0;
   qint64 elapsed = 0;
 
-  void dispense(bool hasGPIO);
+  void dispense(bool hasGPIO, QTimer* timerEndDispense);
   void logEvent(QString const& event);
   std::function<void(int)> updateGuiCallback = nullptr;
 };
@@ -35,10 +34,12 @@ namespace {
 
 Logic::Logic() {
   AssertSingleton();
+  timerEndDispense = new QTimer;
+  timerEndDispense->setSingleShot(true);
+  timerEndDispense->setInterval(4000);
   impl = new LogicImpl;
 }
 
-QTimer* Logic::timerEndDispense() { return impl->timerEndDispense; }
 int Logic::delaySeconds() { return impl->delaySeconds; }
 
 LogicImpl::LogicImpl()
@@ -67,9 +68,6 @@ LogicImpl::LogicImpl()
                     }
                   },
                   {10, {}}});
-
-  timerEndDispense->setSingleShot(true);
-  timerEndDispense->setInterval(4000);
 }
 
 void Logic::closeRelay() {
@@ -83,12 +81,12 @@ void Logic::connect(std::function<void(int)> updateGuiCallback) {
   updateGuiCallback(impl->delaySeconds);
   // call it right away because it was not available earlier, in the constructor
 
-  QObject::connect(impl->timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
+  QObject::connect(timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
 }
 
-void Logic::manualDispense() { impl->dispense(hasGPIO); }
+void Logic::manualDispense() { impl->dispense(hasGPIO, timerEndDispense); }
 
-void LogicImpl::dispense(bool hasGPIO) {
+void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
   // pinctrl("-p");
   if (hasGPIO) {
@@ -130,7 +128,7 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   impl->logEvent(log);
 
   if (timeAboveThreshold && weightAboveThreshold) {
-    impl->dispense(hasGPIO);
+    impl->dispense(hasGPIO, timerEndDispense);
     dispensed = true;
   }
 }

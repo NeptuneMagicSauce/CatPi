@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
     // Logic
     logic->connect([&](int newDelay) { delay->setDelay(newDelay); });
-    QObject::connect(logic->timerEndDispense(), &QTimer::timeout,
+    QObject::connect(logic->timerEndDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
 
     // Delay
