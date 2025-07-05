@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- decouple logic loop from sampling loop
-
 - tick right away, dont wait a first interval
   so that data is displayed right away
 
@@ -147,3 +145,4 @@ do gpio from c -> relay before weight
   - maybe width smaller
   - why is the QList<SubScreen> so bizarrely indented?
 - clang-tidy: include cleaner: warn on unused includes: already working
+- decouple logic loop from sampling loop

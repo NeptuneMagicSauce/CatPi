@@ -72,23 +72,13 @@ int main(int argc, char** argv) {
 
     // LoadCell
     QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
-      auto dispensed = false;
-      auto tare = weight->tare();
-      auto weightTarred = 0.0;
       if (auto data = loadcell->read()) {
-        weight->update(data.value().value, weightTarred);
+        weight->update(data.value().value);
         calibration->update(data.value().reading);
-        logic->update(weightTarred, tare, dispensed);
-        if (dispensed) {
-          mainscreen->dispenseButton->setEnabled(false);
-        }
       } else {
-        weight->update({}, weightTarred);
+        weight->update({});
         calibration->update({});
-        logic->update({}, tare, dispensed);
       }
-
-      delay->setRemaining(logic->timeToDispense());
     });
 
     // Weight
@@ -120,6 +110,17 @@ int main(int argc, char** argv) {
     logic->connect([&](int newDelay) { delay->setDelay(newDelay); });
     QObject::connect(logic->timerEndDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
+    QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
+      delay->setRemaining(logic->timeToDispense());
+
+      auto tare = weight->tare();
+      auto weightTarred = weight->weightTarred();
+      auto dispensed = false;
+      logic->update(weightTarred, tare, dispensed);
+      if (dispensed) {
+        mainscreen->dispenseButton->setEnabled(false);
+      }
+    });
 
     // Delay
     QObject::connect(delay->delayDial, &DeltaDial::valueChanged, [&] {

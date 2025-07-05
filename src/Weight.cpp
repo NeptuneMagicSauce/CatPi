@@ -20,6 +20,7 @@ struct WeightImpl {
   WeightImpl();
   void connect();
 
+  optional<double> weightTarred;
   QLabel *label = new QLabel;
   QLabel *labelFooter = new QLabel;
   QTimer *eventTareFinished = new QTimer;
@@ -41,6 +42,8 @@ struct WeightImpl {
 namespace {
   WeightImpl *impl = nullptr;
 }
+
+optional<double> Weight::weightTarred() { return impl->weightTarred; }
 
 Weight::Weight() : messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns)) {
   impl = new WeightImpl();
@@ -94,15 +97,16 @@ double Weight::tare() { return impl->tare.value; }
 
 QTimer *Weight::eventTareFinished() { return impl->eventTareFinished; }
 
-void Weight::update(std::optional<double> value, double &weightTarred) {
+void Weight::update(std::optional<double> value) {
   if (value.has_value() == false) {
+    impl->weightTarred = {};
     impl->label->setText("Error");
     return;
   }
 
   ostringstream massSs;
-  weightTarred = value.value() - impl->tare.value;
-  massSs << fixed << setprecision(1) << weightTarred;
+  impl->weightTarred = value.value() - impl->tare.value;
+  massSs << fixed << setprecision(1) << impl->weightTarred.value();
   impl->label->setText(QString::fromStdString(massSs.str()));
 
   impl->massGrams = value.value();

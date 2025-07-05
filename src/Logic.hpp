@@ -10,6 +10,7 @@ struct Logic {
   bool hasGPIO = false;
 
   QTimer* timerEndDispense = nullptr;
+  QTimer* timerUpdate = nullptr;
 
   int delaySeconds();
   void connect(std::function<void(int)> updateGuiCallback);

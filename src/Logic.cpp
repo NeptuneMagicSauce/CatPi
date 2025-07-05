@@ -37,6 +37,16 @@ Logic::Logic() {
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
   timerEndDispense->setInterval(4000);
+  timerUpdate = new QTimer;
+  timerUpdate->setSingleShot(false);
+  Settings::load({"LogicInterval",
+                  "Période Logique",
+                  "Période de rafraichissement de la boucle principale",
+                  "Millisecondes",
+                  1000,
+                  [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
+                  {20, {}}});
+  timerUpdate->start();
   impl = new LogicImpl;
 }
 
