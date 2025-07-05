@@ -13,10 +13,9 @@ ninja
   handle control-c: also close relay
 
 - more debug settings:
-  - refresh frequency of the load cell polling: to test
+  - load cell polling, refresh frequency : to test
+  - load cell polling, timeout (for cpu consumption when unplugged): to test
   - duration of button/relay press (<-> quantity)
-  - load cell polling timeout, for cpu consumption when unplugged
-  - refresh frequency of the main loop
   - minimum weight for bowl is empty
   - two pins of HX711
   - gain?
@@ -148,3 +147,4 @@ do gpio from c -> relay before weight
   NO, too complex, instead :
   init the gui before looping with correct values
   before weight data is available, or when it's not: display "--"
+- debug setting: refresh frequency of the main loop
