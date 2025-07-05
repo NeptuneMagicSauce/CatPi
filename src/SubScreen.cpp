@@ -9,8 +9,8 @@
 #include "Widget.hpp"
 
 namespace {
-QList<SubScreen*> instances;
-}  
+  QList<SubScreen*> instances;
+}
 
 SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(contents) {
   auto topbar = [&] {

@@ -19,7 +19,7 @@ struct DelayImpl {
 };
 
 namespace {
-DelayImpl* impl = nullptr;
+  DelayImpl* impl = nullptr;
 }
 
 Delay::Delay() {

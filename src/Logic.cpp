@@ -30,7 +30,7 @@ struct LogicImpl {
   std::function<void(int)> updateGuiCallback = nullptr;
 };
 namespace {
-LogicImpl* impl = nullptr;
+  LogicImpl* impl = nullptr;
 }
 
 Logic::Logic() {
@@ -43,7 +43,8 @@ int Logic::delaySeconds() { return impl->delaySeconds; }
 
 LogicImpl::LogicImpl()
     : logFile(
-          QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation).first() +
+          QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
+              .first() +
           "/logs.txt") {
   if (logFile.exists()) {
     logFile.remove();

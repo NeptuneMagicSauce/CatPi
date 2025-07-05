@@ -16,17 +16,17 @@ void printScreen() {  // must be called after ctor QApplication
     return name + string(" ") + to_string(i.width()) + "/" + to_string(i.height());
   };
   auto pRect = [](string name, QRect i) {
-    return name + string(" ") + to_string(i.left()) + "/" + to_string(i.top()) + "/" + to_string(i.right()) +
-           "/" + to_string(i.bottom());
+    return name + string(" ") + to_string(i.left()) + "/" + to_string(i.top()) + "/" +
+           to_string(i.right()) + "/" + to_string(i.bottom());
   };
-  std::cout << "[ " << s->name().toStdString() << " ][ " << s->manufacturer().toStdString() << " ][ "
-            << s->model().toStdString() << " ][ " << s->serialNumber().toStdString() << " ][ "
-            << p("depth", s->depth()) << " ][ " << pSize("size", s->size()) << " ][ "
-            << pRect("geometry", s->geometry()) << " ][ " << "physicalSize " << s->physicalSize().width()
-            << "/" << s->physicalSize().height() << " ][ " << "physicalDotsPerInch "
-            << s->physicalDotsPerInch() << " ][ " << "logicalDotsPerInch " << s->logicalDotsPerInch()
-            << " ][ " << "devicePixelRatio " << s->devicePixelRatio() << " ][ "
-            << pSize("availableSize", s->availableSize()) << " ][ "
+  std::cout << "[ " << s->name().toStdString() << " ][ " << s->manufacturer().toStdString()
+            << " ][ " << s->model().toStdString() << " ][ " << s->serialNumber().toStdString()
+            << " ][ " << p("depth", s->depth()) << " ][ " << pSize("size", s->size()) << " ][ "
+            << pRect("geometry", s->geometry()) << " ][ " << "physicalSize "
+            << s->physicalSize().width() << "/" << s->physicalSize().height() << " ][ "
+            << "physicalDotsPerInch " << s->physicalDotsPerInch() << " ][ " << "logicalDotsPerInch "
+            << s->logicalDotsPerInch() << " ][ " << "devicePixelRatio " << s->devicePixelRatio()
+            << " ][ " << pSize("availableSize", s->availableSize()) << " ][ "
             << pRect("availableGeometry", s->availableGeometry()) << " ][ "
             << pSize("virtualSize ", s->virtualSize()) << " ][ "
             << pRect("virtualGeom ", s->virtualGeometry()) << " ][ "

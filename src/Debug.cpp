@@ -17,30 +17,30 @@ struct Setting;
 
 namespace {
 
-auto populated = false;
-struct Item {
-  Setting* setting = nullptr;
-  QPushButton* button = nullptr;
-  SubScreen* screen = nullptr;
-};
-auto items = QMap<QString, Item>{};
+  auto populated = false;
+  struct Item {
+    Setting* setting = nullptr;
+    QPushButton* button = nullptr;
+    SubScreen* screen = nullptr;
+  };
+  auto items = QMap<QString, Item>{};
 
-auto breakLines(const QString& line, auto maxLength) {
-  auto ret = QString{};
-  auto lineLength = 0;
-  for (auto word : line.split(" ")) {
-    auto lineBreak = lineLength + word.length() > maxLength;
-    if (lineBreak) {
-      ret += "\n";
-      lineLength = 0;
+  auto breakLines(const QString& line, auto maxLength) {
+    auto ret = QString{};
+    auto lineLength = 0;
+    for (auto word : line.split(" ")) {
+      auto lineBreak = lineLength + word.length() > maxLength;
+      if (lineBreak) {
+        ret += "\n";
+        lineLength = 0;
+      }
+      ret += word + " ";
+      lineLength += word.length() + 1;
     }
-    ret += word + " ";
-    lineLength += word.length() + 1;
-  }
 
-  return ret.trimmed();
+    return ret.trimmed();
+  }
 }
-}  
 
 bool Debug::Populated() { return populated; }
 
@@ -118,8 +118,8 @@ Debug::Debug() {
       continue;
     }
 
-    std::cout << "Setting: " << key.toStdString() << " = " << Settings::get(key).toString().toStdString()
-              << std::endl;
+    std::cout << "Setting: " << key.toStdString() << " = "
+              << Settings::get(key).toString().toStdString() << std::endl;
 
     const auto& load = Settings::Load::get(key);
 
@@ -144,7 +144,8 @@ Debug::Debug() {
   populated = true;
 }
 
-void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWidget*)> goToSettingCallback) {
+void Debug::connect(std::function<void()> goBackCallback,
+                    std::function<void(QWidget*)> goToSettingCallback) {
   static auto itemChanged = [&](auto& item, auto newValue) {
     Settings::set(item.setting->key, newValue, false);
     item.setting->callback(newValue);
@@ -153,7 +154,8 @@ void Debug::connect(std::function<void()> goBackCallback, std::function<void(QWi
 
   for (const auto& item : items) {
     QObject::connect(item.screen->back, &QAbstractButton::released, [&] { goBackCallback(); });
-    QObject::connect(item.button, &QAbstractButton::released, [&] { goToSettingCallback(item.screen); });
+    QObject::connect(item.button, &QAbstractButton::released,
+                     [&] { goToSettingCallback(item.screen); });
     QObject::connect(item.setting->resetButton, &QAbstractButton::released,
                      [&] { itemChanged(item, item.setting->defaultValue); });
     QObject::connect(item.setting->changeButton, &QAbstractSlider::valueChanged, [&] {

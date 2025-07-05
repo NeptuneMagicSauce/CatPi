@@ -5,14 +5,15 @@
 #include <QWidget>
 
 namespace {
-QWidget* StyleSheeted(QWidget* widget, const QString& styleSheet) {
-  widget->setStyleSheet(styleSheet);
-  return widget;
+  QWidget* StyleSheeted(QWidget* widget, const QString& styleSheet) {
+    widget->setStyleSheet(styleSheet);
+    return widget;
+  }
 }
-}  
 
 QWidget* Widget::FontSized(QWidget* widget, int fontSize) {
-  return StyleSheeted(widget, QString("QWidget{font-size: ") + QString::number(fontSize) + QString("pt; }"));
+  return StyleSheeted(
+      widget, QString("QWidget{font-size: ") + QString::number(fontSize) + QString("pt; }"));
 }
 
 QWidget* Widget::AlignCentered(QLabel* widget) {

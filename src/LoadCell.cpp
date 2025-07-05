@@ -20,12 +20,13 @@ struct LoadCellImpl {
 
   AdvancedHX711 *hx711 = createHX711(nullopt);
 
-  static AdvancedHX711 *createHX711(optional<pair<int, int>> calibration, QString *status = nullptr);
+  static AdvancedHX711 *createHX711(optional<pair<int, int>> calibration,
+                                    QString *status = nullptr);
   optional<double> valueGrams(const Options &options) const noexcept;
 };
 
 namespace {
-LoadCellImpl *impl = nullptr;
+  LoadCellImpl *impl = nullptr;
 }
 
 LoadCell::LoadCell() {
@@ -48,7 +49,8 @@ LoadCell::LoadCell() {
 
 bool LoadCell::hasGPIO() { return impl->hx711 != nullptr; }
 
-AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibrationData, QString *status) {
+AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibrationData,
+                                         QString *status) {
   try {
     auto const gain = Gain::GAIN_128;
     // auto const gain = Gain::GAIN_64;
@@ -104,7 +106,8 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
     }
 
     if (refUnit == 0) {  // INFs and NANs
-      std::cout << "Invalid calibration: " << refUnit << " " << offset << ", using defaults" << std::endl;
+      std::cout << "Invalid calibration: " << refUnit << " " << offset << ", using defaults"
+                << std::endl;
 
       refUnit = defaultData.first;
       offset = defaultData.second;

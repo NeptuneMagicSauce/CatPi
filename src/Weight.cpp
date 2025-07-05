@@ -39,7 +39,7 @@ struct WeightImpl {
 };
 
 namespace {
-WeightImpl *impl = nullptr;
+  WeightImpl *impl = nullptr;
 }
 
 Weight::Weight() : messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns)) {
@@ -56,7 +56,8 @@ WeightImpl::WeightImpl() {
   labelFooter->setStyleSheet("QWidget{font-size: 30pt;}");
 
   tare.button->setText(tare.buttonText);
-  tare.button->setStyleSheet("QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
+  tare.button->setStyleSheet(
+      "QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
   tare.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
   tare.button->setIconSize({40, 40});
 
@@ -74,7 +75,8 @@ WeightImpl::WeightImpl() {
   tare.progress->setMaximum(tare.maxTicks);
   tare.progress->setTextVisible(false);
   tare.progress->setMaximumHeight(15);
-  tare.progress->setSizePolicy({QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
+  tare.progress->setSizePolicy(
+      {QSizePolicy::Policy::Minimum, tare.progress->sizePolicy().verticalPolicy()});
 
   layout->addWidget(label);
   layout->addWidget(labelFooter);

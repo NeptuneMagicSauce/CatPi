@@ -8,7 +8,7 @@
 // #include <iostream>
 
 namespace {
-auto isFullscreen = false;
+  auto isFullscreen = false;
 }
 
 MainWindow::MainWindow(QWidget* centralWidget, QToolBar* toolbar)

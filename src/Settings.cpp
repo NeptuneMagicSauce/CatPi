@@ -7,13 +7,13 @@
 #include "Debug.hpp"
 
 namespace {
-QSettings& instance() {
-  static auto ret = QSettings{"CatPi", "CatPi"};
-  return ret;
-}
+  QSettings& instance() {
+    static auto ret = QSettings{"CatPi", "CatPi"};
+    return ret;
+  }
 
-QMap<QString, Settings::Load> loads;
-}  
+  QMap<QString, Settings::Load> loads;
+}
 
 QVariant Settings::get(const QString& key) {
   assert(instance().contains(key));

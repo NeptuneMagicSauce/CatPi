@@ -19,7 +19,7 @@ struct CentralWidgetImpl {
 };
 
 namespace {
-CentralWidgetImpl* impl = nullptr;
+  CentralWidgetImpl* impl = nullptr;
 }
 
 CentralWidget::CentralWidget(QList<SubScreen*> subScreens) {
