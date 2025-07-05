@@ -52,7 +52,6 @@ Weight::Weight() : messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns
 
 WeightImpl::WeightImpl() {
   AssertSingleton();
-  label->setText("--");
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   labelFooter->setText("grams");
   labelFooter->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -100,7 +99,7 @@ QTimer *Weight::eventTareFinished() { return impl->eventTareFinished; }
 void Weight::update(std::optional<double> value) {
   if (value.has_value() == false) {
     impl->weightTarred = {};
-    impl->label->setText("Error");
+    impl->label->setText("--");
     return;
   }
 

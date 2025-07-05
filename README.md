@@ -7,9 +7,6 @@ ninja
 
 # TODO
 
-- tick right away, dont wait a first interval
-  so that data is displayed right away
-
 - close relay even on crash
   needs crash handler
   so then just port all features
@@ -146,3 +143,8 @@ do gpio from c -> relay before weight
   - why is the QList<SubScreen> so bizarrely indented?
 - clang-tidy: include cleaner: warn on unused includes: already working
 - decouple logic loop from sampling loop
+- tick LoadCell and Logic right away, dont wait a first interval
+  so that all data is displayed right away: weight and delay
+  NO, too complex, instead :
+  init the gui before looping with correct values
+  before weight data is available, or when it's not: display "--"
