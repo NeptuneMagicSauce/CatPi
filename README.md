@@ -7,12 +7,6 @@ ninja
 
 # TODO
 
-- clang format:
-  - no // namespace at closure
-  - maybe width smaller
-  - why is the QList<SubScreen> so bizarrely indented?
-  - include cleaner: warn on unused includes
-
 - decouple logic loop from sampling loop
 
 - tick right away, dont wait a first interval
@@ -148,3 +142,8 @@ do gpio from c -> relay before weight
   but you put your finger on the scale
   then it's in a state with bad calibration data
   in the debug menu?
+- clang format:
+  - no // namespace at closure
+  - maybe width smaller
+  - why is the QList<SubScreen> so bizarrely indented?
+- clang-tidy: include cleaner: warn on unused includes: already working

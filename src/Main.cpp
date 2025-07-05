@@ -28,9 +28,9 @@ int main(int argc, char** argv) {
   ToolBar* toolbar = new ToolBar;
   Debug* debug = new Debug;
   MainScreen* mainscreen = new MainScreen{weight, delay};
-  CentralWidget* central =
-      new CentralWidget{{new SubScreen("", mainscreen), new SubScreen("Calibration", calibration),
-                         new SubScreen("Debug", debug)}};
+  CentralWidget* central = new CentralWidget{{new SubScreen("", mainscreen),
+                                              new SubScreen("Calibration", calibration), /**/
+                                              new SubScreen("Debug", debug)}};
   MainWindow* window = new MainWindow{central, toolbar};
 
   // Initialize globals
@@ -50,7 +50,8 @@ int main(int argc, char** argv) {
     QObject::connect(quitShortcut, &QShortcut::activated, app, &QApplication::quit);
     auto fullscreenShortcut = new QShortcut(QKeySequence(Qt::Key_F11), window);
     fullscreenShortcut->setContext(Qt::ApplicationShortcut);
-    QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen, &QAction::trigger);
+    QObject::connect(fullscreenShortcut, &QShortcut::activated, toolbar->fullscreen,
+                     &QAction::trigger);
 
     // ToolBar
     QObject::connect(toolbar->quit, &QAction::triggered, app, &QApplication::quit);
@@ -59,7 +60,8 @@ int main(int argc, char** argv) {
       window->toggleFullscreen(isFullscreen);
       toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(isFullscreen));
     });
-    QObject::connect(toolbar->calibration, &QAction::triggered, [&]() { central->setPage(calibration); });
+    QObject::connect(toolbar->calibration, &QAction::triggered,
+                     [&]() { central->setPage(calibration); });
     QObject::connect(toolbar->debug, &QAction::triggered, [&] { central->setPage(debug); });
 
     // Dispense
@@ -126,7 +128,8 @@ int main(int argc, char** argv) {
     });
 
     // Debug
-    debug->connect([&] { central->setPage(debug); }, [&](QWidget* item) { central->setSettingPage(item); });
+    debug->connect([&] { central->setPage(debug); },
+                   [&](QWidget* item) { central->setSettingPage(item); });
   }
 
   // Initializing that needs the signals connected

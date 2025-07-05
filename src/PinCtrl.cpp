@@ -25,4 +25,4 @@ void pinctrl(string_view sv) {
   // ranges::for_each(char_args, [](auto i) { cout << (void*)i << " " << i << endl; });
   main_pinctrl(char_args.size(), (char**)char_args.data());
 }
-}  // namespace PinCtrl
+}  

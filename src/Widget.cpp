@@ -9,7 +9,7 @@ QWidget* StyleSheeted(QWidget* widget, const QString& styleSheet) {
   widget->setStyleSheet(styleSheet);
   return widget;
 }
-}  // namespace
+}  
 
 QWidget* Widget::FontSized(QWidget* widget, int fontSize) {
   return StyleSheeted(widget, QString("QWidget{font-size: ") + QString::number(fontSize) + QString("pt; }"));

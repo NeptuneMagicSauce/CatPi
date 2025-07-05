@@ -21,19 +21,18 @@ using std::pair;
 
 namespace {
 
-QStackedLayout* screens = nullptr;
-int knownWeight = 0;
-const QString knownWeightKey = "KnownWeight";
-QLabel* knownWeightLabel = nullptr;
-QLabel* readingLabel = nullptr;
-DeltaDial* deltaDial = nullptr;
+  QStackedLayout* screens = nullptr;
+  int knownWeight = 0;
+  const QString knownWeightKey = "KnownWeight";
+  QLabel* knownWeightLabel = nullptr;
+  QLabel* readingLabel = nullptr;
+  DeltaDial* deltaDial = nullptr;
 
-double readingZero = 0;
+  double readingZero = 0;
 
-auto const minWeight = 10;
-auto const maxWeight = 1000;
-
-}  // namespace
+  auto const minWeight = 10;
+  auto const maxWeight = 1000;
+}
 
 Calibration::Calibration() {
   AssertSingleton();
@@ -65,8 +64,8 @@ Calibration::Calibration() {
     widget->setLayout(widgetLayout);
 
     widgetLayout->addWidget(Widget::FontSized(Widget::AlignCentered(new QLabel(title)), 15));
-    widgetLayout->addWidget(
-        Widget::FontSized(Widget::AlignCentered(new QLabel(QString{prompt} + "\nAnd press Ready")), 15));
+    widgetLayout->addWidget(Widget::FontSized(
+        Widget::AlignCentered(new QLabel(QString{prompt} + "\nAnd press Ready")), 15));
 
     if (button == buttons.step2) {  // known weight screen
       auto parent = new QWidget;
@@ -104,7 +103,8 @@ Calibration::Calibration() {
     ret->setLayout(screens);
     ret->setSizePolicy(ret->sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
     screens->addWidget(measure(buttons.step1, "Empty Measure", "Remove any object from the scale"));
-    screens->addWidget(measure(buttons.step2, "Known Measure", "Put an object of known weight on the scale"));
+    screens->addWidget(
+        measure(buttons.step2, "Known Measure", "Put an object of known weight on the scale"));
     return ret;
   }();
 
@@ -150,7 +150,9 @@ optional<pair<int, int>> Calibration::Callbacks::step2(optional<double> rawPreci
   return {};
 }
 
-void Calibration::updateLabel() { knownWeightLabel->setText(QString::number(knownWeight) + " grams"); }
+void Calibration::updateLabel() {
+  knownWeightLabel->setText(QString::number(knownWeight) + " grams");
+}
 
 void Calibration::connect() {
   QObject::connect(deltaDial, &QAbstractSlider::valueChanged, [&] {
@@ -165,6 +167,6 @@ void Calibration::connect() {
 }
 
 void Calibration::update(optional<double> reading) {
-  readingLabel->setText("Raw reading: " +
-                        (reading.has_value() ? QString::number(reading.value()) : QString{"error"}));
+  readingLabel->setText("Raw reading: " + (reading.has_value() ? QString::number(reading.value())
+                                                               : QString{"error"}));
 }

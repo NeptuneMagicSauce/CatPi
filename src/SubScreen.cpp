@@ -10,7 +10,7 @@
 
 namespace {
 QList<SubScreen*> instances;
-}  // namespace
+}  
 
 SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(contents) {
   auto topbar = [&] {

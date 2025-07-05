@@ -13,7 +13,7 @@ QSettings& instance() {
 }
 
 QMap<QString, Settings::Load> loads;
-}  // namespace
+}  
 
 QVariant Settings::get(const QString& key) {
   assert(instance().contains(key));

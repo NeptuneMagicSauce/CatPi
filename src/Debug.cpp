@@ -40,7 +40,7 @@ auto breakLines(const QString& line, auto maxLength) {
 
   return ret.trimmed();
 }
-}  // namespace
+}  
 
 bool Debug::Populated() { return populated; }
 
