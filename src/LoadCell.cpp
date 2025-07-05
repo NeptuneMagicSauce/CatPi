@@ -35,16 +35,15 @@ LoadCell::LoadCell() {
   impl = new LoadCellImpl;
 
   timer = new QTimer;
-  auto value = 0;
   Settings::load({impl->intervalSettingName,
                   "Période Balance",
                   "Temps d'attente entre les mesures du poids de la balance",
                   "Millisecondes",
                   1000,
-                  [&](QVariant v) { value = v.toInt(); },
+                  [&](QVariant v) { timer->setInterval(v.toInt()); },
                   {20, {}}});
   timer->setSingleShot(false);
-  timer->start(value);
+  timer->start();
 }
 
 bool LoadCell::hasGPIO() { return impl->hx711 != nullptr; }
