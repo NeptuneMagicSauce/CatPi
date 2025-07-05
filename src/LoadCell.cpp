@@ -15,7 +15,7 @@ using namespace HX711;
 using namespace std;
 
 struct LoadCellImpl {
-  const std::chrono::milliseconds pollingInterval{100};
+  const std::chrono::milliseconds pollingTimeout{100};
   const QString intervalSettingName = "WeightPollInterval";
 
   AdvancedHX711 *hx711 = createHX711(nullopt);
@@ -146,8 +146,8 @@ optional<LoadCell::Data> readInMode(const Options &options) noexcept {
 
 optional<LoadCell::Data> LoadCell::read() noexcept {
   // short timeout, only one sample, no busy wait
-  return readInMode(Options{impl->pollingInterval});
-};
+  return readInMode(Options{impl->pollingTimeout});
+}
 
 optional<double> LoadCell::readPreciseRaw() noexcept {
   // fixed number of samples, no timeout, busy wait
