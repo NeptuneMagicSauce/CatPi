@@ -1,12 +1,15 @@
 #include "CrashDialog.hpp"
 
+#include <QApplication>
 #include <QGridLayout>
+#include <QLabel>
 #include <QPushButton>
+#include <QScrollArea>
 #include <map>
-#include <stacktrace>
 #include <string>
 
 #include "CrashHandler.hpp"
+#include "Widget.hpp"
 
 using namespace std;
 
@@ -36,6 +39,7 @@ CrashTester::CrashTester()
   hide();
   setWindowTitle("CrashTester");
   setModal(true);
+  Widget::FontSized(this, 20);
   auto layout = new QGridLayout;
   setLayout(layout);
   auto index = 0;
@@ -50,6 +54,53 @@ CrashTester::CrashTester()
 }
 
 void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
-  //
-  qDebug() << Q_FUNC_INFO;
+  // if QApplication is not constructed, construct it because QDialog::exec() needs it
+  if (qApp == nullptr) {
+    new QApplication(*(new int(0)), (char**)nullptr);
+  }
+
+  auto dialog = new QDialog{nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint |
+                                         Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint};
+  Widget::FontSized(dialog, 20);
+  dialog->setModal(true);
+  dialog->setWindowTitle("Crash");
+  auto layout_root = new QVBoxLayout;
+  dialog->setLayout(layout_root);
+  auto error_label = new QLabel{error};
+  layout_root->addWidget(Widget::AlignCentered(error_label));
+
+  auto button_quit = new QPushButton{"Quit"};
+  button_quit->setDefault(true);
+  QObject::connect(button_quit, &QPushButton::released, [&dialog]() { dialog->accept(); });
+  auto pid_string = QString::number(QApplication::applicationPid());
+
+  auto stack_label = new QLabel;
+  stack_label->setTextFormat(Qt::RichText);
+  // stack_label->setTextFormat(Qt::MarkdownText);
+  auto stack_text = QString{};
+  stack_text += "<b>Process ID</b> " + pid_string + "<br>";
+  stack_text += "<b>Stack Trace</b><br><br>";
+
+#warning "TODO here"
+  // fancy format the stack (markdown)
+  // highlight lines in my code
+  // for (auto stackline : stack.split("\n")) {
+  // }
+
+  stack_text += stack;
+  stack_text.replace("\n", "<br>");
+  stack_text.remove("/c/Devel/Workspace/CatPi/");
+  stack_text.remove("/home/romain/CatPi/");
+  stack_label->setText(stack_text.trimmed());
+
+  auto stack_area = new QScrollArea;
+  stack_area->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  stack_area->setWidget(stack_label);
+  stack_area->setWidgetResizable(true);
+  layout_root->addWidget(stack_area);
+
+  layout_root->addWidget(button_quit);
+
+  dialog->resize(800, 500);
+  dialog->exec();
 }
