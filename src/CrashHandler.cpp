@@ -12,10 +12,21 @@ using namespace std;
 CrashHandler* CrashHandler::instance = new CrashHandler;
 
 namespace {
-  std::function<void()> cleanUpCallback = nullptr;
-  std::function<void(const std::string&, const std::string&)> reportCallback = nullptr;
+  vector<int> signals() {
+    static auto ret = vector<int>{SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGINT, SIGTERM};
+    return ret;
+  }
+
+  function<void()> cleanUpCallback = nullptr;
+  function<void(const string&, const string&)> reportCallback = nullptr;
 
   void handler(int signal) {
+    // uninstall all handlers, if we crash again that would be looping
+    for (auto inhibit : signals()) {
+      std::signal(inhibit, SIG_DFL);
+    }
+
+    // call clean up
     if (cleanUpCallback != nullptr) {
       cleanUpCallback();
     }
@@ -28,7 +39,7 @@ namespace {
                 : signal == SIGTERM ? "SIGTERM"
                                     : "??";
     cout << "Signal " << name << endl;
-    auto stacktrace = to_string(std::stacktrace::current());
+    auto stacktrace = to_string(stacktrace::current());
     cout << stacktrace;
     if (reportCallback != nullptr) {
       reportCallback(name, stacktrace);
@@ -40,8 +51,8 @@ namespace {
 
 CrashHandler::CrashHandler() {
   // install signal handlers
-  for (auto signal : {SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGINT, SIGTERM}) {
-    std::signal(signal, handler);
+  for (auto enable : signals()) {
+    std::signal(enable, handler);
   }
 }
 
@@ -97,11 +108,11 @@ void CrashHandler::Test::This(CrashHandler::Test::Type type) {
   }
 }
 
-void CrashHandler::installCleanUpCallback(std::function<void()> cleanUpCallback) {
+void CrashHandler::installCleanUpCallback(function<void()> cleanUpCallback) {
   ::cleanUpCallback = cleanUpCallback;
 }
 
 void CrashHandler::installReportCallback(
-    std::function<void(const std::string&, const std::string&)> reportCallback) {
+    function<void(const string&, const string&)> reportCallback) {
   ::reportCallback = reportCallback;
 }
