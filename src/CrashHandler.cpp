@@ -41,7 +41,7 @@ namespace {
     cout << "Signal " << name << endl;
     auto stacktrace = to_string(stacktrace::current());
     cout << stacktrace;
-    if (reportCallback != nullptr) {
+    if (signal != SIGINT && reportCallback != nullptr) {
       reportCallback(name, stacktrace);
     }
     exit(1);
