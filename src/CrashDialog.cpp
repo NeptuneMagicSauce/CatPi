@@ -66,7 +66,8 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   dialog->setWindowTitle("Crash");
   auto layout_root = new QVBoxLayout;
   dialog->setLayout(layout_root);
-  auto error_label = new QLabel{error};
+  auto error_label = new QLabel{"**" + error + "**"};
+  error_label->setTextFormat(Qt::MarkdownText);
   layout_root->addWidget(Widget::AlignCentered(error_label));
 
   auto button_quit = new QPushButton{"Quit"};
@@ -75,31 +76,36 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   auto pid_string = QString::number(QApplication::applicationPid());
 
   auto stack_label = new QLabel;
-  stack_label->setTextFormat(Qt::RichText);
-  // stack_label->setTextFormat(Qt::MarkdownText);
+  stack_label->setTextFormat(Qt::MarkdownText);
   auto stack_text = QString{};
-  stack_text += "<b>Process ID</b> " + pid_string + "<br>";
-  stack_text += "<b>Stack Trace</b><br><br>";
+  stack_text += "**Process ID** " + pid_string + "\n";
+  stack_text += "**Stack Trace**\n";
 
 #warning "TODO here"
   // fancy format the stack (markdown)
   // highlight lines in my code
-  // for (auto stackline : stack.split("\n")) {
-  // }
+  for (auto stackline : stack.split("\n")) {
+    static auto const patterns =
+        QList<QString>{{"/c/Devel/Workspace/CatPi/"}, {"/home/romain/CatPi/"}};
+    auto isUserCode = false;
+    for (auto const& p : patterns) {
+      if (stackline.contains(p)) {
+        stackline.remove(p);
+        isUserCode = true;
+      }
+    }
+    stack_text += stackline + "\n";
+  }
 
-  stack_text += stack;
-  stack_text.replace("\n", "<br>");
-  stack_text.remove("/c/Devel/Workspace/CatPi/");
-  stack_text.remove("/home/romain/CatPi/");
+  stack_text.replace("\n", "\n\n");
   stack_label->setText(stack_text.trimmed());
 
   auto stack_area = new QScrollArea;
   stack_area->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   stack_area->setWidget(stack_label);
   stack_area->setWidgetResizable(true);
-  layout_root->addWidget(stack_area);
-
   layout_root->addWidget(button_quit);
+  layout_root->addWidget(stack_area);
 
   dialog->resize(800, 500);
   dialog->exec();
