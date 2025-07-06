@@ -6,6 +6,7 @@
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
 #include "CrashDialog.hpp"
+#include "CrashHandler.hpp"
 #include "Debug.hpp"
 #include "Delay.hpp"
 #include "DeltaDial.hpp"
@@ -13,6 +14,7 @@
 #include "Logic.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
+#include "PinCtrl.hpp"
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
@@ -20,6 +22,11 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+  CrashHandler::instance->installCleanUpCallback([] { PinCtrl::pinctrl("set 17 op dl"); });
+  CrashHandler::instance->installReportCallback([](const std::string& error, const string& stack) {
+    CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
+  });
+
   QApplication* app = new QApplication(argc, argv);
   LoadCell* loadcell = new LoadCell;
   Weight* weight = new Weight;

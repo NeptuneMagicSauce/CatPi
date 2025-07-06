@@ -12,7 +12,14 @@ using namespace std;
 CrashHandler* CrashHandler::instance = new CrashHandler;
 
 namespace {
+  std::function<void()> cleanUpCallback = nullptr;
+  std::function<void(const std::string&, const std::string&)> reportCallback = nullptr;
+
   void handler(int signal) {
+    if (cleanUpCallback != nullptr) {
+      cleanUpCallback();
+    }
+
     auto name = signal == SIGSEGV   ? "SIGSEGV"
                 : signal == SIGABRT ? "SIGABRT"
                 : signal == SIGFPE  ? "SIGFPE"
@@ -23,8 +30,12 @@ namespace {
     cout << "Signal " << name << endl;
     auto stacktrace = to_string(std::stacktrace::current());
     cout << stacktrace;
+    if (reportCallback != nullptr) {
+      reportCallback(name, stacktrace);
+    }
     exit(1);
   }
+
 }
 
 CrashHandler::CrashHandler() {
@@ -84,4 +95,13 @@ void CrashHandler::Test::This(CrashHandler::Test::Type type) {
       raise(SIGTERM);
       break;
   }
+}
+
+void CrashHandler::installCleanUpCallback(std::function<void()> cleanUpCallback) {
+  ::cleanUpCallback = cleanUpCallback;
+}
+
+void CrashHandler::installReportCallback(
+    std::function<void(const std::string&, const std::string&)> reportCallback) {
+  ::reportCallback = reportCallback;
 }

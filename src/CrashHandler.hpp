@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <string>
+
 struct CrashHandler {
   struct Test {
     enum struct Type {
@@ -24,5 +27,9 @@ struct CrashHandler {
   };
 
   static CrashHandler* instance;
+
   CrashHandler();
+  void installCleanUpCallback(std::function<void()> cleanUpCallback);
+  void installReportCallback(
+      std::function<void(const std::string&, const std::string&)> reportCallback);
 };
