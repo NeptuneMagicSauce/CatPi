@@ -25,3 +25,6 @@ target_link_libraries(${PROJECT_NAME} ${LIBPINCTRLDIR}/libpinctrl.a)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${LIBHX711}/include")
 target_link_libraries(${PROJECT_NAME} "-llgpio")
 target_link_libraries(${PROJECT_NAME} "${LIBHX711}/build/static/libhx711.a")
+
+# needed for stacktrace
+target_link_libraries(${PROJECT_NAME} "-lstdc++exp")

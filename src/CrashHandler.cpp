@@ -4,6 +4,7 @@
 #include <cmath>
 #include <csignal>
 #include <iostream>
+#include <stacktrace>
 #include <vector>
 
 using namespace std;
@@ -20,6 +21,8 @@ namespace {
                 : signal == SIGTERM ? "SIGTERM"
                                     : "??";
     cout << "Signal " << name << endl;
+    auto stacktrace = to_string(std::stacktrace::current());
+    cout << stacktrace;
     exit(1);
   }
 }

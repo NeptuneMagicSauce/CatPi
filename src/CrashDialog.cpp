@@ -3,6 +3,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <map>
+#include <stacktrace>
 #include <string>
 
 #include "CrashHandler.hpp"

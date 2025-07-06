@@ -39,8 +39,8 @@ auto grayscaleQImage(QImage& image) {
       // https://stackoverflow.com/a/17619494
       // http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
       auto cLinear = 0.2126f * r + 0.7152f * g + 0.0722f * b;
-      auto cSrgb =
-          cLinear <= 0.0031308 ? (12.92f * cLinear) : (1.055f * std::pow(cLinear, 1.f / 2.4f) - 0.055f);
+      auto cSrgb = cLinear <= 0.0031308 ? (12.92f * cLinear)
+                                        : (1.055f * std::pow(cLinear, 1.f / 2.4f) - 0.055f);
       auto cLinear255 = (int)(cSrgb * 255);
       rgb = qRgba(cLinear255, cLinear255, cLinear255, qAlpha(rgb));
     }
@@ -97,4 +97,13 @@ auto separateWords(auto line) {
     prev = c;
   }
   return asWords;
+}
+
+// source https://stackoverflow.com/a/3418285
+void str_replace(std::string& str, const std::string& from, const std::string& to) {
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length();
+  }
 }
