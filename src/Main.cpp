@@ -5,6 +5,7 @@
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
+#include "CrashDialog.hpp"
 #include "Debug.hpp"
 #include "Delay.hpp"
 #include "DeltaDial.hpp"
@@ -134,6 +135,12 @@ int main(int argc, char** argv) {
     // Debug
     debug->connect([&] { central->setPage(debug); },
                    [&](QWidget* item) { central->setSettingPage(item); });
+
+    // CrashTester
+    auto crashTester = new CrashTester;
+    auto crashShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F1), window);
+    crashShortcut->setContext(Qt::ApplicationShortcut);
+    QObject::connect(crashShortcut, &QShortcut::activated, app, [&]() { crashTester->show(); });
   }
 
   // Initializing that needs the signals connected

@@ -21,8 +21,6 @@ ninja
   - gain?
   - duration of confirm tare
 
-- base widget: maybe QSlider is better than DeltaDial ?
-
 - problem: the screen is too bright in the night
   test screen saver shuts off screen:
   can it be waken up with a touch?
@@ -31,6 +29,12 @@ ninja
 
 - better gui layout
   frequent buttons bigger
+
+- also long-press-protect the DispenseNow button ?
+  with a shared widget: heritor of push button and composer of progress bar
+  so that we can find the signals
+  but then it won't work for toolbar which has tool buttons that do not inherit from push button
+  so inherit from abstract button? but no, we want to instantiate push and tool buttons
 
 - Dial: bigger maximum for smooth rotate, then divide delta
   does not work: some composers of Dial change the maximum after construction
@@ -59,11 +63,7 @@ ninja
 
 - libhx711: can we take out the implementation and do it in tree?
 
-- also long-press-protect the DispenseNow button ?
-  with a shared widget: heritor of push button and composer of progress bar
-  so that we can find the signals
-  but then it won't work for toolbar which has tool buttons that do not inherit from push button
-  so inherit from abstract button? but no, we want to instantiate push and tool buttons
+- base widget: maybe QSlider is better than DeltaDial ?
 
 - logging
   log eat events and dispense events
