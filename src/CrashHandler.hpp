@@ -22,4 +22,7 @@ struct CrashHandler {
     };
     static void This(Type);
   };
+
+  static CrashHandler* instance;
+  CrashHandler();
 };

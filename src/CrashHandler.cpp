@@ -8,6 +8,29 @@
 
 using namespace std;
 
+CrashHandler* CrashHandler::instance = new CrashHandler;
+
+namespace {
+  void handler(int signal) {
+    auto name = signal == SIGSEGV   ? "SIGSEGV"
+                : signal == SIGABRT ? "SIGABRT"
+                : signal == SIGFPE  ? "SIGFPE"
+                : signal == SIGILL  ? "SIGILL"
+                : signal == SIGINT  ? "SIGINT"
+                : signal == SIGTERM ? "SIGTERM"
+                                    : "??";
+    cout << "Signal " << name << endl;
+    exit(1);
+  }
+}
+
+CrashHandler::CrashHandler() {
+  // install signal handlers
+  for (auto signal : {SIGSEGV, SIGABRT, SIGFPE, SIGILL, SIGINT, SIGTERM}) {
+    std::signal(signal, handler);
+  }
+}
+
 void CrashHandler::Test::This(CrashHandler::Test::Type type) {
   switch (type) {
     case Type::NullPtr:

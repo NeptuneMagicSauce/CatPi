@@ -25,7 +25,7 @@ namespace {
       {CrashHandler::Test::Type::SigAbort, "SigAbort"},
       {CrashHandler::Test::Type::SigFPE, "SigFPE"},
       {CrashHandler::Test::Type::SigIllFormed, "SigIllFormed"},
-      {CrashHandler::Test::Type::SigInterrupt, "SigInterrupe"},
+      {CrashHandler::Test::Type::SigInterrupt, "SigInterrupt"},
       {CrashHandler::Test::Type::SigTerminate, "SigTerminate"},
   };
 }
