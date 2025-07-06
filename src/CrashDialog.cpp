@@ -1,11 +1,13 @@
 #include "CrashDialog.hpp"
 
 #include <QApplication>
+#include <QFile>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QScrollArea>
+#include <iostream>
 #include <map>
 #include <string>
 
@@ -75,25 +77,42 @@ namespace {
       }
       return QString{"*"} + str + "*";
     };
+    static auto formatIndex = [](const QString& index) {
+      return bold("[" + QString::number(index.toInt()) + "]");
+    };
 
     try {
       auto regexep = QRegularExpression{"(^ *\\d*)(# )(.*)( at )(.*)"};
       auto match = regexep.match(line);
       if (match.hasMatch() == false) {
+        auto regexpIndexOnly = QRegularExpression{"(^ *\\d*)(#.*)"};
+        auto matchIndexOnly = regexpIndexOnly.match(line);
+        if (matchIndexOnly.hasMatch()) {
+          return formatIndex(matchIndexOnly.captured(1));
+        }
         return line;
       }
-      auto index = match.captured(1).toInt();
+      auto index = match.captured(1);
       auto function = match.captured(3);
       auto location = match.captured(5);
       // qDebug() << index << function << location;
 
       auto ret = QString{};
-      ret += bold(QString::number(index));
-      ret += " " + (isUserCode ? bold(location) : location);
-      ret += "\n";
-      // ret += " ";
+
+      ret += formatIndex(index) + " ";
+
       function = italic(function);
       ret += isUserCode ? bold(function) : function;
+
+      ret += "\n";
+
+      if (location.isEmpty() || location == ":0") {
+        ret += "--";
+      } else {
+        ret += isUserCode ? bold(location) : location;
+        // ret += location;
+      }
+      ret += " ";
       return ret;
     } catch (exception&) {
       return line;
@@ -141,13 +160,22 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
         isUserCode = true;
       }
     }
-    stack_text += formatStackItem(stackline, isUserCode) + "\n";
+    auto formatted = formatStackItem(stackline, isUserCode) + "\n";
+    // cout << formatted.toStdString();
+    stack_text += formatted;
   }
   // qDebug() << stack_text;
 
   // TODO bug: there are blank lines between each line
   // TODO bug: we're missing the bottom half of the stack
   stack_text.replace("\n", "  \n");  // markdown new-lines
+
+  // debug
+  auto file = QFile{"/home/romain/log.md"};
+  file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
+  file.write(stack_text.toUtf8());
+  cout << "\n\n\n" << stack_text.toStdString() << endl;
+
   stack_label->setText(stack_text);
 
   auto stack_area = new QScrollArea;
@@ -155,6 +183,7 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   stack_area->setWidget(stack_label);
   stack_area->setWidgetResizable(true);
   layout_root->addWidget(button_quit);
+  // TODO button to copy the PID
   layout_root->addWidget(stack_area);
 
   dialog->resize(800, 500);
