@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QScrollArea>
 #include <map>
 #include <string>
@@ -53,6 +54,53 @@ CrashTester::CrashTester()
   }
 }
 
+namespace {
+  QString formatStackItem(const QString& line, bool isUserCode) {
+    //   5# main at Main.cpp:30
+    //   6# __libc_start_call_main at ../sysdeps/nptl/libc_start_call_main.h:58
+
+    static auto iswhitespace = [](const QString& str) {
+      auto regexp = QRegularExpression{"^ *$"};
+      return regexp.match(str).hasMatch();
+    };
+    static auto bold = [](const QString& str) {
+      if (iswhitespace(str)) {
+        return str;
+      }
+      return QString{"**"} + str + "**";
+    };
+    static auto italic = [](const QString& str) {
+      if (iswhitespace(str)) {
+        return str;
+      }
+      return QString{"*"} + str + "*";
+    };
+
+    try {
+      auto regexep = QRegularExpression{"(^ *\\d*)(# )(.*)( at )(.*)"};
+      auto match = regexep.match(line);
+      if (match.hasMatch() == false) {
+        return line;
+      }
+      auto index = match.captured(1).toInt();
+      auto function = match.captured(3);
+      auto location = match.captured(5);
+      // qDebug() << index << function << location;
+
+      auto ret = QString{};
+      ret += bold(QString::number(index));
+      ret += " " + (isUserCode ? bold(location) : location);
+      ret += "\n";
+      // ret += " ";
+      function = italic(function);
+      ret += isUserCode ? bold(function) : function;
+      return ret;
+    } catch (exception&) {
+      return line;
+    }
+  }
+}
+
 void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   // if QApplication is not constructed, construct it because QDialog::exec() needs it
   if (qApp == nullptr) {
@@ -81,11 +129,10 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   stack_text += "**Process ID** " + pid_string + "\n";
   stack_text += "**Stack Trace**\n";
 
-#warning "TODO here"
-  // fancy format the stack (markdown)
-  // highlight lines in my code
-  for (auto stackline : stack.split("\n")) {
+  auto lines = stack.split("\n");
+  for (auto stackline : lines) {
     static auto const patterns =
+        // TODO use cmake build dir and realpath, do not leak personal info
         QList<QString>{{"/c/Devel/Workspace/CatPi/"}, {"/home/romain/CatPi/"}};
     auto isUserCode = false;
     for (auto const& p : patterns) {
@@ -94,11 +141,14 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
         isUserCode = true;
       }
     }
-    stack_text += stackline + "\n";
+    stack_text += formatStackItem(stackline, isUserCode) + "\n";
   }
+  // qDebug() << stack_text;
 
-  stack_text.replace("\n", "\n\n");
-  stack_label->setText(stack_text.trimmed());
+  // TODO bug: there are blank lines between each line
+  // TODO bug: we're missing the bottom half of the stack
+  stack_text.replace("\n", "  \n");  // markdown new-lines
+  stack_label->setText(stack_text);
 
   auto stack_area = new QScrollArea;
   stack_area->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
