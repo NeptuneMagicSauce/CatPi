@@ -27,8 +27,6 @@ int main(int argc, char** argv) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
   });
 
-  std::abort();  // debug
-
   QApplication* app = new QApplication(argc, argv);
   LoadCell* loadcell = new LoadCell;
   Weight* weight = new Weight;

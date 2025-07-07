@@ -7,12 +7,7 @@ ninja
 
 # TODO
 
-- close relay even on crash
-  needs crash handler
-  so then just port all features
-  handle control-c: also close relay
-  but on control-c: do not print stack trace, it's user-initiated SIGINT
-  halt on nan and inf
+- halt on nan and inf
 
 - more debug settings:
   - load cell polling, refresh frequency : to test
@@ -150,3 +145,8 @@ do gpio from c -> relay before weight
   init the gui before looping with correct values
   before weight data is available, or when it's not: display "--"
 - debug setting: refresh frequency of the main loop
+- close relay even on crash
+  needs crash handler
+  so then just port all features
+  handle control-c: also close relay
+  but on control-c: do not print stack trace, it's user-initiated SIGINT
