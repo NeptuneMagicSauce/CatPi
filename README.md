@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- halt on nan and inf
-
 - more debug settings:
   - load cell polling, refresh frequency : to test
   - load cell polling, timeout (for cpu consumption when unplugged): to test
@@ -150,3 +148,4 @@ do gpio from c -> relay before weight
   so then just port all features
   handle control-c: also close relay
   but on control-c: do not print stack trace, it's user-initiated SIGINT
+- halt on nan and inf

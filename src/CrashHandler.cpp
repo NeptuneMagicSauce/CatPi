@@ -1,6 +1,7 @@
 #include "CrashHandler.hpp"
 
 #include <cassert>
+#include <cfenv>
 #include <cmath>
 #include <csignal>
 #include <iostream>
@@ -54,9 +55,13 @@ CrashHandler::CrashHandler() {
   for (auto enable : signals()) {
     std::signal(enable, handler);
   }
+
+  // trap on INF and NAN
+  feenableexcept(FE_DIVBYZERO | FE_INVALID);
 }
 
 void CrashHandler::Test::This(CrashHandler::Test::Type type) {
+  static auto one = 1.0;
   switch (type) {
     case Type::NullPtr:
       cout << *(volatile int*)nullptr;
@@ -74,7 +79,7 @@ void CrashHandler::Test::This(CrashHandler::Test::Type type) {
 #pragma clang diagnostic pop
       break;
     case Type::FloatInf:
-      cout << 1.0 / 0.0 << endl;
+      cout << (one / 0.0) << endl;
       break;
     case Type::FloatNaN:
       cout << -sqrt(-1.0) << endl;

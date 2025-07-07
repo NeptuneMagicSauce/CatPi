@@ -31,7 +31,7 @@ namespace {
       {CrashHandler::Test::Type::SigSegv, "SigSegv"},
       {CrashHandler::Test::Type::SigAbort, "SigAbort"},
       {CrashHandler::Test::Type::SigFPE, "SigFPE"},
-      {CrashHandler::Test::Type::SigIllFormed, "SigIllFormed"},
+      {CrashHandler::Test::Type::SigIllFormed, "SigIllegal"},
       {CrashHandler::Test::Type::SigInterrupt, "SigInterrupt"},
       {CrashHandler::Test::Type::SigTerminate, "SigTerminate"},
   };
