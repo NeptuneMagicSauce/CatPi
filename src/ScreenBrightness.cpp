@@ -16,9 +16,10 @@ namespace {
     }
     return dir.path() + "/" + files.first() + "/brightness";
   }
-  auto procfile = QFile{findProcFilePath()};
 
+  auto procfile = QFile{findProcFilePath()};
   auto const rangeMin = 1, rangeMax = 100;
+  auto isOn = true;
 
   void change(int byte) {
     if (procfile.exists() == false) {
@@ -40,4 +41,29 @@ ScreenBrightness::ScreenBrightness() {
                   rangeMax,
                   [&](QVariant v) { change(v.toInt()); },
                   {rangeMin, rangeMax}});
+
+  Settings::load({"ScreenSaverDelay",
+                  "Attente éteinte écran",
+                  "Temps d'atteinte après lequel l'écran s'éteint",
+                  "Minutes",
+                  5,
+                  [&](QVariant v) {
+                    delayScreenSaverMinutes = v.toInt();  // how can this work with a DeltaDial !?
+                  },
+                  {1, 20}});
+}
+
+void ScreenBrightness::wakeUp() {
+  if (isOn) {
+    return;
+  }
+  qDebug() << Q_FUNC_INFO;
+  change(Settings::get("ScreenBrightness").toInt());
+  isOn = true;
+}
+
+void ScreenBrightness::turnOff() {
+  qDebug() << Q_FUNC_INFO;
+  change(0);
+  isOn = false;
 }

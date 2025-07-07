@@ -150,6 +150,11 @@ int main(int argc, char** argv) {
     auto crashShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F1), window);
     crashShortcut->setContext(Qt::ApplicationShortcut);
     QObject::connect(crashShortcut, &QShortcut::activated, app, [&]() { crashTester->show(); });
+
+    // MainWindow
+    window->connect([&] { return brightness.delayScreenSaverMinutes; },
+                    [&] { brightness.turnOff(); },  //
+                    [&] { brightness.wakeUp(); });
   }
 
   // Initializing that needs the signals connected
