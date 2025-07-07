@@ -1,10 +1,9 @@
 #include "MainWindow.hpp"
 
 #include <QApplication>
-#include <QGuiApplication>
-#include <QScreen>
 
 #include "System.hpp"
+#include "Widget.hpp"
 // #include <iostream>
 
 namespace {
@@ -12,7 +11,7 @@ namespace {
 }
 
 MainWindow::MainWindow(QWidget* centralWidget, QToolBar* toolbar)
-    : isSmallScreen(QGuiApplication::primaryScreen()->geometry().height() <= 720) {
+    : isSmallScreen(Widget::IsSmallScreen()) {
   AssertSingleton();
 
   addToolBar(Qt::LeftToolBarArea, toolbar);

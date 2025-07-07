@@ -132,8 +132,7 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
     new QApplication(*(new int(0)), (char**)nullptr);
   }
 
-  auto dialog = new QDialog{nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint |
-                                         Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint};
+  auto dialog = new QDialog{nullptr, Qt::Window};
   Widget::FontSized(dialog, 20);
   dialog->setModal(true);
   dialog->setWindowTitle("Crash");
@@ -185,6 +184,11 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   layout_root->addWidget(button_quit);
   layout_root->addWidget(stack_area);
 
-  dialog->resize(800, 500);
+  if (Widget::IsSmallScreen()) {
+    dialog->resize(800, 450);
+    dialog->showMaximized();
+  } else {
+    dialog->resize(1200, 900);
+  }
   dialog->exec();
 }

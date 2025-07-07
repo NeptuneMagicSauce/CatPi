@@ -8,4 +8,6 @@ struct Widget {
   static QWidget* AlignCentered(QLabel* widget);
   static QWidget* FontSized(QWidget* widget, int fontSize);
   static QWidget* Spacer();
+
+  static bool IsSmallScreen();
 };
