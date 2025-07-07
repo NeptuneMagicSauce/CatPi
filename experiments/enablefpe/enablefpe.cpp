@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
   cout << __PRETTY_FUNCTION__ << endl << endl;
 
   auto inf = [] {
-    auto one = 1.0;  // when we inline the division, it does not raise an FPE with clang
+    auto one = 1.0;  // when we inline the division "1.0/0.0", it does not raise an FPE with clang
     cout << "1.0 / 0.0 = " << endl;
     cout << one / 0.0 << endl;
   };

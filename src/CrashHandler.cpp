@@ -61,7 +61,6 @@ CrashHandler::CrashHandler() {
 }
 
 void CrashHandler::Test::This(CrashHandler::Test::Type type) {
-  static auto one = 1.0;
   switch (type) {
     case Type::NullPtr:
       cout << *(volatile int*)nullptr;
@@ -79,7 +78,10 @@ void CrashHandler::Test::This(CrashHandler::Test::Type type) {
 #pragma clang diagnostic pop
       break;
     case Type::FloatInf:
-      cout << (one / 0.0) << endl;
+      [] {
+        auto one = 1.0;
+        cout << one / 0.0 << endl;
+      }();
       break;
     case Type::FloatNaN:
       cout << -sqrt(-1.0) << endl;
