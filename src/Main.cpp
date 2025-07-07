@@ -15,6 +15,7 @@
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "PinCtrl.hpp"
+#include "ScreenBrightness.hpp"
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
   });
 
+  ScreenBrightness brightness;
   QApplication* app = new QApplication(argc, argv);
   LoadCell* loadcell = new LoadCell;
   Weight* weight = new Weight;

@@ -1,7 +1,6 @@
 #include "CrashDialog.hpp"
 
 #include <QApplication>
-#include <QFile>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
