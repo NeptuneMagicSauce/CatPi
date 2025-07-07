@@ -64,9 +64,7 @@ namespace {
   auto isempty(const QString& str) { return str.isEmpty() || iswhitespace(str) || str == ":0"; }
   auto bold(const QString& str) { return QString{"<b>"} + str + "</b>"; }
   auto italic(const QString& str) { return QString{"<i>"} + str + "</i>"; }
-  auto formatIndex(const QString& index) {
-    return bold("[" + QString::number(index.toInt()) + "]");
-  }
+  auto formatIndex(const QString& index) { return "[" + QString::number(index.toInt()) + "]"; }
   auto newline(int count = 1) {
     auto ret = QString{};
     for (int i = 0; i < count; ++i) {
@@ -98,7 +96,11 @@ namespace {
 
       auto ret = QString{};
 
-      ret += formatIndex(index);
+      auto indexStr = formatIndex(index);
+      if (isUserCode) {
+        indexStr = bold(indexStr);
+      }
+      ret += index;
 
       auto hasfunction = isempty(function) == false;
       if (hasfunction) {
