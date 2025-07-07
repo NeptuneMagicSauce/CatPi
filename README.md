@@ -7,6 +7,11 @@ ninja
 
 # TODO
 
+- screen saver:
+  detect even if it hits a child widget
+  remove debug setting delay is seconds instead of minutes
+  remove debug print in ScreenBrightness::setIsOn()
+
 - more debug settings:
   - load cell polling, refresh frequency : to test
   - load cell polling, timeout (for cpu consumption when unplugged): to test
@@ -16,11 +21,7 @@ ninja
   - gain?
   - duration of confirm tare
 
-- problem: the screen is too bright in the night
-  test screen saver shuts off screen:
-  can it be waken up with a touch?
-  can we control the screen brigthness in-app?
-  IR motion detector: can it do auto on/off of the screen?
+- IR motion detector: can it do auto on/off of the screen?
 
 - better gui layout
   frequent buttons bigger
@@ -149,3 +150,7 @@ do gpio from c -> relay before weight
   handle control-c: also close relay
   but on control-c: do not print stack trace, it's user-initiated SIGINT
 - halt on nan and inf
+- problem: the screen is too bright in the night
+  test screen saver shuts off screen:
+  can it be waken up with a touch? yes
+  can we control the screen brigthness in-app? yes

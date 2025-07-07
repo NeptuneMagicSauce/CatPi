@@ -14,13 +14,14 @@ namespace {
   struct {
     std::function<int()> delayScreenSaverMinutes = nullptr;
     std::function<void()> turnOffScreen = nullptr;
-    std::function<void()> reportActivity = nullptr;
+    std::function<void()> turnOnScreen = nullptr;
   } callbacks;
 
   void onEvent() {
     assert(callbacks.delayScreenSaverMinutes != nullptr);
-    timerInactive.start(callbacks.delayScreenSaverMinutes() * 1000);  // debug seconds
-    callbacks.reportActivity();
+#warning "debug minutes to seconds here, to remove"
+    timerInactive.start(callbacks.delayScreenSaverMinutes() * 1000);
+    callbacks.turnOnScreen();
   }
 }
 
@@ -57,8 +58,8 @@ QIcon MainWindow::StandardIcon(QStyle::StandardPixmap name) {
 }
 
 void MainWindow::connect(std::function<int()> delayScreenSaverMinutes,
-                         std::function<void()> turnOffScreen,
-                         std::function<void()> reportActivity) {
+                         std::function<void()> turnOffScreen,  //
+                         std::function<void()> turnOnScreen) {
   timerInactive.setSingleShot(true);
   QObject::connect(&timerInactive, &QTimer::timeout, [&] {
     assert(callbacks.turnOffScreen != nullptr);
@@ -67,12 +68,10 @@ void MainWindow::connect(std::function<int()> delayScreenSaverMinutes,
 
   callbacks.delayScreenSaverMinutes = delayScreenSaverMinutes;
   callbacks.turnOffScreen = turnOffScreen;
-  callbacks.reportActivity = reportActivity;
+  callbacks.turnOnScreen = turnOnScreen;
   onEvent();
 }
 
-// TODO detect even if it hits a child widget
-// maybe with QApplication::mouseMoveEvent()
 void MainWindow::mouseMoveEvent(QMouseEvent* event) {
   onEvent();
   QMainWindow::mouseMoveEvent(event);

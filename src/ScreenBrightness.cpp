@@ -53,17 +53,11 @@ ScreenBrightness::ScreenBrightness() {
                   {1, 20}});
 }
 
-void ScreenBrightness::wakeUp() {
-  if (isOn) {
+void ScreenBrightness::setIsOn(bool isOn) {
+  if (::isOn == isOn) {
     return;
   }
-  qDebug() << Q_FUNC_INFO;
-  change(Settings::get("ScreenBrightness").toInt());
-  isOn = true;
-}
-
-void ScreenBrightness::turnOff() {
-  qDebug() << Q_FUNC_INFO;
-  change(0);
-  isOn = false;
+  ::isOn = isOn;
+  qDebug() << Q_FUNC_INFO << isOn;
+  change(isOn ? Settings::get("ScreenBrightness").toInt() : 0);
 }

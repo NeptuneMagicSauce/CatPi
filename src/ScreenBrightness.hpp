@@ -5,6 +5,5 @@ struct ScreenBrightness {
 
   int delayScreenSaverMinutes;
 
-  void turnOff();
-  void wakeUp();
+  void setIsOn(bool isOn);
 };

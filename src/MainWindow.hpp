@@ -20,7 +20,7 @@ struct MainWindow : public QMainWindow {
 
   void connect(std::function<int()> delayScreenSaverMinutes,  //
                std::function<void()> turnOffScreen,           //
-               std::function<void()> reportActivity);
+               std::function<void()> turnOnScreen);
 
   static QIcon StandardIcon(QStyle::StandardPixmap);
 };
