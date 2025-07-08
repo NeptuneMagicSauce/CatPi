@@ -16,7 +16,11 @@ ninja
 
   add to generate.sh: libstdc++-14-dev for x86, arm ...
 
-- use cmake build dir and realpath, do not leak personal info
+- use cmake build dir and realpath
+  to not leak personal info
+  and to compute is user code
+
+- test inf and nan on arm
 
 - emacs lsp-treemacs-errors-list does not work great, find better
 

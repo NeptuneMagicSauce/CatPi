@@ -1,13 +1,16 @@
 #include "CrashDialog.hpp"
 
 #include <QApplication>
+#include <QFileInfo>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMap>
 #include <QProcess>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QScrollArea>
-#include <iostream>
+#include <QTemporaryFile>
+// #include <iostream>
 #include <map>
 #include <string>
 
@@ -62,7 +65,12 @@ namespace {
     return regexp.match(str).hasMatch();
   }
   auto isempty(const QString& str) { return str.isEmpty() || iswhitespace(str) || str == ":0"; }
-  auto bold(const QString& str) { return QString{"<b>"} + str + "</b>"; }
+  auto bold(const QString& str, bool isUserCode = true) {
+    if (isUserCode == false) {
+      return str;
+    }
+    return QString{"<b>"} + str + "</b>";
+  }
   auto italic(const QString& str) { return QString{"<i>"} + str + "</i>"; }
   auto formatIndex(const QString& index) { return "[" + QString::number(index.toInt()) + "]"; }
   auto newline(int count = 1) {
@@ -73,27 +81,37 @@ namespace {
     return ret;
   }
 
-  QString formatStackItem(const QString& line, bool isUserCode) {
+  struct Frame {
+    QString file;
+    QString function;
+    QString address;
+
+    QString info;  // that's the output of backtrace_symbols()
+    QString canonicalPath;
+    QString filename;
+  };
+  QList<Frame> frames;
+
+  QString parseStackItem(const QString& line, bool isUserCode) {
     try {
       // #ifdef __aarch64__
-      // /home/romain/CatPi/CatPi(+0x2d7d4) [0x556da4d7d4]
-      // linux-vdso.so.1(__kernel_rt_sigreturn+0) [0x7f99c84820]
-      // /lib/aarch64-linux-gnu/libQt6Widgets.so.6(_ZN15QAbstractButton15keyReleaseEventEP9QKeyEvent+0x11c)[0x7f99799efc]
       {
-        // static int lineIndex = 0;
-        // auto index = QString::number(lineIndex++);
+        // /home/romain/CatPi/CatPi(+0x2d7d4) [0x556da4d7d4]
+        // linux-vdso.so.1(__kernel_rt_sigreturn+0) [0x7f99c84820]
+        // /lib/aarch64-linux-gnu/libQt6Widgets.so.6(_ZN15QAbstractButton15keyReleaseEventEP9QKeyEvent+0x11c)[0x7f99799efc]
         // auto regexep = QRegularExpression{"(^.*)(\\(.*\\))"};
-        // qDebug() << line;
-        auto regexep = QRegularExpression{"(^.*\\[)(.*)(\\])"};
+        auto regexep = QRegularExpression{"(^.*)(\\()(.*)(\\[)(.*)(\\])"};
         auto match = regexep.match(line);
         if (match.hasMatch() == false) {
-          // qDebug() << -1;
           return line;
         }
-        // auto location = match.captured(1);
-        // auto function = match.captured(2);
-        // qDebug() << index << function << location;
-        auto address = match.captured(2);
+
+        auto file = match.captured(1);
+        auto function = match.captured(3);
+        auto address = match.captured(5);
+        auto fileinfo = QFileInfo{file};
+        frames.append(
+            {file, function, address, line, fileinfo.canonicalFilePath(), fileinfo.fileName()});
         // qDebug() << match.captured(1) << match.captured(2) << match.captured(3);
         return address;
       }
@@ -150,23 +168,33 @@ namespace {
   }
 }
 
-QString addr2line(const QString& addresses) {
+QStringList cppfilt(const QString& mangled) {
+  auto process1 = QProcess{};
+  auto process2 = QProcess{};
+  auto f = QTemporaryFile{};
+  f.open();
+  f.write(mangled.toUtf8());
+  f.close();
+
+  auto args = QStringList{} << "-c" << "cat " + f.fileName() + " | c++filt";
+  process1.start("sh", args);
+  process1.waitForFinished();
+  auto ret = QString{process1.readAll()}.split("\n");
+  return ret;
+}
+
+QString addr2line(const QString& file, const QString& addresses) {
   QProcess p;
   QStringList args = {
       "-C",  // --demangle
       // "-s" // --basenames
-      "-a",  // --addresses
+      // "-a",  // --addresses
       "-f",  // --functions
       "-p",  // --pretty-print
       "-e",
-      // TODO qApp->
-      QCoreApplication::applicationFilePath(),
+      file,
   };
-  QStringList args_addr;
-  for (auto& a : addresses.trimmed().split(" ")) {
-    args_addr << a;
-  }
-  args << args_addr;
+  args << addresses.trimmed().split(" ");
 
   p.start("addr2line", args);
   if (!p.waitForStarted()) {
@@ -175,9 +203,6 @@ QString addr2line(const QString& addresses) {
   }
   p.waitForFinished();
   auto process_output = QString{p.readAll()};
-  qDebug() << ">>>" << process_output;
-  // process_output.remove("\r");  // windows carriage return
-  // return process_output.split("\n", Qt::SkipEmptyParts);
   return process_output;
 }
 
@@ -212,9 +237,9 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
 
   stack_text += bold("Stack Trace") + newline(2);
 
-  auto addresses = QString{};
-
   auto lines = stack.split("\n");
+
+  auto addresses = QString{};
   for (auto stackline : lines) {
     static auto const patterns =
         // TODO use cmake build dir and realpath, do not leak personal info
@@ -226,17 +251,47 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
         isUserCode = true;
       }
     }
-    auto formatted = formatStackItem(stackline, isUserCode);
-    // if (addresses.isEmpty()) {
+    auto formatted = parseStackItem(stackline, isUserCode);
     addresses += formatted + " ";
-    // }
-    // cout << formatted.toStdString() << endl;
     stack_text += formatted + newline();
   }
-  qDebug() << ">>>" << addresses;
-  stack_text = addr2line(addresses).replace("\n", newline());
-  // qDebug() << stack_text;
+  // stack_text = addr2line(addresses).replace("\n", newline());
+  stack_text = "";
 
+  auto const mypath = QFileInfo{qApp->applicationFilePath()}.canonicalFilePath();
+
+  // demangle functions
+  auto functions = QString{};
+  auto areUserCode = QMap<int, bool>{};
+  int indexFunction = 0;
+  for (const auto& frame : frames) {
+    auto isUserCode = (bool)(frame.canonicalPath == mypath);
+    areUserCode[indexFunction] = isUserCode;
+    functions += (isUserCode ? "" : frame.function) + "\n";
+    ++indexFunction;
+  }
+  auto demangled = cppfilt(functions);
+  // qDebug() << demangled;
+
+  // format frames
+  int index = 0;
+  for (const auto& frame : frames) {
+    auto isUserCode = areUserCode[index];
+    auto line = formatIndex(QString::number(index)) + " ";
+    if (isUserCode) {
+      // backtrace_symbols() can not print my addresses
+      line += addr2line(frame.file, frame.address);
+      line.replace(" at ", newline());
+    } else {
+      line += demangled[index] + newline() + frame.filename;
+    }
+
+    line = bold(line, isUserCode);
+
+    stack_text += line + newline();
+
+    ++index;
+  }
   stack_label->setText(stack_text);
 
   auto stack_area = new QScrollArea;
