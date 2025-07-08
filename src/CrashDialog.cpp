@@ -3,10 +3,11 @@
 #include <QApplication>
 #include <QGridLayout>
 #include <QLabel>
+#include <QProcess>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QScrollArea>
-// #include <iostream>
+#include <iostream>
 #include <map>
 #include <string>
 
@@ -74,21 +75,29 @@ namespace {
 
   QString formatStackItem(const QString& line, bool isUserCode) {
     try {
-#ifdef __aarch64__
+      // #ifdef __aarch64__
       // /home/romain/CatPi/CatPi(+0x2d7d4) [0x556da4d7d4]
       // linux-vdso.so.1(__kernel_rt_sigreturn+0) [0x7f99c84820]
       // /lib/aarch64-linux-gnu/libQt6Widgets.so.6(_ZN15QAbstractButton15keyReleaseEventEP9QKeyEvent+0x11c)[0x7f99799efc]
-      static int lineIndex = 0;
-      auto index = QString::number(lineIndex++);
-      auto regexep = QRegularExpression{"(^.*)(\\(.*\\))"};
-      auto match = regexep.match(line);
-      if (match.hasMatch() == false) {
-        return line;
+      {
+        // static int lineIndex = 0;
+        // auto index = QString::number(lineIndex++);
+        // auto regexep = QRegularExpression{"(^.*)(\\(.*\\))"};
+        // qDebug() << line;
+        auto regexep = QRegularExpression{"(^.*\\[)(.*)(\\])"};
+        auto match = regexep.match(line);
+        if (match.hasMatch() == false) {
+          // qDebug() << -1;
+          return line;
+        }
+        // auto location = match.captured(1);
+        // auto function = match.captured(2);
+        // qDebug() << index << function << location;
+        auto address = match.captured(2);
+        // qDebug() << match.captured(1) << match.captured(2) << match.captured(3);
+        return address;
       }
-      auto location = match.captured(1);
-      auto function = match.captured(2);
-      // qDebug() << index << function << location;
-#elifdef __x86_64__
+      // #elifdef __x86_64__
       //   5# main at Main.cpp:30
       //   6# __libc_start_call_main at ../sysdeps/nptl/libc_start_call_main.h:58
       //   7#      at :0
@@ -105,7 +114,7 @@ namespace {
       auto index = match.captured(1);
       auto function = match.captured(3);
       auto location = match.captured(5);
-#endif
+      // #endif
       // qDebug() << index << function << location;
 
       auto ret = QString{};
@@ -141,6 +150,37 @@ namespace {
   }
 }
 
+QString addr2line(const QString& addresses) {
+  QProcess p;
+  QStringList args = {
+      "-C",  // --demangle
+      // "-s" // --basenames
+      "-a",  // --addresses
+      "-f",  // --functions
+      "-p",  // --pretty-print
+      "-e",
+      // TODO qApp->
+      QCoreApplication::applicationFilePath(),
+  };
+  QStringList args_addr;
+  for (auto& a : addresses.trimmed().split(" ")) {
+    args_addr << a;
+  }
+  args << args_addr;
+
+  p.start("addr2line", args);
+  if (!p.waitForStarted()) {
+    QStringList ret;
+    return "addr2line failed for " + addresses;
+  }
+  p.waitForFinished();
+  auto process_output = QString{p.readAll()};
+  qDebug() << ">>>" << process_output;
+  // process_output.remove("\r");  // windows carriage return
+  // return process_output.split("\n", Qt::SkipEmptyParts);
+  return process_output;
+}
+
 void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   // if QApplication is not constructed, construct it because QDialog::exec() needs it
   if (qApp == nullptr) {
@@ -172,6 +212,8 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
 
   stack_text += bold("Stack Trace") + newline(2);
 
+  auto addresses = QString{};
+
   auto lines = stack.split("\n");
   for (auto stackline : lines) {
     static auto const patterns =
@@ -184,10 +226,15 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
         isUserCode = true;
       }
     }
-    auto formatted = formatStackItem(stackline, isUserCode) + newline();
-    // cout << formatted.toStdString();
-    stack_text += formatted;
+    auto formatted = formatStackItem(stackline, isUserCode);
+    // if (addresses.isEmpty()) {
+    addresses += formatted + " ";
+    // }
+    // cout << formatted.toStdString() << endl;
+    stack_text += formatted + newline();
   }
+  qDebug() << ">>>" << addresses;
+  stack_text = addr2line(addresses).replace("\n", newline());
   // qDebug() << stack_text;
 
   stack_label->setText(stack_text);
