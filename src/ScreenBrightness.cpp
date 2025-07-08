@@ -1,7 +1,9 @@
 #include "ScreenBrightness.hpp"
 
+#include <QApplication>
 #include <QDir>
 #include <QFile>
+#include <QTimer>
 
 #include "Settings.hpp"
 
@@ -17,9 +19,12 @@ namespace {
     return dir.path() + "/" + files.first() + "/brightness";
   }
 
+  auto const rangeMin = 1;
+  auto const rangeMax = 100;
   auto procfile = QFile{findProcFilePath()};
-  auto const rangeMin = 1, rangeMax = 100;
   auto isOn = true;
+  int delayScreenSaverMinutes;
+  QTimer timerInactive;
 
   void change(int byte) {
     if (procfile.exists() == false) {
@@ -30,6 +35,15 @@ namespace {
     byte /= rangeMax;
     procfile.write(QString::number(byte).toUtf8());
     procfile.close();
+  }
+
+  void setIsOn(bool isOn) {
+    if (::isOn == isOn) {
+      return;
+    }
+    ::isOn = isOn;
+    // qDebug() << Q_FUNC_INFO << isOn;
+    change(isOn ? Settings::get("ScreenBrightness").toInt() : 0);
   }
 }
 
@@ -47,15 +61,27 @@ ScreenBrightness::ScreenBrightness() {
                   "Temps d'atteinte après lequel l'écran s'éteint",
                   "Minutes",
                   5,
-                  [&](QVariant v) { delayScreenSaverMinutes = v.toInt(); },
+                  [&](QVariant v) {
+                    delayScreenSaverMinutes = v.toInt();
+#warning "debug minutes to seconds here, to remove"
+                    timerInactive.setInterval(delayScreenSaverMinutes * 1000);
+                    timerInactive.start();
+                  },
                   {1, 20}});
-}
 
-void ScreenBrightness::setIsOn(bool isOn) {
-  if (::isOn == isOn) {
-    return;
-  }
-  ::isOn = isOn;
-  qDebug() << Q_FUNC_INFO << isOn;
-  change(isOn ? Settings::get("ScreenBrightness").toInt() : 0);
+  // install watcher to detect activity
+  timerInactive.setSingleShot(true);
+  QObject::connect(&timerInactive, &QTimer::timeout, [&] { setIsOn(false); });
+  struct Watcher : public QObject {
+    bool eventFilter(QObject* dest, QEvent* event) override {
+      auto type = event->type();
+      if (type == QEvent::MouseMove || type == QEvent::MouseButtonPress) {
+        setIsOn(true);
+        timerInactive.start();
+      }
+      return QObject::eventFilter(dest, event);
+    }
+  };
+  assert(qApp != nullptr);
+  qApp->installEventFilter(new Watcher);
 }

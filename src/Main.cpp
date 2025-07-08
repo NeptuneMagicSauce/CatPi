@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
   });
 
-  ScreenBrightness brightness;
   QApplication* app = new QApplication(argc, argv);
+  ScreenBrightness brightness;
   LoadCell* loadcell = new LoadCell;
   Weight* weight = new Weight;
   Calibration* calibration = new Calibration;
@@ -150,10 +150,6 @@ int main(int argc, char** argv) {
     auto crashShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F1), window);
     crashShortcut->setContext(Qt::ApplicationShortcut);
     QObject::connect(crashShortcut, &QShortcut::activated, app, [&]() { crashTester->show(); });
-
-    // MainWindow
-    window->connect([&] { return brightness.delayScreenSaverMinutes; },
-                    [&](bool isOn) { brightness.setIsOn(isOn); });
   }
 
   // Initializing that needs the signals connected

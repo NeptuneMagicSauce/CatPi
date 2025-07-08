@@ -15,11 +15,5 @@ struct MainWindow : public QMainWindow {
   void toggleFullscreen(bool& isFullscreen);
   void setAutomaticSize();
 
-  virtual void mouseMoveEvent(QMouseEvent* event) override;
-  virtual void mousePressEvent(QMouseEvent* event) override;
-
-  void connect(std::function<int()> delayScreenSaverMinutes,
-               std::function<void(bool)> setScreenIsOn);
-
   static QIcon StandardIcon(QStyle::StandardPixmap);
 };

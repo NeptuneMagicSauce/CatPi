@@ -8,9 +8,8 @@ ninja
 # TODO
 
 - screen saver:
-  detect even if it hits a child widget
+  do not pass event if screen is off
   remove debug setting delay is seconds instead of minutes
-  remove debug print in ScreenBrightness::setIsOn()
 
 - more debug settings:
   - load cell polling, refresh frequency : to test
@@ -154,3 +153,6 @@ do gpio from c -> relay before weight
   test screen saver shuts off screen:
   can it be waken up with a touch? yes
   can we control the screen brigthness in-app? yes
+- screen saver:
+  detect even if it hits a child widget
+  remove debug print in ScreenBrightness::setIsOn()
