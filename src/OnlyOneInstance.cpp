@@ -17,8 +17,11 @@ OnlyOneInstance::OnlyOneInstance() {
   auto myExe = exeOfPid(QString::number(pid));
 
   for (auto process : procDir.entryList({"[0-9]*"})) {
+    if (process.toInt() == pid) {
+      continue;
+    }
     auto exe = procDir.path() + "/" + process + "/exe";
-    if (process.toInt() != pid && exeOfPid(process) == myExe) {
+    if (exeOfPid(process) == myExe) {
       QMessageBox::critical(nullptr, "", "Already running");
       std::exit(1);
     }
