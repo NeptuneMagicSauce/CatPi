@@ -47,9 +47,7 @@ ScreenBrightness::ScreenBrightness() {
                   "Temps d'atteinte après lequel l'écran s'éteint",
                   "Minutes",
                   5,
-                  [&](QVariant v) {
-                    delayScreenSaverMinutes = v.toInt();  // how can this work with a DeltaDial !?
-                  },
+                  [&](QVariant v) { delayScreenSaverMinutes = v.toInt(); },
                   {1, 20}});
 }
 

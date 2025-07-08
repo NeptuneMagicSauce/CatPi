@@ -153,8 +153,7 @@ int main(int argc, char** argv) {
 
     // MainWindow
     window->connect([&] { return brightness.delayScreenSaverMinutes; },
-                    [&] { brightness.setIsOn(false); },  //
-                    [&] { brightness.setIsOn(true); });
+                    [&](bool isOn) { brightness.setIsOn(isOn); });
   }
 
   // Initializing that needs the signals connected

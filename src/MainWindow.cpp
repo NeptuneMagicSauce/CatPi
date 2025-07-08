@@ -13,15 +13,14 @@ namespace {
 
   struct {
     std::function<int()> delayScreenSaverMinutes = nullptr;
-    std::function<void()> turnOffScreen = nullptr;
-    std::function<void()> turnOnScreen = nullptr;
+    std::function<void(bool)> setScreenIsOn = nullptr;
   } callbacks;
 
   void onEvent() {
     assert(callbacks.delayScreenSaverMinutes != nullptr);
 #warning "debug minutes to seconds here, to remove"
     timerInactive.start(callbacks.delayScreenSaverMinutes() * 1000);
-    callbacks.turnOnScreen();
+    callbacks.setScreenIsOn(true);
   }
 }
 
@@ -58,17 +57,15 @@ QIcon MainWindow::StandardIcon(QStyle::StandardPixmap name) {
 }
 
 void MainWindow::connect(std::function<int()> delayScreenSaverMinutes,
-                         std::function<void()> turnOffScreen,  //
-                         std::function<void()> turnOnScreen) {
+                         std::function<void(bool)> setScreenIsOn) {
   timerInactive.setSingleShot(true);
   QObject::connect(&timerInactive, &QTimer::timeout, [&] {
-    assert(callbacks.turnOffScreen != nullptr);
-    callbacks.turnOffScreen();
+    assert(callbacks.setScreenIsOn != nullptr);
+    callbacks.setScreenIsOn(false);
   });
 
   callbacks.delayScreenSaverMinutes = delayScreenSaverMinutes;
-  callbacks.turnOffScreen = turnOffScreen;
-  callbacks.turnOnScreen = turnOnScreen;
+  callbacks.setScreenIsOn = setScreenIsOn;
   onEvent();
 }
 
