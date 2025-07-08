@@ -87,7 +87,7 @@ namespace {
       }
       auto location = match.captured(1);
       auto function = match.captured(2);
-      qDebug() << index << function << location;
+      // qDebug() << index << function << location;
 #elifdef __x86_64__
       //   5# main at Main.cpp:30
       //   6# __libc_start_call_main at ../sysdeps/nptl/libc_start_call_main.h:58
@@ -105,8 +105,8 @@ namespace {
       auto index = match.captured(1);
       auto function = match.captured(3);
       auto location = match.captured(5);
-      // qDebug() << index << function << location;
 #endif
+      // qDebug() << index << function << location;
 
       auto ret = QString{};
 
