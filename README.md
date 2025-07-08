@@ -7,9 +7,15 @@ ninja
 
 # TODO
 
-- pi emacs: sync config, enable lsp
-
 - crash handler compatibility on pi: stacktrace is broken
+  use glibc backtrace
+  demangle c++ abi
+  handle conditional paths for arm and x86
+  parse this new syntax in our crash dialog
+
+- use cmake build dir and realpath, do not leak personal info
+
+- emacs lsp-treemacs-errors-list does not work great, find better
 
 - more debug settings:
   - load cell polling, refresh frequency : to test
@@ -162,3 +168,26 @@ do gpio from c -> relay before weight
     instead, protect the buttons with long-press requirement
   remove debug setting delay is seconds instead of minutes
 - do not allow multiple instances
+- pi emacs: sync config, enable lsp
+  test 5 bindings: Alt/Control * P/O, Alt-backquote
+  remove all .elc from repo
+  remove links that make duplicate .el
+  auto compile elc
+  fix compile error   > Error (bytecomp): Bytecode overflow
+  on pi, clone dotfiles anonymously
+  on pi, hide git status in home
+  fewer threads for clangd if nproc 4
+- emacs:
+ compile: find root dir with locate-dominating-file
+ do not prompt for compile command
+ allow change compile command
+ fix the ctrl-b recompile goes to ripgrep ?
+ auto jump to first error, but compile only, not ripgrep
+   maybe like this:
+   setq compilation-last-buffer nil
+   on this hook
+   rg-finish-function
+ visit buffer rg on results: rg-finish-functions
+ search current word: see isearch-forward-symbol-at-point
+https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
+ select current word, line
