@@ -7,13 +7,11 @@ ninja
 
 # TODO
 
-- screen saver:
-  do not pass event if screen is off
-  remove debug setting delay is seconds instead of minutes
-
 - do not allow multiple instances
 
 - pi emacs: sync config, enable lsp
+
+- crash handler compatibility on pi: stacktrace is broken
 
 - more debug settings:
   - load cell polling, refresh frequency : to test
@@ -161,3 +159,6 @@ do gpio from c -> relay before weight
   detect even if it hits a child widget
   remove debug print in ScreenBrightness::setIsOn()
   reset brightness to default on quit
+  do not pass event if screen is off : no, pass it, it's too complex to inhibit
+    instead, protect the buttons with long-press requirement
+  remove debug setting delay is seconds instead of minutes

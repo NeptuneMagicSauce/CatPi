@@ -63,8 +63,7 @@ ScreenBrightness::ScreenBrightness() {
                   5,
                   [&](QVariant v) {
                     delayScreenSaverMinutes = v.toInt();
-#warning "debug minutes to seconds here, to remove"
-                    timerInactive.setInterval(delayScreenSaverMinutes * 1000);
+                    timerInactive.setInterval(delayScreenSaverMinutes * 1000 * 60);
                     timerInactive.start();
                   },
                   {1, 20}});
