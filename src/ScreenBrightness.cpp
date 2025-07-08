@@ -66,11 +66,17 @@ ScreenBrightness::ScreenBrightness() {
                     timerInactive.setInterval(delayScreenSaverMinutes * 1000 * 60);
                     timerInactive.start();
                   },
-                  {1, 20}});
+                  {0, 20}});
 
   // install watcher to detect activity
   timerInactive.setSingleShot(true);
-  QObject::connect(&timerInactive, &QTimer::timeout, [&] { setIsOn(false); });
+  QObject::connect(&timerInactive, &QTimer::timeout, [&] {
+    if (delayScreenSaverMinutes == 0) {
+      // that's a disabled screen saver
+      return;
+    }
+    setIsOn(false);
+  });
   struct Watcher : public QObject {
     bool eventFilter(QObject* dest, QEvent* event) override {
       auto type = event->type();
