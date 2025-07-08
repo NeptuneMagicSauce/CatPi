@@ -9,13 +9,18 @@ ninja
 
 - crash handler compatibility on pi: stacktrace is broken
   use glibc backtrace
-  demangle c++ abi
   handle conditional paths for arm and x86
+  demangle c++ abi
+  maybe needs f omit frame pointer for my code
   parse this new syntax in our crash dialog
+
+  add to generate.sh: libstdc++-14-dev for x86, arm ...
 
 - use cmake build dir and realpath, do not leak personal info
 
 - emacs lsp-treemacs-errors-list does not work great, find better
+
+- write crash log to a file
 
 - more debug settings:
   - load cell polling, refresh frequency : to test

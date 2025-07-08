@@ -5,7 +5,12 @@
 #include <cmath>
 #include <csignal>
 #include <iostream>
+#ifdef __x86_64__
 #include <stacktrace>
+#elifdef __aarch64__
+#include <execinfo.h>
+#endif
+
 #include <vector>
 
 using namespace std;
@@ -40,7 +45,21 @@ namespace {
                 : signal == SIGTERM ? "SIGTERM"
                                     : "??";
     cout << "Signal " << name << endl;
+
+#ifdef __x86_64__
     auto stacktrace = to_string(stacktrace::current());
+#elifdef __aarch64__
+    auto stacktrace = string{};
+    auto const size = 256;
+    void* callstack[size];
+    auto frames = backtrace(callstack, size);
+    auto strs = backtrace_symbols(callstack, frames);
+    for (int i = 0; i < frames; ++i) {
+      stacktrace += string{strs[i]} + "\n";
+    }
+#else
+#error "not supported"
+#endif
     cout << stacktrace;
     if (signal != SIGINT && reportCallback != nullptr) {
       reportCallback(name, stacktrace);

@@ -73,11 +73,25 @@ namespace {
   }
 
   QString formatStackItem(const QString& line, bool isUserCode) {
-    //   5# main at Main.cpp:30
-    //   6# __libc_start_call_main at ../sysdeps/nptl/libc_start_call_main.h:58
-    //   7#      at :0
-
     try {
+#ifdef __aarch64__
+      // /home/romain/CatPi/CatPi(+0x2d7d4) [0x556da4d7d4]
+      // linux-vdso.so.1(__kernel_rt_sigreturn+0) [0x7f99c84820]
+      // /lib/aarch64-linux-gnu/libQt6Widgets.so.6(_ZN15QAbstractButton15keyReleaseEventEP9QKeyEvent+0x11c)[0x7f99799efc]
+      static int lineIndex = 0;
+      auto index = QString::number(lineIndex++);
+      auto regexep = QRegularExpression{"(^.*)(\\(.*\\))"};
+      auto match = regexep.match(line);
+      if (match.hasMatch() == false) {
+        return line;
+      }
+      auto location = match.captured(1);
+      auto function = match.captured(2);
+      qDebug() << index << function << location;
+#elifdef __x86_64__
+      //   5# main at Main.cpp:30
+      //   6# __libc_start_call_main at ../sysdeps/nptl/libc_start_call_main.h:58
+      //   7#      at :0
       auto regexep = QRegularExpression{"(^ *\\d*)(# )(.*)( at )(.*)"};
       auto match = regexep.match(line);
       if (match.hasMatch() == false) {
@@ -92,14 +106,16 @@ namespace {
       auto function = match.captured(3);
       auto location = match.captured(5);
       // qDebug() << index << function << location;
+#endif
 
       auto ret = QString{};
 
       auto indexStr = formatIndex(index);
+      // TODO move this test in bold()
       if (isUserCode) {
         indexStr = bold(indexStr);
       }
-      ret += index;
+      ret += indexStr;
 
       auto hasfunction = isempty(function) == false;
       if (hasfunction) {

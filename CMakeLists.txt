@@ -27,4 +27,7 @@ target_link_libraries(${PROJECT_NAME} "-llgpio")
 target_link_libraries(${PROJECT_NAME} "${LIBHX711}/build/static/libhx711.a")
 
 # needed for stacktrace
-target_link_libraries(${PROJECT_NAME} "-lstdc++exp")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  target_link_libraries(${PROJECT_NAME} "-lstdc++exp")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+endif()
