@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- do not allow multiple instances
-
 - pi emacs: sync config, enable lsp
 
 - crash handler compatibility on pi: stacktrace is broken
@@ -22,10 +20,9 @@ ninja
   - gain?
   - duration of confirm tare
 
-- IR motion detector: can it do auto on/off of the screen?
-
 - better gui layout
   frequent buttons bigger
+  debug setting screen: more gap after dial <-> dial more centered
 
 - also long-press-protect the DispenseNow button ?
   with a shared widget: heritor of push button and composer of progress bar
@@ -73,6 +70,8 @@ ninja
   dispensed grams (needs reliable weight signal)
 
 - disable dpi scaling on linux side for emacs and CatPi
+
+- IR motion detector: can it do auto on/off of the screen?
 
 # DONE
 - two horizonal split panels
@@ -162,3 +161,4 @@ do gpio from c -> relay before weight
   do not pass event if screen is off : no, pass it, it's too complex to inhibit
     instead, protect the buttons with long-press requirement
   remove debug setting delay is seconds instead of minutes
+- do not allow multiple instances

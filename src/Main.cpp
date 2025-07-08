@@ -14,6 +14,7 @@
 #include "Logic.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
+#include "OnlyOneInstance.hpp"
 #include "ScreenBrightness.hpp"
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
@@ -35,6 +36,7 @@ int main(int argc, char** argv) {
   });
 
   QApplication* app = new QApplication(argc, argv);
+  OnlyOneInstance onlyone;
   ScreenBrightness brightness;
   LoadCell* loadcell = new LoadCell;
   Weight* weight = new Weight;
