@@ -14,7 +14,6 @@
 #include "Logic.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
-#include "PinCtrl.hpp"
 #include "ScreenBrightness.hpp"
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
@@ -22,8 +21,15 @@
 
 using namespace std;
 
+namespace {
+  void cleanup() {
+    Logic::closeRelay();
+    ScreenBrightness::reset();
+  }
+}
+
 int main(int argc, char** argv) {
-  CrashHandler::instance->installCleanUpCallback([] { PinCtrl::pinctrl("set 17 op dl"); });
+  CrashHandler::instance->installCleanUpCallback([] { cleanup(); });
   CrashHandler::instance->installReportCallback([](const std::string& error, const string& stack) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
   });
@@ -47,7 +53,7 @@ int main(int argc, char** argv) {
   {
     app->setStyleSheet("QWidget{font-size: 48pt;} ");
 
-    logic->hasGPIO = loadcell->hasGPIO();
+    Logic::hasGPIO = loadcell->hasGPIO();
 
     // update Delay so that it's displayed on startup, no wait for first tick
     delay->setRemaining(logic->timeToDispense());
@@ -164,7 +170,7 @@ int main(int argc, char** argv) {
   auto ret = app->exec();
 
   // Clean Up
-  logic->closeRelay();
+  cleanup();
 
   return ret;
 }

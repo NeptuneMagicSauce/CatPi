@@ -11,6 +11,10 @@ ninja
   do not pass event if screen is off
   remove debug setting delay is seconds instead of minutes
 
+- do not allow multiple instances
+
+- pi emacs: sync config, enable lsp
+
 - more debug settings:
   - load cell polling, refresh frequency : to test
   - load cell polling, timeout (for cpu consumption when unplugged): to test
@@ -156,3 +160,4 @@ do gpio from c -> relay before weight
 - screen saver:
   detect even if it hits a child widget
   remove debug print in ScreenBrightness::setIsOn()
+  reset brightness to default on quit

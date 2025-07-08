@@ -14,6 +14,8 @@
 using namespace std;
 using PinCtrl::pinctrl;
 
+bool Logic::hasGPIO = false;
+
 struct LogicImpl {
   LogicImpl();
 

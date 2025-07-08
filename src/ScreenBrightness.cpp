@@ -85,3 +85,5 @@ ScreenBrightness::ScreenBrightness() {
   assert(qApp != nullptr);
   qApp->installEventFilter(new Watcher);
 }
+
+void ScreenBrightness::reset() { change(rangeMax); }

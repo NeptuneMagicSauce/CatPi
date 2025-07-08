@@ -7,7 +7,7 @@ struct QTimer;
 struct Logic {
   Logic();
 
-  bool hasGPIO = false;
+  static bool hasGPIO;
 
   QTimer* timerEndDispense = nullptr;
   QTimer* timerUpdate = nullptr;
@@ -17,6 +17,6 @@ struct Logic {
   void manualDispense();
   void update(std::optional<double> weightTarred, double tare, bool& dispensed);
   void changeDelay(int delta);
-  void closeRelay();
   int timeToDispense();
+  static void closeRelay();
 };
