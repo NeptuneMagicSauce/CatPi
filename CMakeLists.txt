@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_LINKER_TYPE "LLD")
 # compile-commands are needed by clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_AUTOMOC ON) # must be before add_executable()
+# set(CMAKE_AUTOMOC ON) # not needed, must be before add_executable()
 set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTOUIC ON)) # not needed
 add_compile_options(-Wall -Wextra) # must be before add_executable()
 add_executable(${PROJECT_NAME} ${sources} ${resources})
 set(QTLIBLIST Widgets) # Core Gui
