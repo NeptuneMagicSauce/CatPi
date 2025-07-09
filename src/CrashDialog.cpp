@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QDialog>
+#include <QDir>
 #include <QFileInfo>
 #include <QFontDatabase>
 #include <QLabel>
@@ -190,8 +191,8 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
     auto isUserCode = (bool)(frame.canonicalPath == myFilePath);  // ARM
     functions += (isUserCode ? "" : frame.function) + "\n";
 #elif __x86_64__
-    auto& f = frame.sourceFile;
-    auto isUserCode = f.isEmpty() == false && QFile{myPath + "/" + f}.exists();
+    auto f = QString{frame.sourceFile}.remove(myPath + "/");
+    auto isUserCode = f.isEmpty() == false && QFile{f}.exists();
 #endif
     areUserCode[indexFunction] = isUserCode;
     ++indexFunction;
@@ -225,13 +226,14 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
       auto functionFile = addr2line(frame.objectFile, frame.address).split(" at ");
       auto function = functionFile.size() < 1 ? "" : functionFile[0];
       auto file = functionFile.size() < 2 ? "" : functionFile[1];
-      // TODO remove base path from file
       line += formatFunctionAndFile(function, file);
     } else {
       line += formatFunctionAndFile(demangled[index], frame.filename);
     }
 #elif __x86_64__
-    line += formatFunctionAndFile(frame.function, frame.sourceFileLine);
+    auto sourceFileLine = QString{frame.sourceFileLine}.remove(myPath + "/");
+    // remove myPath because path is broken with symlinks and wsl
+    line += formatFunctionAndFile(frame.function, sourceFileLine);
     (void)addr2line;  // compile for all archs and dont warn unused
 #endif
 

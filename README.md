@@ -7,19 +7,6 @@ ninja
 
 # TODO
 
-- crash handler compatibility on pi: stacktrace is broken
-  use glibc backtrace
-  handle conditional paths for arm and x86
-  demangle c++ abi
-  maybe needs f omit frame pointer for my code
-  parse this new syntax in our crash dialog
-
-  add to generate.sh: libstdc++-14-dev for x86, arm ...
-
-- use cmake build dir and realpath
-  to not leak personal info
-  and to compute is user code
-
 - test inf and nan on arm
 
 - emacs lsp-treemacs-errors-list does not work great, find better
@@ -200,3 +187,13 @@ do gpio from c -> relay before weight
  search current word: see isearch-forward-symbol-at-point
 https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
  select current word, line
+- crash handler compatibility on pi: stacktrace is broken
+  use glibc backtrace
+  handle conditional paths for arm and x86
+  demangle c++ abi
+  maybe needs f omit frame pointer for my code
+  parse this new syntax in our crash dialog
+  add to generate.sh: binutils
+- use object or source file, compared to application filepath
+  to not leak personal info
+  and to compute is user code
