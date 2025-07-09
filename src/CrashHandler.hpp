@@ -28,8 +28,8 @@ struct CrashHandler {
 
   static CrashHandler* instance;
 
+  std::function<void()> cleanUpCallback = nullptr;
+  std::function<void(const std::string&, const std::string&)> reportCallback = nullptr;
+
   CrashHandler();
-  void installCleanUpCallback(std::function<void()> cleanUpCallback);
-  void installReportCallback(
-      std::function<void(const std::string&, const std::string&)> reportCallback);
 };

@@ -23,9 +23,6 @@ namespace {
     return ret;
   }
 
-  function<void()> cleanUpCallback = nullptr;
-  function<void(const string&, const string&)> reportCallback = nullptr;
-
   void handler(int signal) {
     // uninstall all handlers, if we crash again that would be looping
     for (auto inhibit : signals()) {
@@ -33,8 +30,8 @@ namespace {
     }
 
     // call clean up
-    if (cleanUpCallback != nullptr) {
-      cleanUpCallback();
+    if (CrashHandler::instance->cleanUpCallback != nullptr) {
+      CrashHandler::instance->cleanUpCallback();
     }
 
     auto name = signal == SIGSEGV   ? "SIGSEGV"
@@ -61,8 +58,8 @@ namespace {
 #error "not supported"
 #endif
     cout << stacktrace;
-    if (signal != SIGINT && reportCallback != nullptr) {
-      reportCallback(name, stacktrace);
+    if (signal != SIGINT && CrashHandler::instance->reportCallback != nullptr) {
+      CrashHandler::instance->reportCallback(name, stacktrace);
     }
     exit(1);
   }
@@ -132,13 +129,4 @@ void CrashHandler::Test::This(CrashHandler::Test::Type type) {
       raise(SIGTERM);
       break;
   }
-}
-
-void CrashHandler::installCleanUpCallback(function<void()> cleanUpCallback) {
-  ::cleanUpCallback = cleanUpCallback;
-}
-
-void CrashHandler::installReportCallback(
-    function<void(const string&, const string&)> reportCallback) {
-  ::reportCallback = reportCallback;
 }

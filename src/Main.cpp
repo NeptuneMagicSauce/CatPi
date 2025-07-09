@@ -30,10 +30,10 @@ namespace {
 }
 
 int main(int argc, char** argv) {
-  CrashHandler::instance->installCleanUpCallback([] { cleanup(); });
-  CrashHandler::instance->installReportCallback([](const std::string& error, const string& stack) {
+  CrashHandler::instance->cleanUpCallback = [] { cleanup(); };
+  CrashHandler::instance->reportCallback = [](const std::string& error, const string& stack) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
-  });
+  };
 
   QApplication* app = new QApplication(argc, argv);
   OnlyOneInstance onlyone;
