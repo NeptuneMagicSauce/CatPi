@@ -66,7 +66,7 @@ namespace {
     }
     return QString{"<b>"} + str + "</b>";
   }
-  // auto italic(const QString& str) { return QString{"<i>"} + str + "</i>"; }
+  auto italic(const QString& str) { return QString{"<i>"} + str + "</i>"; }
   auto formatIndex(const QString& index) { return "[" + QString::number(index.toInt()) + "]"; }
   auto newline(int count = 1) {
     auto ret = QString{};
@@ -99,20 +99,21 @@ namespace {
     // CatPi(+0x2d7d4) [0x556da4d7d4]
     // linux-vdso.so.1(__kernel_rt_sigreturn+0) [0x7f99c84820]
     // /lib/aarch64-linux-gnu/libQt6Widgets.so.6(_ZN15QAbstractButton15keyReleaseEventEP9QKeyEvent+0x11c)[0x7f99799efc]
-    auto regexep = QRegularExpression{"(^.*)(\\()(.*)(\\[)(.*)(\\])"};
+    auto regexep = QRegularExpression{"(^.*)(\\()(.*)(\\) \\[)(.*)(\\])"};
     auto match = regexep.match(line);
     if (match.hasMatch() == false) {
-      frames.append({});
+      frames.append(Frame{});
       return;
     }
 
     auto objectFile = match.captured(1);
     auto function = match.captured(3);
     auto address = match.captured(5);
-    auto fileinfo = QFileInfo{file};
+    auto fileinfo = QFileInfo{objectFile};
     frames.append(
         {function, objectFile, address, fileinfo.canonicalFilePath(), fileinfo.fileName()});
-    // qDebug() << match.captured(1) << match.captured(3) << match.captured(5);
+    // qDebug() << match.captured(1) << match.captured(2) << match.captured(3) << match.captured(4)
+    // << match.captured(5);
     return;
 
 #elifdef __x86_64__
@@ -240,6 +241,17 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   // qDebug() << demangled;
 #endif
 
+  auto formatFunctionAndFile = [&](auto& function, auto& file) {
+    auto ret = function;
+    if (function.size() > 10 && file.size() > 10) {
+      ret += newline();
+    } else {
+      ret += " ";
+    }
+    ret += italic(file);
+    return ret;
+  };
+
   // format frames
   int index = 0;
   for (const auto& frame : frames) {
@@ -248,22 +260,16 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
 #ifdef __aarch64__
     if (isUserCode) {
       // backtrace_symbols() can not print my addresses on ARM
-      line += addr2line(frame.objectFile, frame.address);
-      line.replace(" at ", newline());
+      auto functionFile = addr2line(frame.objectFile, frame.address).split(" at ");
+      auto function = functionFile.size() < 1 ? "" : functionFile[0];
+      auto file = functionFile.size() < 2 ? "" : functionFile[1];
+      // TODO remove base path from file
+      line += formatFunctionAndFile(function, file);
     } else {
-      line += demangled[index] + newline() + frame.filename;
+      line += formatFunctionAndFile(demangled[index], frame.filename);
     }
 #elif __x86_64__
-    line += frame.function;
-
-    auto& source = frame.sourceFileLine;
-    if (source.size() > 5 && frame.function.size() > 5) {
-      line += newline();
-    } else {
-      line += " ";
-    }
-
-    line += source;
+    line += formatFunctionAndFile(frame.function, frame.sourceFileLine);
 #endif
 
     line = bold(line, isUserCode);
