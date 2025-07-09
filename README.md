@@ -7,20 +7,9 @@ ninja
 
 # TODO
 
-- test inf and nan on arm
-
 - emacs lsp-treemacs-errors-list does not work great, find better
 
 - write crash log to a file
-
-- more debug settings:
-  - load cell polling, refresh frequency : to test
-  - load cell polling, timeout (for cpu consumption when unplugged): to test
-  - duration of button/relay press (<-> quantity)
-  - minimum weight for bowl is empty
-  - two pins of HX711
-  - gain?
-  - duration of confirm tare
 
 - better gui layout
   frequent buttons bigger
@@ -60,6 +49,15 @@ ninja
 - libhx711: can we take out the implementation and do it in tree?
 
 - base widget: maybe QSlider is better than DeltaDial ?
+
+- more debug settings:
+  - load cell polling, refresh frequency : to test
+  - load cell polling, timeout (for cpu consumption when unplugged): to test
+  - duration of button/relay press (<-> quantity)
+  - minimum weight for bowl is empty
+  - two pins of HX711
+  - gain?
+  - duration of confirm tare
 
 - logging
   log eat events and dispense events
@@ -197,3 +195,9 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - use object or source file, compared to application filepath
   to not leak personal info
   and to compute is user code
+- test inf and nan on arm
+  maybe it's not supported
+  https://stackoverflow.com/a/77334141
+  https://community.nxp.com/t5/i-MX-Processors/No-exception-when-divided-by-zero/m-p/1793764
+  https://stackoverflow.com/a/79018956
+  https://developer.arm.com/documentation/dui0808/l/Floating-point-Support/Controlling-the-Arm-floating-point-environment
