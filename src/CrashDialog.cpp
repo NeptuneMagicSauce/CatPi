@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMap>
@@ -186,6 +187,7 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   }
 
   auto dialog = new QDialog{nullptr, Qt::Window};
+
   Widget::FontSized(dialog, 20);
   dialog->setModal(true);
   dialog->setWindowTitle("Crash");
@@ -202,6 +204,8 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   QObject::connect(button_quit, &QPushButton::released, [&dialog]() { dialog->accept(); });
 
   auto stack_label = new QLabel;
+  stack_label->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+
   stack_label->setTextFormat(Qt::RichText);
   auto stack_text = QString{};
 
