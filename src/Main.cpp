@@ -7,6 +7,7 @@
 #include "CentralWidget.hpp"
 #include "CrashDialog.hpp"
 #include "CrashHandler.hpp"
+#include "CrashTester.hpp"
 #include "Debug.hpp"
 #include "Delay.hpp"
 #include "DeltaDial.hpp"

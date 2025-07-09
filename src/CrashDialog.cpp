@@ -1,9 +1,9 @@
 #include "CrashDialog.hpp"
 
 #include <QApplication>
+#include <QDialog>
 #include <QFileInfo>
 #include <QFontDatabase>
-#include <QGridLayout>
 #include <QLabel>
 #include <QMap>
 #include <QProcess>
@@ -11,54 +11,12 @@
 #include <QRegularExpression>
 #include <QScrollArea>
 #include <QTemporaryFile>
+#include <QVBoxLayout>
 // #include <iostream>
-#include <map>
-#include <string>
 
-#include "CrashHandler.hpp"
 #include "Widget.hpp"
 
 using namespace std;
-
-namespace {
-  const map<CrashHandler::Test::Type, string> signalNames = {
-      {CrashHandler::Test::Type::NullPtr, "NullPtr"},
-      {CrashHandler::Test::Type::Assert, "Assert"},
-      {CrashHandler::Test::Type::StdContainerAccess, "StdContainerAccess"},
-      {CrashHandler::Test::Type::DivByZeroInteger, "DivByZeroInteger"},
-      {CrashHandler::Test::Type::FloatInf, "FloatInf"},
-      {CrashHandler::Test::Type::FloatNaN, "FloatNaN"},
-      {CrashHandler::Test::Type::ThrowEmpty, "ThrowEmpty"},
-      {CrashHandler::Test::Type::Exception, "Exception"},
-      {CrashHandler::Test::Type::Terminate, "Terminate"},
-      {CrashHandler::Test::Type::Abort, "Abort"},
-      {CrashHandler::Test::Type::SigSegv, "SigSegv"},
-      {CrashHandler::Test::Type::SigAbort, "SigAbort"},
-      {CrashHandler::Test::Type::SigFPE, "SigFPE"},
-      {CrashHandler::Test::Type::SigIllFormed, "SigIllegal"},
-      {CrashHandler::Test::Type::SigInterrupt, "SigInterrupt"},
-      {CrashHandler::Test::Type::SigTerminate, "SigTerminate"},
-  };
-}
-
-CrashTester::CrashTester()
-    : QDialog(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
-  hide();
-  setWindowTitle("CrashTester");
-  setModal(true);
-  Widget::FontSized(this, 20);
-  auto layout = new QGridLayout;
-  setLayout(layout);
-  auto index = 0;
-  auto buttonsPerRow = 3;
-  for (auto type : signalNames) {
-    auto button = new QPushButton{type.second.c_str()};
-    QObject::connect(button, &QAbstractButton::released,
-                     [=] { CrashHandler::Test::This(type.first); });
-    layout->addWidget(button, index / buttonsPerRow, index % buttonsPerRow);
-    ++index;
-  }
-}
 
 namespace {
   auto bold(const QString& str, bool isUserCode = true) {
@@ -139,7 +97,6 @@ namespace {
 #endif
   }
 
-#ifdef __aarch64__
   QStringList cppfilt(const QString& mangled) {
     auto process1 = QProcess{};
     auto process2 = QProcess{};
@@ -177,7 +134,6 @@ namespace {
     auto process_output = QString{p.readAll()};
     return process_output;
   }
-#endif
 }
 
 void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
@@ -242,7 +198,9 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
   }
 #ifdef __aarch64__
   auto demangled = cppfilt(functions);
-  // qDebug() << demangled;
+// qDebug() << demangled;
+#else
+  (void)cppfilt;  // compile for all archs and dont warn unused
 #endif
 
   auto formatFunctionAndFile = [&](auto& function, auto& file) {
@@ -274,6 +232,7 @@ void CrashDialog::ShowStackTrace(const QString& error, const QString& stack) {
     }
 #elif __x86_64__
     line += formatFunctionAndFile(frame.function, frame.sourceFileLine);
+    (void)addr2line;  // compile for all archs and dont warn unused
 #endif
 
     line = bold(line, isUserCode);
