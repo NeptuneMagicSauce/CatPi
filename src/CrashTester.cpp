@@ -54,7 +54,7 @@ namespace {
         }();
         break;
       case Type::FloatNaN:
-        cout << -sqrt(-1.0) << endl;
+        cout << sqrt(-1.0) << endl;
         break;
       case Type::ThrowEmpty:
         throw;
