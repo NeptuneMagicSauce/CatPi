@@ -1,10 +1,10 @@
 #pragma once
 
-struct QAbstractButton;
+struct ProtectedButton;
 #include <QWidget>
 
 struct MainScreen : public QWidget {
   MainScreen(QWidget* weight, QWidget* delay);
 
-  QAbstractButton* dispenseButton = nullptr;
+  ProtectedButton* dispenseButton = nullptr;
 };

@@ -1,5 +1,4 @@
 #include <QWidget>
-#include <functional>
 
 struct ProtectedButtonImpl;
 struct QPushButton;

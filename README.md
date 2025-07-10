@@ -7,13 +7,6 @@ ninja
 
 # TODO
 
-- also long-press-protect the DispenseNow button
-  because wake screen from sleep does press buttons
-  with a shared widget: heritor of push button and composer of progress bar
-  so that we can find the signals
-  but then it won't work for toolbar which has tool buttons that do not inherit from push button
-  so inherit from abstract button? but no, we want to instantiate push and tool buttons
-
 - no need for pragma once when we just declare
 
 - better gui layout
@@ -202,3 +195,9 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   https://developer.arm.com/documentation/dui0808/l/Floating-point-Support/Controlling-the-Arm-floating-point-environment
 - emacs lsp-treemacs-errors-list does not work great, find better
 - write crash log to a file
+- also long-press-protect the DispenseNow button
+  because wake screen from sleep does press buttons
+  with a shared widget: heritor of push button and composer of progress bar
+  so that we can find the signals
+  but then it won't work for toolbar which has tool buttons that do not inherit from push button
+  so inherit from abstract button? but no, we want to instantiate push and tool buttons

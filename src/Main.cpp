@@ -16,6 +16,7 @@
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "OnlyOneInstance.hpp"
+#include "ProtectedButton.hpp"
 #include "ScreenBrightness.hpp"
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
     QObject::connect(toolbar->debug, &QAction::triggered, [&] { central->setPage(debug); });
 
     // Dispense
-    QObject::connect(mainscreen->dispenseButton, &QAbstractButton::released, [&]() {
+    QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
       mainscreen->dispenseButton->setEnabled(false);
       logic->manualDispense();
     });

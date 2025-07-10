@@ -3,10 +3,13 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
+#include "ProtectedButton.hpp"
+
 MainScreen::MainScreen(QWidget* weight, QWidget* delay) {
   auto layoutMainTop = new QHBoxLayout;
-  dispenseButton = new QPushButton("Now!");
-  dispenseButton->setSizePolicy(
+  dispenseButton = new ProtectedButton;
+  dispenseButton->button->setText("Now!");
+  dispenseButton->button->setSizePolicy(
       {dispenseButton->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
   layoutMainTop->addWidget(weight);
   layoutMainTop->addWidget(dispenseButton);
