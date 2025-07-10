@@ -35,7 +35,7 @@ CentralWidgetImpl::CentralWidgetImpl(QList<SubScreen*> subScreens) {
     pages->addWidget(subScreen);
   }
 
-  statusMessage->setStyleSheet("QWidget{font-size: 25pt;}");
+  statusMessage->setStyleSheet("QWidget{font-size: 15pt;}");
   statusMessage->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   layout->addLayout(pages);
   layout->addWidget(statusMessage);
@@ -57,6 +57,7 @@ void CentralWidget::setSettingPage(QWidget* page) {
 
 void CentralWidget::statusMessage(const QString& message) {
   impl->statusMessage->setText(message);
+  return;
   impl->statusMessage->show();
   QTimer::singleShot(3000, [&] { impl->statusMessage->hide(); });
 }

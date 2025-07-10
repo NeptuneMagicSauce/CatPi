@@ -7,6 +7,8 @@ ninja
 
 # TODO
 
+- tare progress bar moves other widgets around! "grams"
+
 - better gui layout
   frequent buttons bigger
   debug setting screen: more gap after dial <-> dial more centered
@@ -30,6 +32,25 @@ ninja
 - logic: bug sometimes dispense zero or very little: detect and dispense again
   needs to detect eat events
 
+- logging
+  log eat events and dispense events
+  log weight signal raw and processed
+  rotate / compress the logs for disk
+
+- plot, histograms
+  eat events
+  dispense events
+  dispensed grams (needs reliable weight signal)
+
+- status message (tare, calib result) is off screen (resizes window)
+  reproduced on wsl -> detect window resize more than pi screen size
+  fix =
+  make window not resizable
+  print on detect window resized
+  either make permanent room for status message
+  xor display it over something
+  xor display it smaller
+
 - libhx711: what happens when unplugged? crashes
  - start unplugged
  - unplug/replug multiple times
@@ -48,16 +69,6 @@ ninja
   - two pins of HX711
   - gain?
   - duration of confirm tare
-
-- logging
-  log eat events and dispense events
-  log weight signal raw and processed
-  rotate / compress the logs for disk
-
-- plot, histograms
-  eat events
-  dispense events
-  dispensed grams (needs reliable weight signal)
 
 - disable dpi scaling on linux side for emacs and CatPi
 
