@@ -7,11 +7,13 @@ ninja
 
 # TODO
 
-- tare progress bar moves other widgets around! "grams"
-
 - better gui layout
   frequent buttons bigger
   debug setting screen: more gap after dial <-> dial more centered
+
+- tare progress bar moves other widgets around! "grams"
+  what about the progress bar vertical on the side of the button?
+  is it better after main layout reorg?
 
 - Dial: bigger maximum for smooth rotate, then divide delta
   does not work: some composers of Dial change the maximum after construction

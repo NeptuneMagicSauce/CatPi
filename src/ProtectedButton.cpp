@@ -39,19 +39,28 @@ ProtectedButtonImpl::ProtectedButtonImpl(QTimer& finished, QPushButton& button)
 
   progress.setMaximum(maxTicks);
   progress.setTextVisible(false);
+
+  progress.setEnabled(false);
+
   progress.setMaximumHeight(15);
   progress.setSizePolicy({QSizePolicy::Policy::Minimum, progress.sizePolicy().verticalPolicy()});
-  progress.setVisible(false);
+
+  // Vertical progress bar:
+  // progress.setOrientation(Qt::Vertical);
+  // progress.setMaximumWidth(15);
+  // // progress.setMaximumHeight(100); bad
+  // progress.setSizePolicy({button.sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Minimum});
 
   QObject::connect(&button, &QAbstractButton::pressed, [this]() {
     buttonPressedTicks = 0;
     progress.setValue(0);
-    progress.setVisible(true);
+    progress.setEnabled(true);
     pressedTimer.start();
   });
   QObject::connect(&button, &QAbstractButton::released, [this]() {
     pressedTimer.stop();
-    progress.setVisible(false);
+    progress.setValue(0);
+    progress.setEnabled(false);
   });
   QObject::connect(&pressedTimer, &QTimer::timeout, [&]() {
     ++buttonPressedTicks;
@@ -60,7 +69,8 @@ ProtectedButtonImpl::ProtectedButtonImpl(QTimer& finished, QPushButton& button)
       pressedTimer.start();
     } else {
       // qDebug() << this << "long press";
-      progress.setVisible(false);
+      progress.setValue(0);
+      progress.setEnabled(false);
       finished.start();
     }
   });
