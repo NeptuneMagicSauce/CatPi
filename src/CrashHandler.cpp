@@ -4,6 +4,9 @@
 #include <cfenv>
 #include <cmath>
 #include <csignal>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #ifdef __x86_64__
 #include <stacktrace>
@@ -55,6 +58,15 @@ namespace {
 #else
 #error "not supported"
 #endif
+    try {
+      std::ostringstream logfilename;
+      auto t = std::time(nullptr);
+      logfilename << "crashlog-" << std::put_time(std::localtime(&t), "%d-%m-%Y-%Hh%Mm%Ss")
+                  << ".txt";
+      ofstream fout{logfilename.str()};
+      fout << stacktrace;
+    } catch (exception&) {
+    }
     cout << stacktrace;
     if (signal != SIGINT && CrashHandler::instance->reportCallback != nullptr) {
       CrashHandler::instance->reportCallback(name, stacktrace);

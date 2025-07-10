@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- write crash log to a file
-
 - better gui layout
   frequent buttons bigger
   debug setting screen: more gap after dial <-> dial more centered
@@ -200,3 +198,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   https://stackoverflow.com/a/79018956
   https://developer.arm.com/documentation/dui0808/l/Floating-point-Support/Controlling-the-Arm-floating-point-environment
 - emacs lsp-treemacs-errors-list does not work great, find better
+- write crash log to a file
