@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- emacs lsp-treemacs-errors-list does not work great, find better
-
 - write crash log to a file
 
 - better gui layout
@@ -201,3 +199,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   https://community.nxp.com/t5/i-MX-Processors/No-exception-when-divided-by-zero/m-p/1793764
   https://stackoverflow.com/a/79018956
   https://developer.arm.com/documentation/dui0808/l/Floating-point-Support/Controlling-the-Arm-floating-point-environment
+- emacs lsp-treemacs-errors-list does not work great, find better
