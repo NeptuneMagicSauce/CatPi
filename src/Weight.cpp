@@ -64,7 +64,7 @@ WeightImpl::WeightImpl() {
                   "Tare de la balance",
                   "Grammes",
                   0.0,
-                  [&](QVariant v) { tare.value = v.toInt(); },
+                  [&](QVariant v) { tare.value = v.toDouble(); },
                   {{}, {}}});
   layout->addWidget(label);
   layout->addWidget(labelFooter);

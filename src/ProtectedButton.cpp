@@ -59,7 +59,7 @@ ProtectedButtonImpl::ProtectedButtonImpl(QTimer& finished, QPushButton& button)
     if (buttonPressedTicks < maxTicks) {
       pressedTimer.start();
     } else {
-      qDebug() << this << "long press";
+      // qDebug() << this << "long press";
       progress.setVisible(false);
       finished.start();
     }
