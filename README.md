@@ -7,15 +7,18 @@ ninja
 
 # TODO
 
-- better gui layout
-  frequent buttons bigger
-  debug setting screen: more gap after dial <-> dial more centered
-
-- also long-press-protect the DispenseNow button ?
+- also long-press-protect the DispenseNow button
+  because wake screen from sleep does press buttons
   with a shared widget: heritor of push button and composer of progress bar
   so that we can find the signals
   but then it won't work for toolbar which has tool buttons that do not inherit from push button
   so inherit from abstract button? but no, we want to instantiate push and tool buttons
+
+- no need for pragma once when we just declare
+
+- better gui layout
+  frequent buttons bigger
+  debug setting screen: more gap after dial <-> dial more centered
 
 - Dial: bigger maximum for smooth rotate, then divide delta
   does not work: some composers of Dial change the maximum after construction

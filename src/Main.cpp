@@ -104,7 +104,6 @@ int main(int argc, char** argv) {
     });
 
     // Weight
-    weight->connect();
     QObject::connect(weight->eventTareFinished(), &QTimer::timeout,
                      [&] { central->statusMessage(weight->messageFinished); });
 
