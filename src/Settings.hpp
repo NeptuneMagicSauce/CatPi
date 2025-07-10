@@ -1,5 +1,3 @@
-#pragma once
-
 #include <QString>
 #include <QVariant>
 #include <optional>

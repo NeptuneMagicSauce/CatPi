@@ -1,5 +1,3 @@
-#pragma once
-
 #include <QIcon>
 #include <QMainWindow>
 #include <QStyle>

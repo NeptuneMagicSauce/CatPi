@@ -1,5 +1,3 @@
-#pragma once
-
 struct ProtectedButton;
 #include <QWidget>
 

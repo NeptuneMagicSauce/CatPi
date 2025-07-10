@@ -1,5 +1,3 @@
-#pragma once
-
 #include <QDial>
 
 // a dial to input small deltas, wrapping

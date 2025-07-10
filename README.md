@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- no need for pragma once when we just declare
-
 - better gui layout
   frequent buttons bigger
   debug setting screen: more gap after dial <-> dial more centered
@@ -201,3 +199,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   so that we can find the signals
   but then it won't work for toolbar which has tool buttons that do not inherit from push button
   so inherit from abstract button? but no, we want to instantiate push and tool buttons
+- no need for pragma once when we just declare

@@ -1,5 +1,3 @@
-#pragma once
-
 struct QString;
 #include <QTimer>
 #include <optional>

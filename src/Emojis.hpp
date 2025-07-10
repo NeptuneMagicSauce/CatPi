@@ -1,5 +1,3 @@
-#pragma once
-
 struct Emojis {
   enum struct Type {
     OkayWithThreeVSigns,

@@ -1,5 +1,3 @@
-#pragma once
-
 struct QString;
 struct QLabel;
 struct QWidget;
