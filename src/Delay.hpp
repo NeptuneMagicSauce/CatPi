@@ -1,8 +1,8 @@
 struct QLabel;
 struct DeltaDial;
-#include <QWidget>
+#include <QGroupBox>
 
-struct Delay : public QWidget {
+struct Delay : public QGroupBox {
   Delay();
 
   DeltaDial* delayDial = nullptr;

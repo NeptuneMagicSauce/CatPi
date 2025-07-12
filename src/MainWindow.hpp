@@ -13,5 +13,7 @@ struct MainWindow : public QMainWindow {
   void toggleFullscreen(bool& isFullscreen);
   void setAutomaticSize();
 
+  void resizeEvent(QResizeEvent* event) override;
+
   static QIcon StandardIcon(QStyle::StandardPixmap);
 };

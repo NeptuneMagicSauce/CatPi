@@ -7,19 +7,9 @@ ninja
 
 # TODO
 
-- better gui layout
-  frequent buttons bigger
-  debug setting screen: more gap after dial <-> dial more centered
+- labels Delay and Remaining: bigger? but where!
 
-- tare progress bar moves other widgets around! "grams"
-  what about the progress bar vertical on the side of the button?
-  is it better after main layout reorg?
-
-- Dial: bigger maximum for smooth rotate, then divide delta
-  does not work: some composers of Dial change the maximum after construction
-  lower-than-default maximum (for Delay) is more precise but very not smooth
-  -> use the default maximum that is quite smooth
-  give more screen space to the Delay dial: is it smooth now?
+- translate all labels to french
 
 - signal of weight is noisy
   it easily goes over threshold because of spikes
@@ -213,3 +203,13 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   but then it won't work for toolbar which has tool buttons that do not inherit from push button
   so inherit from abstract button? but no, we want to instantiate push and tool buttons
 - no need for pragma once when we just declare
+- tare progress bar moves other widgets around! "grams"
+  what about the progress bar vertical on the side of the button? -> bad
+  make it always visible, disabled when not in use, transparent when disabled
+- better gui layout
+  frequent buttons bigger
+- Dial: bigger maximum for smooth rotate, then divide delta
+  does not work: some composers of Dial change the maximum after construction
+  lower-than-default maximum (for Delay) is more precise but very not smooth
+  -> use the default maximum that is quite smooth
+  give more screen space to the Delay dial: is it smooth now?

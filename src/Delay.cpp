@@ -1,6 +1,6 @@
 #include "Delay.hpp"
 
-#include <QHBoxLayout>
+#include <QBoxLayout>
 #include <QLabel>
 #include <QProgressBar>
 // #include <iostream>
@@ -11,11 +11,12 @@
 struct DelayImpl {
   DelayImpl(Delay* parent);
 
-  QLabel* remainingLabel = new QLabel;
-  QLabel* delayLabel = new QLabel;
+  QString textDelay, textRemaining;
+  QLabel* label = new QLabel;
   QProgressBar* progress = new QProgressBar;
 
   static QString FormatTime(int seconds);
+  void updateLabel();
 };
 
 namespace {
@@ -24,31 +25,26 @@ namespace {
 
 Delay::Delay() {
   AssertSingleton();
+  setMinimumWidth(400);
   delayDial = new DeltaDial;
+  delayDial->setSizePolicy(
+      {delayDial->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
   impl = new DelayImpl(this);
 }
 
 DelayImpl::DelayImpl(Delay* parent) {
-  auto layout = new QHBoxLayout;
+  parent->setStyleSheet("QWidget{font-size: 15pt;}");
+  auto layout = new QVBoxLayout;
   parent->setLayout(layout);
 
-  auto times = new QWidget;
-  times->setStyleSheet("QWidget{font-size: 15pt;}");
-  auto layoutTimes = new QVBoxLayout;
-  times->setLayout(layoutTimes);
+  label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-  remainingLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-  delayLabel->setAlignment(remainingLabel->alignment());
-
-  layoutTimes->addWidget(remainingLabel);
-  layoutTimes->addWidget(delayLabel);
-  layoutTimes->addWidget(progress);
+  layout->addWidget(parent->delayDial);
+  layout->addWidget(label);
+  layout->addWidget(progress);
 
   progress->setTextVisible(false);
   progress->setSizePolicy({QSizePolicy::Policy::Minimum, progress->sizePolicy().verticalPolicy()});
-
-  layout->addWidget(times);
-  layout->addWidget(parent->delayDial);
 }
 
 QString DelayImpl::FormatTime(int seconds) {
@@ -56,15 +52,19 @@ QString DelayImpl::FormatTime(int seconds) {
     auto minutes = std::round((double)seconds / 60);
     return QString::number(minutes) + " minute" + (minutes > 1 ? "s" : "");
   }
-  return QString::number(seconds) + " second" + (seconds > 1 ? "s" : "");
+  return QString::number(seconds) + " seconde" + (seconds > 1 ? "s" : "");
 }
 
 void Delay::setDelay(int seconds) {
-  impl->delayLabel->setText(QString{"Delay: "} + impl->FormatTime(seconds));
+  impl->textDelay = impl->FormatTime(seconds);
+  impl->updateLabel();
   impl->progress->setMaximum(seconds);
 }
 
 void Delay::setRemaining(int seconds) {
-  impl->remainingLabel->setText(QString{"Remaining: "} + impl->FormatTime(seconds));
+  impl->textRemaining = QString{"Attente: "} + impl->FormatTime(seconds);
+  impl->updateLabel();
   impl->progress->setValue(impl->progress->maximum() - seconds);
 }
+
+void DelayImpl::updateLabel() { label->setText(textRemaining + " / " + textDelay); }

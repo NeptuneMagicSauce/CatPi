@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 
 #include <QApplication>
+#include <QResizeEvent>
 
 #include "System.hpp"
 #include "Widget.hpp"
@@ -40,4 +41,9 @@ void MainWindow::setAutomaticSize() {
 
 QIcon MainWindow::StandardIcon(QStyle::StandardPixmap name) {
   return reinterpret_cast<QApplication*>(QApplication::instance())->style()->standardIcon(name);
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+  qDebug() << "Main Window size" << event->size();
+  QMainWindow::resizeEvent(event);
 }

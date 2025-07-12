@@ -76,7 +76,7 @@ struct Setting : public QWidget {
     }
     Widget::FontSized(value, 30);
 
-    description->setText(breakLines(load.description, 30));
+    description->setText(breakLines(load.description, 50));
     updateValue();
     unit->setText(load.unit);
     resetButton->setText("Reset");
@@ -124,7 +124,7 @@ Debug::Debug() {
     const auto& load = Settings::Load::get(key);
 
     auto setting = new Setting{load};
-    auto button = new QPushButton{load.name};
+    auto button = new QPushButton{breakLines(load.name, 12)};
     auto screen = new SubScreen{load.name, setting};
     items[key] = {setting, button, screen};
 

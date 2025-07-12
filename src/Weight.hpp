@@ -1,10 +1,10 @@
 struct QTimer;
 
+#include <QGroupBox>
 #include <QString>
-#include <QWidget>
 #include <optional>
 
-class Weight : public QWidget {
+class Weight : public QGroupBox {
  public:
   Weight();
 
