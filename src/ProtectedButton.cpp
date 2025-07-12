@@ -40,6 +40,9 @@ ProtectedButtonImpl::ProtectedButtonImpl(QTimer& finished, QPushButton& button)
   progress.setMaximum(maxTicks);
   progress.setTextVisible(false);
 
+  // make transparent so that it's not visible when disabled
+  progress.setStyleSheet("background-color: rgba(255,0,0,0)");
+
   progress.setEnabled(false);
 
   progress.setMaximumHeight(15);
