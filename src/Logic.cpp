@@ -120,7 +120,8 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   auto& dispenseTime = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
-  auto weightAboveThreshold = weightTarred.has_value() ? (weightTarred.value() < 0.8) : false;
+  auto weightAboveThreshold =
+      weightTarred.has_value() ? (weightTarred.value() < 0.8) : (hasGPIO ? false : true);
   auto& start = dispenseTime.has_value() ? dispenseTime.value() : impl->startTime;
   auto elapsed = start.secsTo(now);
   auto timeAboveThreshold = elapsed > impl->delaySeconds;
@@ -159,7 +160,10 @@ void Logic::changeDelay(int delta) {
   if (impl->delaySeconds >= 60) {
     delta *= 10;
   }
-  impl->delaySeconds += delta;
-  impl->delaySeconds = std::max(10, impl->delaySeconds);
+  setDelaySeconds(impl->delaySeconds + delta);
+}
+
+void Logic::setDelaySeconds(int delaySeconds) {
+  impl->delaySeconds = std::max(10, delaySeconds);
   Settings::set(impl->delayKey, impl->delaySeconds);
 }

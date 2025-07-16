@@ -132,7 +132,7 @@ Debug::Debug() {
     auto column = index % itemsPerRow;
     layout->addWidget(button, row, column);
 
-    button->setMinimumHeight(100);
+    button->setMinimumHeight(80);
 
     ++index;
   }

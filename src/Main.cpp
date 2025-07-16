@@ -149,6 +149,14 @@ int main(int argc, char** argv) {
       logic->changeDelay(delay->delayDial->delta);
       delay->setDelay(logic->delaySeconds());
     });
+    QObject::connect(delay->buttonDay, &QAbstractButton::released, [&] {
+      logic->setDelaySeconds(delay->delayDaySeconds * 60);
+      delay->setDelay(logic->delaySeconds());
+    });
+    QObject::connect(delay->buttonNight, &QAbstractButton::released, [&] {
+      logic->setDelaySeconds(delay->delayNightSeconds * 60);
+      delay->setDelay(logic->delaySeconds());
+    });
 
     // Debug
     debug->connect([&] { central->setPage(debug); },
