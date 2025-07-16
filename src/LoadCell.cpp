@@ -81,14 +81,14 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
       offset = newCalibrationData.value().second;
     } else {
       Settings::load({keyRefUnit,
-                      "Calibration RefUnit",
+                      "Calibration Référence",
                       "Données de calibration, remettre à defaut si on a une mauvaise calibration",
                       "",
                       defaultData.first,
                       [&](QVariant v) { refUnit = v.toInt(); },
                       {{}, {}}});
       Settings::load({keyOffset,
-                      "Calibration Offest",
+                      "Calibration Décalage",
                       "Données de calibration, remettre à defaut si on a une mauvaise calibration",
                       "",
                       defaultData.second,

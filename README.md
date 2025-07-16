@@ -9,8 +9,6 @@ ninja
 
 - labels Delay and Remaining: bigger? but where!
 
-- translate all labels to french
-
 - signal of weight is noisy
   it easily goes over threshold because of spikes
   average, median: research a bit
@@ -20,6 +18,11 @@ ninja
   needs to detect eat events
   which needs a reliable weight signal
   which needs the processing
+
+- why not do auto-tare at this moment:
+  auto-tare = when we detect it's empty and we should dispense
+  because then, we want to detect "dispensed portion is eaten"
+  so it's really "weight increase when we served went back"
 
 - logic: bug sometimes dispense zero or very little: detect and dispense again
   needs to detect eat events
@@ -213,3 +216,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   lower-than-default maximum (for Delay) is more precise but very not smooth
   -> use the default maximum that is quite smooth
   give more screen space to the Delay dial: is it smooth now?
+- translate all labels to french

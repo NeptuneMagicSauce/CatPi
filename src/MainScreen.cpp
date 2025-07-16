@@ -10,7 +10,7 @@
 MainScreen::MainScreen(QWidget* weight, QWidget* delay) {
   auto layoutMainTop = new QHBoxLayout;
   dispenseButton = new ProtectedButton;
-  dispenseButton->button->setText("Now!");
+  dispenseButton->button->setText("Croquettes !");
   Widget::FontSized(dispenseButton, 25);
   dispenseButton->button->setSizePolicy(
       {QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum});
