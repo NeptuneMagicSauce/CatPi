@@ -76,7 +76,7 @@ struct Setting : public QWidget {
     }
     Widget::FontSized(value, 30);
 
-    description->setText(breakLines(load.description, 50));
+    description->setText(breakLines(load.description, 45));
     updateValue();
     unit->setText(load.unit);
     resetButton->setText("Reset");
