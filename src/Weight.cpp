@@ -13,6 +13,7 @@
 #include "ProtectedButton.hpp"
 #include "Settings.hpp"
 #include "System.hpp"
+#include "Widget.hpp"
 
 using namespace std;
 
@@ -54,9 +55,10 @@ WeightImpl::WeightImpl() {
   labelFooter->setStyleSheet("QWidget{font-size: 30pt;}");
 
   tare.button.button->setText("Tare");
-  tare.button.button->setStyleSheet(
-      "QAbstractButton{font-size: 36pt; padding-top: 15px; padding-bottom: 15px} ");
-  tare.button.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
+  Widget::FontSized(tare.button.button, 25);
+  // tare.button.button->setStyleSheet(
+  // "QAbstractButton{font-size: 25pt; padding-top: 15px; padding-bottom: 15px} ");
+  // tare.button.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
   tare.button.button->setIconSize({40, 40});
 
   Settings::load({tare.key,
