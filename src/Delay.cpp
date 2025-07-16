@@ -7,6 +7,7 @@
 
 #include "DeltaDial.hpp"
 #include "System.hpp"
+#include "Widget.hpp"
 
 struct DelayImpl {
   DelayImpl(Delay* parent);
@@ -25,7 +26,7 @@ namespace {
 
 Delay::Delay() {
   AssertSingleton();
-  setMinimumWidth(400);
+  setMinimumWidth(350);
   delayDial = new DeltaDial;
   delayDial->setSizePolicy(
       {delayDial->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
@@ -33,11 +34,12 @@ Delay::Delay() {
 }
 
 DelayImpl::DelayImpl(Delay* parent) {
-  parent->setStyleSheet("QWidget{font-size: 15pt;}");
+  Widget::FontSized(parent, 20);
   auto layout = new QVBoxLayout;
   parent->setLayout(layout);
 
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  label->setTextFormat(Qt::RichText);
 
   layout->addWidget(parent->delayDial);
   layout->addWidget(label);
@@ -56,15 +58,15 @@ QString DelayImpl::FormatTime(int seconds) {
 }
 
 void Delay::setDelay(int seconds) {
-  impl->textDelay = impl->FormatTime(seconds);
+  impl->textDelay = "<b>" + impl->FormatTime(seconds) + "</b>";
   impl->updateLabel();
   impl->progress->setMaximum(seconds);
 }
 
 void Delay::setRemaining(int seconds) {
-  impl->textRemaining = QString{"Attente: "} + impl->FormatTime(seconds);
+  impl->textRemaining = "Attente: " + impl->FormatTime(seconds);
   impl->updateLabel();
   impl->progress->setValue(impl->progress->maximum() - seconds);
 }
 
-void DelayImpl::updateLabel() { label->setText(textRemaining + " / " + textDelay); }
+void DelayImpl::updateLabel() { label->setText(textRemaining + "<br>" + textDelay); }
