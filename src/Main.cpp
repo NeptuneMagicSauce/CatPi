@@ -13,6 +13,7 @@
 #include "DeltaDial.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
+#include "Logs.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "OnlyOneInstance.hpp"
@@ -37,21 +38,22 @@ int main(int argc, char** argv) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
   };
 
-  QApplication* app = new QApplication(argc, argv);
-  OnlyOneInstance onlyone;
-  ScreenBrightness brightness;
-  LoadCell* loadcell = new LoadCell;
-  Weight* weight = new Weight;
-  Calibration* calibration = new Calibration;
-  Logic* logic = new Logic;
-  Delay* delay = new Delay;
-  ToolBar* toolbar = new ToolBar;
-  Debug* debug = new Debug;
-  MainScreen* mainscreen = new MainScreen{weight, delay};
-  CentralWidget* central = new CentralWidget{{new SubScreen("", mainscreen),
-                                              new SubScreen("Calibration", calibration), /**/
-                                              new SubScreen("Debug", debug)}};
-  MainWindow* window = new MainWindow{central, toolbar};
+  auto app = new QApplication(argc, argv);
+  auto onlyone = OnlyOneInstance{};
+  auto brightness = ScreenBrightness{};
+  auto loadcell = new LoadCell;
+  auto weight = new Weight;
+  auto calibration = new Calibration;
+  auto logic = new Logic;
+  auto delay = new Delay;
+  auto logs = new Logs;
+  auto toolbar = new ToolBar;
+  auto debug = new Debug;
+  auto mainscreen = new MainScreen{weight, delay};
+  auto central = new CentralWidget{{new SubScreen("", mainscreen),
+                                    new SubScreen("Calibration", calibration),  //
+                                    new SubScreen("Debug", debug)}};
+  auto window = new MainWindow{central, toolbar};
 
   // Initialize globals
   {
@@ -167,6 +169,9 @@ int main(int argc, char** argv) {
     auto crashShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F1), window);
     crashShortcut->setContext(Qt::ApplicationShortcut);
     QObject::connect(crashShortcut, &QShortcut::activated, app, [&]() { crashTester->show(); });
+
+    // Logs
+    logs->connect(window);
   }
 
   // Initializing that needs the signals connected

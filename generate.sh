@@ -9,6 +9,7 @@ sudo apt install -y \
         binutils \
         libxkbcommon-dev \
         qt6-base-dev \
+        qt6-charts-dev \
         qt6-wayland
 
 for i in clang clangd clang-format

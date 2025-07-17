@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 # set(CMAKE_AUTOUIC ON)) # not needed
 add_compile_options(-Wall -Wextra) # must be before add_executable()
 add_executable(${PROJECT_NAME} ${sources} ${resources})
-set(QTLIBLIST Widgets) # Core Gui
+set(QTLIBLIST Widgets Charts) # Core Gui
 find_package(Qt6 REQUIRED ${QTLIBLIST})
 foreach(qtlib ${QTLIBLIST})
   target_link_libraries(${PROJECT_NAME} Qt6::${qtlib})

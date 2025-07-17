@@ -25,6 +25,9 @@ ninja
 - logic: bug sometimes dispense zero or very little: detect and dispense again
   needs to detect eat events
 
+- have interia in the Dial
+  so that it's easy to use for small and big changes
+
 - logging
   log eat events and dispense events
   log weight signal raw and processed
