@@ -29,12 +29,13 @@ void MainWindow::setAutomaticSize() {
   if (::isFullscreen) {
     showFullScreen();
   } else {
-    showNormal();
     if (isSmallScreen) {
-      setWindowState(Qt::WindowMaximized);
+      // setWindowState(Qt::WindowMaximized);
+      showMaximized();
     } else {
       // use the resolution of the pi
       resize(800, 480);
+      showNormal();
     }
   }
 }
@@ -44,6 +45,6 @@ QIcon MainWindow::StandardIcon(QStyle::StandardPixmap name) {
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event) {
-  qDebug() << "Main Window size" << event->size();
+  qDebug() << "MainWindow:" << event->size();
   QMainWindow::resizeEvent(event);
 }

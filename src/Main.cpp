@@ -63,8 +63,6 @@ int main(int argc, char** argv) {
 
     // update Delay so that it's displayed on startup, no wait for first tick
     delay->setRemaining(logic->timeToDispense());
-
-    window->show();  // must be after window is  finished constructing and after setStyleSheet
   }
 
   // Connect Signals
