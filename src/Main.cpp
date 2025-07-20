@@ -63,6 +63,22 @@ int main(int argc, char** argv) {
 
     // update Delay so that it's displayed on startup, no wait for first tick
     delay->setRemaining(logic->timeToDispense());
+
+    brightness.setCallbackOnChange([window](bool isOn) {
+      if (isOn == false) {
+        // if we're going to screen saver
+        // then disable all the widgets
+        // because we must not be able to interact with widgets
+        // when the screen is off
+        window->setEnabled(false);
+      } else {
+        // if we just woke up from screen saver
+        // wait a bit before enabling all the widgets
+        // so that they do not react on the event that woke us up
+        // because touching/clicking a screen that is off must not handle the event
+        QTimer::singleShot(250, [window] { window->setEnabled(true); });
+      }
+    });
   }
 
   // Connect Signals

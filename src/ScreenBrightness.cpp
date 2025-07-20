@@ -6,6 +6,7 @@
 #include <QTimer>
 
 #include "Settings.hpp"
+#include "System.hpp"
 
 using namespace std;
 
@@ -23,8 +24,9 @@ namespace {
   auto const rangeMax = 100;
   auto procfile = QFile{findProcFilePath()};
   auto isOn = true;
-  int delayScreenSaverMinutes;
+  int delayScreenSaverMinutes = 1;
   QTimer timerInactive;
+  std::function<void(bool)> onChangeCallback = nullptr;
 
   void change(int byte) {
     if (procfile.exists() == false) {
@@ -42,12 +44,17 @@ namespace {
       return;
     }
     ::isOn = isOn;
+    if (onChangeCallback != nullptr) {
+      onChangeCallback(isOn);
+    }
     // qDebug() << Q_FUNC_INFO << isOn;
     change(isOn ? Settings::get("ScreenBrightness").toInt() : 0);
   }
 }
 
 ScreenBrightness::ScreenBrightness() {
+  AssertSingleton();
+
   Settings::load({"ScreenBrightness",
                   "Luminosité de l'écran",
                   "",
@@ -92,3 +99,7 @@ ScreenBrightness::ScreenBrightness() {
 }
 
 void ScreenBrightness::reset() { change(rangeMax); }
+
+void ScreenBrightness::setCallbackOnChange(std::function<void(bool)> onChangeCallback) {
+  ::onChangeCallback = onChangeCallback;
+}

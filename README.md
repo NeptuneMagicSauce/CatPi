@@ -7,6 +7,9 @@ ninja
 
 # TODO
 
+- bug A: sometimes it dispenses soon after starting
+  maybe after fiddling with the delay timer?
+
 - signal of weight is noisy
   it easily goes over threshold because of spikes
   average, median: research a bit
@@ -27,6 +30,12 @@ ninja
 
 - have interia in the Dial
   so that it's easy to use for small and big changes
+
+- auto run on boot
+
+- auto restart on crash
+  but not on quit
+  and not forever: max X times per Y period
 
 - logging
   log eat events and dispense events
@@ -219,3 +228,6 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   give more screen space to the Delay dial: is it smooth now?
 - translate all labels to french
 - labels Delay and Remaining: bigger? but where!
+- bug: when screen saver is on (screen turned off)
+  waking by touching does fire the buttons
+  fix = set MainWindow QWidget::disabled when screen saver is on
