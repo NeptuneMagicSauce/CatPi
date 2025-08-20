@@ -32,11 +32,17 @@ Temperature::Temperature() {
       process->start("vcgencmd", {"measure_temp"});
       process->waitForFinished();
       auto temperature = process->readAll();
+      if (temperature.startsWith("temp=") == false) {
+        temperature = "temp=";
+      }
       // temperature = "temp=49.6'C";
 
       process->start("vcgencmd", {"measure_volts"});
       process->waitForFinished();
       auto volts = process->readAll();
+      if (volts.startsWith("volt=") == false) {
+        volts = "volts=";
+      }
       // volts = "volt=0.9260V";
 
       label->setText(temperature + "\n" + volts);

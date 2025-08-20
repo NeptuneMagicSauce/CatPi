@@ -11,6 +11,7 @@
 #include "Debug.hpp"
 #include "Delay.hpp"
 #include "DeltaDial.hpp"
+#include "FilterWeight.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
 #include "Logs.hpp"
@@ -42,6 +43,7 @@ int main(int argc, char** argv) {
   auto app = new QApplication(argc, argv);
   auto onlyone = OnlyOneInstance{};
   auto brightness = ScreenBrightness{};
+  auto filterweight = FilterWeight{};
   auto loadcell = new LoadCell;
   auto weight = new Weight;
   auto calibration = new Calibration;
@@ -118,10 +120,10 @@ int main(int argc, char** argv) {
     // LoadCell
     QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
       if (auto data = loadcell->read()) {
-        weight->update(data.value().value);
+        weight->update(filterweight.update(data.value().value));
         calibration->update(data.value().reading);
       } else {
-        weight->update({});
+        weight->update(filterweight.value());
         calibration->update({});
       }
     });

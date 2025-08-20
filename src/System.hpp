@@ -1,3 +1,5 @@
+#include <cassert>
+
 #define AssertSingleton()     \
   {                           \
     static auto first = true; \

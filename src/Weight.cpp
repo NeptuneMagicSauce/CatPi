@@ -8,8 +8,6 @@
 #include <iomanip>
 #include <iostream>
 
-// #include "Emojis.hpp"
-#include "LoadCell.hpp"
 #include "ProtectedButton.hpp"
 #include "Settings.hpp"
 #include "System.hpp"

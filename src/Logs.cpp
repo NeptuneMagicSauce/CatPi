@@ -104,10 +104,10 @@ namespace {
 
     for (auto series : {
              raw,  //
-             // average10,   //
+             // average10,  //
              // average50,   //
              // average100,  //
-             // median10,  //
+             median10,  //
              median20,
              // median30,  //
              // median50,  //
