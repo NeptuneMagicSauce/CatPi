@@ -16,6 +16,7 @@
 #include "Logs.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
+#include "Menu.hpp"
 #include "OnlyOneInstance.hpp"
 #include "ProtectedButton.hpp"
 #include "ScreenBrightness.hpp"
@@ -49,8 +50,10 @@ int main(int argc, char** argv) {
   auto logs = new Logs;
   auto toolbar = new ToolBar;
   auto debug = new Debug;
+  auto menu = new Menu;
   auto mainscreen = new MainScreen{weight, delay};
-  auto central = new CentralWidget{{new SubScreen("", mainscreen),
+  auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
+                                    new SubScreen("Menu", menu),                //
                                     new SubScreen("Calibration", calibration),  //
                                     new SubScreen("Debug", debug)}};
   auto window = new MainWindow{central, toolbar};
@@ -99,9 +102,12 @@ int main(int argc, char** argv) {
       window->toggleFullscreen(isFullscreen);
       toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(isFullscreen));
     });
-    QObject::connect(toolbar->calibration, &QAction::triggered,
+    QObject::connect(toolbar->menu, &QAction::triggered, [&] { central->setPage(menu); });
+
+    // Menu
+    QObject::connect(menu->calibration, &QAbstractButton::released,
                      [&]() { central->setPage(calibration); });
-    QObject::connect(toolbar->debug, &QAction::triggered, [&] { central->setPage(debug); });
+    QObject::connect(menu->debug, &QAbstractButton::released, [&] { central->setPage(debug); });
 
     // Dispense
     QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
@@ -125,7 +131,13 @@ int main(int argc, char** argv) {
                      [&] { central->statusMessage(weight->messageFinished); });
 
     // SubScreens
-    SubScreen::connect([&] { central->setPage(mainscreen); });
+    SubScreen::connect([&] {
+      if (menu->isVisible()) {
+        central->setPage(mainscreen);
+      } else {
+        central->setPage(menu);
+      }
+    });
 
     // Calibration
     QObject::connect(calibration->buttons.step1, &QAbstractButton::released,

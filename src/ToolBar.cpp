@@ -22,25 +22,20 @@ ToolBar::ToolBar() {
   setFixedWidth(90);
   setIconSize({90, 90});
 
-  fullscreen = new QAction();
+  fullscreen = new QAction;
   fullscreen->setIcon(fullScreenIcon(false));
   fullscreen->setText("Fullscreen");
 
-  calibration = new QAction();
-  calibration->setIcon(QIcon{QPixmap("://settings.png")});
-  calibration->setText("Weight Calibration");
-
-  debug = new QAction();
-  debug->setIcon(QIcon{QPixmap("://bug.png")});
-  debug->setText("Debug");
+  menu = new QAction;
+  menu->setIcon(QIcon{QPixmap{"://burgermenu.png"}});
+  menu->setText("Menu");
 
   quit = new QAction();
-  quit->setIcon(QIcon{QPixmap("://quit.png")});
+  quit->setIcon(QIcon{QPixmap{"://quit.png"}});
   quit->setText("Quit");
 
+  addAction(menu);
   addAction(fullscreen);
-  addAction(calibration);
-  addAction(debug);
   addWidget(Widget::Spacer());
   addAction(quit);
 }

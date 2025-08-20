@@ -106,11 +106,12 @@ struct Setting : public QWidget {
 };
 
 Debug::Debug() {
-  setStyleSheet("QWidget{font-size: 15pt;}");
+  Widget::FontSized(this, 15);
   auto layout = new QGridLayout;
   setLayout(layout);
   auto const itemsPerRow = 3;
   int index = 0;
+
   QList<QString> obsoleteKeys;
   for (auto key : Settings::keys()) {
     if (Settings::isLoaded(key) == false) {

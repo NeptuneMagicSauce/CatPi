@@ -29,4 +29,10 @@
     <qresource>
         <file>night.png</file>
     </qresource>
+    <qresource>
+        <file>temperature.png</file>
+    </qresource>
+    <qresource>
+        <file>burgermenu.png</file>
+    </qresource>
 </RCC>
