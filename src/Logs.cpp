@@ -39,7 +39,7 @@ Logs::Logs() {
   Widget::FontSized(table, 15);
 }
 
-void Logs::updateLogs(const QList<Logic::Event>& events) {
+void Logs::updateLogs(const QList<Event>& events) {
   // TODO measure cpu usage, only update on change
   if (events.isEmpty()) {
     return;

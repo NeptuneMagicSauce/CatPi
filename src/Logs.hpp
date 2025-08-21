@@ -1,8 +1,8 @@
 #include <QWidget>
 
-#include "Logic.hpp"
+#include "Event.hpp"
 
 struct Logs : public QWidget {
   Logs();
-  void updateLogs(const QList<Logic::Event>& events);
+  void updateLogs(const QList<Event>& events);
 };

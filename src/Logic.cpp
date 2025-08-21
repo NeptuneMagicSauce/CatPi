@@ -26,7 +26,7 @@ struct LogicImpl {
   const QString delayKey = "Delay";
   int delaySeconds = 0;
   qint64 elapsed = 0;
-  QList<Logic::Event> events;
+  QList<Event> events;
 
   void dispense(bool hasGPIO, QTimer* timerEndDispense);
   void logEvent(QString const& event);
@@ -187,4 +187,4 @@ void Logic::setDelaySeconds(int delaySeconds) {
   Settings::set(impl->delayKey, impl->delaySeconds);
 }
 
-const QList<Logic::Event>& Logic::events() const { return impl->events; }
+const QList<Event>& Logic::events() const { return impl->events; }
