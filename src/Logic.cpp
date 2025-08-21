@@ -28,7 +28,7 @@ struct LogicImpl {
   const QString delayKey = "Delay";
   const int durationDispenseRelayMilliseconds = 4000;
   int delaySeconds = 0;
-  qint64 elapsed = 0;
+  qint64 elapsedSeconds = 0;
   QList<Event> events;
   double dispensedWeight = 0.0;
   double weightThreshold = 0.4;
@@ -151,6 +151,7 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mo
 void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& dispensed) {
   auto& previousDispense = impl->previousDispense;
   auto& events = impl->events;
+  auto& elapsedSeconds = impl->elapsedSeconds;
 
   auto now = QDateTime::currentDateTime();
 
@@ -158,9 +159,8 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
                                   ? (weightTarred.value() < impl->weightThreshold)
                                   : (hasGPIO ? false : true);
   auto start = previousDispense.value_or(impl->startTime);
-  auto elapsedSeconds = start.secsTo(now);
+  elapsedSeconds = start.secsTo(now);
   auto timeAboveThreshold = elapsedSeconds > impl->delaySeconds;
-  impl->elapsed = elapsedSeconds;
 
   if (previousDispense.has_value() && elapsedSeconds < 10 && weightTarred.has_value()) {
     // compute and store the dispensed weight
@@ -217,7 +217,7 @@ void LogicImpl::logEvent(QString const& event) {
   file.close();
 }
 
-int Logic::timeToDispense() { return std::max(0, impl->delaySeconds - (int)impl->elapsed); }
+int Logic::timeToDispense() { return std::max(0, impl->delaySeconds - (int)impl->elapsedSeconds); }
 
 void Logic::changeDelay(int delta) {
   if (impl->delaySeconds >= 60) {
