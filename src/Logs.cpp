@@ -34,7 +34,8 @@ Logs::Logs() {
 
   table->setSelectionMode(QAbstractItemView::NoSelection);
 
-  table->setSizePolicy({QSizePolicy::Policy::Minimum, table->sizePolicy().verticalPolicy()});
+  // size policy: not needed with spacer in class that composites me (Menu)
+  // table->setSizePolicy({QSizePolicy::Policy::Minimum, table->sizePolicy().verticalPolicy()});
 
   Widget::FontSized(table, 15);
 }

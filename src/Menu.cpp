@@ -34,7 +34,9 @@ Menu::Menu() {
 
   auto layout = new QHBoxLayout;
   setLayout(layout);
+  layout->addWidget(Widget::Spacer());
   layout->addWidget(leftSide);
+  layout->addWidget(Widget::Spacer());
   layout->addWidget(rightSide);
   layout->addWidget(Widget::Spacer());
 }
