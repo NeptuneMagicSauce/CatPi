@@ -1,4 +1,9 @@
+#pragma once
+
 struct QTimer;
+
+#include <QDateTime>
+#include <QList>
 #include <QString>
 #include <optional>
 
@@ -18,4 +23,11 @@ struct Logic {
   void setDelaySeconds(int delaySeconds);
   int timeToDispense();
   static void closeRelay();
+
+  // TODO move this declaration out of Logic class and remove pragma
+  struct Event {
+    QDateTime timeDispensed;
+    std::optional<QDateTime> timeEaten;
+  };
+  const QList<Event>& events() const;
 };

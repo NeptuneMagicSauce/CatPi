@@ -19,6 +19,7 @@
 #include "MainWindow.hpp"
 #include "Menu.hpp"
 #include "OnlyOneInstance.hpp"
+#include "Plots.hpp"
 #include "ProtectedButton.hpp"
 #include "ScreenBrightness.hpp"
 #include "SubScreen.hpp"
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
   auto calibration = new Calibration;
   auto logic = new Logic;
   auto delay = new Delay;
-  auto logs = new Logs;
+  auto logs = new Plots;
   auto toolbar = new ToolBar;
   auto debug = new Debug;
   auto menu = new Menu;
@@ -174,6 +175,8 @@ int main(int argc, char** argv) {
         mainscreen->dispenseButton->setEnabled(false);
         weight->doTare();
       }
+
+      menu->logs->updateLogs(logic->events());
     });
 
     // Delay
@@ -200,7 +203,7 @@ int main(int argc, char** argv) {
     crashShortcut->setContext(Qt::ApplicationShortcut);
     QObject::connect(crashShortcut, &QShortcut::activated, app, [&]() { crashTester->show(); });
 
-    // Logs
+    // Plots
     logs->connect(window);
   }
 

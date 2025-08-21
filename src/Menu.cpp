@@ -1,9 +1,12 @@
 #include "Menu.hpp"
 
 #include <QBoxLayout>
+#include <QGroupBox>
 #include <QToolButton>
 
+#include "Logs.hpp"
 #include "Temperature.hpp"
+#include "Widget.hpp"
 
 Menu::Menu() {
   calibration = new QToolButton;
@@ -16,9 +19,22 @@ Menu::Menu() {
   debug->setText("Debug");
   debug->setIconSize({100, 100});
 
-  auto layout = new QVBoxLayout;
+  auto leftSide = new QGroupBox;
+  auto leftLayout = new QVBoxLayout;
+  leftSide->setLayout(leftLayout);
+  leftLayout->addWidget(debug);
+  leftLayout->addWidget(calibration);
+  leftLayout->addWidget(new Temperature);
+
+  auto rightSide = new QGroupBox;
+  auto rightLayout = new QVBoxLayout;
+  rightSide->setLayout(rightLayout);
+  logs = new Logs;
+  rightLayout->addWidget(logs);
+
+  auto layout = new QHBoxLayout;
   setLayout(layout);
-  layout->addWidget(debug);
-  layout->addWidget(calibration);
-  layout->addWidget(new Temperature);
+  layout->addWidget(leftSide);
+  layout->addWidget(rightSide);
+  layout->addWidget(Widget::Spacer());
 }

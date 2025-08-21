@@ -20,11 +20,13 @@ struct LogicImpl {
   LogicImpl();
 
   optional<QDateTime> previousDispense;
+  bool dispensedIsEaten = false;
   QFile logFile;
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
   int delaySeconds = 0;
   qint64 elapsed = 0;
+  QList<Logic::Event> events;
 
   void dispense(bool hasGPIO, QTimer* timerEndDispense);
   void logEvent(QString const& event);
@@ -114,6 +116,11 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense) {
   logEvent(log);
 
   previousDispense = now;
+  dispensedIsEaten = false;
+  events.append({now, {}});
+  while (events.size() > 100) {
+    events.removeFirst();
+  }
 }
 
 void Logic::update(std::optional<double> weightTarred, double tare, bool& dispensed) {
@@ -127,6 +134,17 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   auto timeAboveThreshold = elapsed > impl->delaySeconds;
   impl->elapsed = elapsed;
 
+  auto justAte = impl->previousDispense.has_value() &&  //
+                 impl->dispensedIsEaten == false &&     //
+                 weightAboveThreshold == false;
+  if (justAte) {
+    impl->dispensedIsEaten = true;
+    if (impl->events.empty() == false) {
+      auto& event = impl->events[impl->events.size() - 1];
+      event.timeEaten = now;
+    }
+  }
+
   auto log = QString{};
   for (auto toLog : vector<QString>{
            now.time().toString(),
@@ -135,6 +153,7 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
            QString{"dispense: "} +
                (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
            QString{"elapsed: "} + QString::number(elapsed),
+           QString{"justAte: "} + QString::number((int)justAte),
        }) {
     log += toLog + ", ";
   }
@@ -167,3 +186,5 @@ void Logic::setDelaySeconds(int delaySeconds) {
   impl->delaySeconds = std::max(10, delaySeconds);
   Settings::set(impl->delayKey, impl->delaySeconds);
 }
+
+const QList<Logic::Event>& Logic::events() const { return impl->events; }

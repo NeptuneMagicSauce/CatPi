@@ -1,7 +1,8 @@
 #include <QWidget>
 
-struct QMainWindow;
+#include "Logic.hpp"
 
 struct Logs : public QWidget {
-  void connect(QMainWindow* window);
+  Logs();
+  void updateLogs(const QList<Logic::Event>& events);
 };
