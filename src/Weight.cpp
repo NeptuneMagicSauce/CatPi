@@ -40,12 +40,14 @@ optional<double> Weight::weightTarred() { return impl->weightTarred; }
 Weight::Weight()
     :  // messageFinished(Emojis::get(Emojis::Type::OkayWithThreeVSigns))
       messageFinished("Tare OK") {
+  AssertSingleton();
   impl = new WeightImpl();
   setLayout(impl->layout);
+
+  QObject::connect(impl->tare.button.finished, &QTimer::timeout, [&] { doTare(); });
 }
 
 WeightImpl::WeightImpl() {
-  AssertSingleton();
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   labelFooter->setText("grammes");
   labelFooter->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -68,14 +70,14 @@ WeightImpl::WeightImpl() {
   layout->addWidget(label);
   layout->addWidget(labelFooter);
   layout->addWidget(&tare.button);
-
-  QObject::connect(tare.button.finished, &QTimer::timeout, [&] {
-    tare.value = massGrams;
-    Settings::set(tare.key, tare.value);
-  });
 }
 
-double Weight::tare() { return impl->tare.value; }
+double Weight::getTare() { return impl->tare.value; }
+
+void Weight::doTare() {
+  impl->tare.value = impl->massGrams;
+  Settings::set(impl->tare.key, impl->tare.value);
+}
 
 QTimer *Weight::eventTareFinished() { return impl->tare.button.finished; }
 

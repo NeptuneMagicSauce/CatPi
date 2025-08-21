@@ -12,6 +12,7 @@ class Weight : public QGroupBox {
   QTimer* eventTareFinished();
 
   void update(std::optional<double> value);
-  double tare();
+  double getTare();
+  void doTare();
   std::optional<double> weightTarred();
 };

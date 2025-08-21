@@ -115,6 +115,7 @@ int main(int argc, char** argv) {
     QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
       mainscreen->dispenseButton->setEnabled(false);
       logic->manualDispense();
+      weight->doTare();
     });
 
     // LoadCell
@@ -165,12 +166,13 @@ int main(int argc, char** argv) {
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
       delay->setRemaining(logic->timeToDispense());
 
-      auto tare = weight->tare();
+      auto tare = weight->getTare();
       auto weightTarred = weight->weightTarred();
       auto dispensed = false;
       logic->update(weightTarred, tare, dispensed);
       if (dispensed) {
         mainscreen->dispenseButton->setEnabled(false);
+        weight->doTare();
       }
     });
 
