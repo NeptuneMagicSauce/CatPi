@@ -14,6 +14,7 @@ ninja
   per day, per 24 hours
   log weight signal raw and processed
   rotate / compress the logs for disk
+  one file per day, compress at end of day
 
 - debug setting "minWeightThreshold"
 

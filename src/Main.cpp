@@ -35,13 +35,21 @@ namespace {
   }
 }
 
+struct Application : public QApplication {
+  Application(int& argc, char** argv) : QApplication(argc, argv) {
+    // app name is needed for AppData location, consumed by Logic for logging
+    // otherwise it is derived from file name, which may be a varying symlink
+    setApplicationName("CatPi");
+  }
+};
+
 int main(int argc, char** argv) {
   CrashHandler::instance->cleanUpCallback = [] { cleanup(); };
   CrashHandler::instance->reportCallback = [](const std::string& error, const string& stack) {
     CrashDialog::ShowStackTrace(QString::fromStdString(error), QString::fromStdString(stack));
   };
 
-  auto app = new QApplication(argc, argv);
+  auto app = new Application(argc, argv);
   auto onlyone = OnlyOneInstance{};
   auto brightness = ScreenBrightness{};
   auto filterweight = FilterWeight{};
