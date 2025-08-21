@@ -1,6 +1,7 @@
 #include "Logs.hpp"
 
 #include <QBoxLayout>
+#include <QLabel>
 #include <QTableWidget>
 #include <iomanip>
 #include <iostream>
@@ -10,18 +11,28 @@
 
 namespace {
   QTableWidget* table = nullptr;
+  QLabel* summary;
 
   auto stringToItem(const QString& str) {
     auto ret = new QTableWidgetItem(str);
     ret->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
     return ret;
   }
+
+  auto formatWeight(const auto& grams) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(1) << grams;
+    return QString::fromStdString(ss.str());
+  }
 }
 
 Logs::Logs() {
   AssertSingleton();
+
   auto layout = new QVBoxLayout;
   setLayout(layout);
+
+  Widget::FontSized(this, 15);
 
   table = new QTableWidget;
   layout->addWidget(table);
@@ -29,7 +40,7 @@ Logs::Logs() {
   table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  table->setRowCount(8);
+  table->setRowCount(7);
   table->setColumnCount(3);
 
   table->setHorizontalHeaderLabels({"Distribué", "Grammes", "Mangé"});
@@ -39,9 +50,10 @@ Logs::Logs() {
   // size policy: not needed with spacer in class that composites me (Menu)
   // table->setSizePolicy({QSizePolicy::Policy::Minimum, table->sizePolicy().verticalPolicy()});
 
-  Widget::FontSized(table, 15);
-
   setMinimumWidth(350);
+
+  summary = new QLabel;
+  layout->addWidget(summary);
 }
 
 void Logs::updateLogs(const QList<Event>& events) {
@@ -63,9 +75,7 @@ void Logs::updateLogs(const QList<Event>& events) {
     table->setItem(row, 0, stringToItem(event.timeDispensed.time().toString()));
 
     // weight
-    std::ostringstream ss;
-    ss << std::fixed << std::setprecision(1) << event.grams;
-    table->setItem(row, 1, stringToItem(QString::fromStdString(ss.str())));
+    table->setItem(row, 1, stringToItem(formatWeight(event.grams)));
 
     // eat
     if (event.timeEaten.has_value()) {
@@ -75,4 +85,20 @@ void Logs::updateLogs(const QList<Event>& events) {
     ++row;
     ++eventIndex;
   }
+
+  auto now = QDateTime::currentDateTime();
+  auto dateNow = now.date();
+  auto totalToday = 0.0;
+  auto total24hours = 0.0;
+  for (auto const& event : events) {
+    if (event.timeDispensed.date() == dateNow) {
+      totalToday += event.grams;
+    }
+    if (event.timeDispensed.secsTo(now) < 60 * 60 * 24) {
+      total24hours += event.grams;
+    }
+  }
+
+  summary->setText("Total Jour: " + formatWeight(totalToday) + " grammes\n" +
+                   "Total 24 heures: " + formatWeight(total24hours) + " grammes");
 }

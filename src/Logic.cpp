@@ -133,9 +133,6 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mo
   dispensedWeight = 0;
 
   events.append({now, 0, {}});
-  while (events.size() > 100) {
-    events.removeFirst();
-  }
 
   auto log = now.toString();
   log += ", dispense, ";
@@ -145,6 +142,8 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mo
 
 void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& dispensed) {
   auto& previousDispense = impl->previousDispense;
+  auto& events = impl->events;
+
   auto now = QDateTime::currentDateTime();
 
   auto weightBelowThreshold =
@@ -157,8 +156,8 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
   if (previousDispense.has_value() && elapsedSeconds < 10 && weightTarred.has_value()) {
     // compute and store the dispensed weight
     impl->dispensedWeight = std::max(weightTarred.value(), impl->dispensedWeight);
-    if (impl->events.empty() == false) {  // must be true
-      auto& event = impl->events[impl->events.size() - 1];
+    if (events.empty() == false) {  // must be true
+      auto& event = events[events.size() - 1];
       event.grams = impl->dispensedWeight;
     }
   }
@@ -169,8 +168,8 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
                  weightBelowThreshold == true;
   if (justAte) {
     impl->dispensedIsEaten = true;
-    if (impl->events.empty() == false) {  // must be true
-      auto& event = impl->events[impl->events.size() - 1];
+    if (events.empty() == false) {  // must be true
+      auto& event = events[events.size() - 1];
       event.timeEaten = now;
       impl->logEvent(now.toString() + ", eat");
     }
@@ -192,6 +191,11 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
   if (timeAboveThreshold && weightBelowThreshold) {
     impl->dispense(hasGPIO, timerEndDispense, DispenseMode::Automatic);
     dispensed = true;
+  }
+
+  // remove events older than 24 hours
+  while (events.isEmpty() == false && events.first().timeDispensed.secsTo(now) > 60 * 60 * 24) {
+    events.removeFirst();
   }
 }
 

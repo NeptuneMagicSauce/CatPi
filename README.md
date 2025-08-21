@@ -7,13 +7,6 @@ ninja
 
 # TODO
 
-- logging
-  log eat events
-  log dispense events
-  one log file per day (or hour)
-  log dispensed weight
-  per day, per 24 hours : number of events and weight in the GUI
-
 - debug setting "minWeightThreshold"
 
 - logic: dont dispense right after eating, have a delay
@@ -32,6 +25,12 @@ ninja
   and not forever: max X times per Y period
 
 # TODO but later for V2
+
+- computing the dispensed weight is slightly inaccurate
+  because it is the maximum seen in the 10 seconds following a dispense
+  and sometimes it stabilizes a bit below the maximum, like 0.1 gram
+  so fix would be maybe "weight at dispense + 10 seconds"
+  no because it can be eaten already
 
 - compress previous log file, when it's a new day (new log file)
 
@@ -241,3 +240,9 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   xor display it smaller
   xor do not display status messages
 - detect eat events
+- logging
+  log eat events
+  log dispense events
+  one log file per day (or hour)
+  log dispensed weight
+  per day, per 24 hours : number of events and weight in the GUI
