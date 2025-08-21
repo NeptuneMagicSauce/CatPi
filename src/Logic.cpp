@@ -151,7 +151,7 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mo
 void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& dispensed) {
   auto& previousDispense = impl->previousDispense;
   auto& events = impl->events;
-  auto& elapsedSeconds = impl->elapsedSeconds;
+  auto& elapsedSecondsSinceDispense = impl->elapsedSeconds;
 
   auto now = QDateTime::currentDateTime();
 
@@ -159,22 +159,33 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
                                   ? (weightTarred.value() < impl->weightThreshold)
                                   : (hasGPIO ? false : true);
   auto start = previousDispense.value_or(impl->startTime);
-  elapsedSeconds = start.secsTo(now);
-  auto timeAboveThreshold = elapsedSeconds > impl->delaySeconds;
+  elapsedSecondsSinceDispense = start.secsTo(now);
 
-  if (previousDispense.has_value() && elapsedSeconds < 10 && weightTarred.has_value()) {
+  // time threshold should not dependi only on time since dispense
+  // because then it will re-dispense right after eating
+  // time threshold should depend on time since eating
+  auto timeAboveThreshold = false;
+  if (events.empty() == false && events.last().timeEaten.has_value()) {
+    auto elapsedSecondsSinceEating = events.last().timeEaten.value().secsTo(now);
+    timeAboveThreshold = elapsedSecondsSinceEating > impl->delaySeconds;
+  } else {
+    timeAboveThreshold = elapsedSecondsSinceDispense > impl->delaySeconds;
+  }
+
+  if (previousDispense.has_value() && elapsedSecondsSinceDispense < 10 &&
+      weightTarred.has_value()) {
     // compute and store the dispensed weight
     impl->dispensedWeight = std::max(weightTarred.value(), impl->dispensedWeight);
     if (events.empty() == false) {  // must be true
-      auto& event = events[events.size() - 1];
-      event.grams = impl->dispensedWeight;
+      events.last().grams = impl->dispensedWeight;
     }
   }
 
-  auto justAte = previousDispense.has_value() &&                                             //
-                 impl->dispensedIsEaten == false &&                                          //
-                 elapsedSeconds > (impl->durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
-                 weightBelowThreshold == true;
+  auto justAte =
+      previousDispense.has_value() &&                                                          //
+      impl->dispensedIsEaten == false &&                                                       //
+      elapsedSecondsSinceDispense > (impl->durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
+      weightBelowThreshold == true;
   if (justAte) {
     impl->dispensedIsEaten = true;
     if (events.empty() == false) {  // must be true

@@ -7,11 +7,6 @@ ninja
 
 # TODO
 
-- logic: dont dispense right after eating, have a delay
-  needs to detect eat events
-  which needs a reliable weight signal
-  which needs the processing
-
 - auto run on boot
 
 - auto restart on crash
@@ -245,3 +240,7 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   log dispensed weight
   per day, per 24 hours : number of events and weight in the GUI
 - debug setting minWeightThreshold
+- logic: dont dispense right after eating, have a delay
+  needs to detect eat events
+  which needs a reliable weight signal
+  which needs the processing
