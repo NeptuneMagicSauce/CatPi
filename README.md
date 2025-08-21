@@ -11,7 +11,7 @@ ninja
   log eat events
   log dispense events
   log dispensed weight
-  per day, per 24 hours
+  per day, per 24 hours : number of events and weight
   log weight signal raw and processed
   rotate / compress the logs for disk
   one file per day, compress at end of day

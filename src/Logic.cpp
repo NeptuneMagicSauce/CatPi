@@ -5,7 +5,7 @@
 #include <QStandardPaths>
 #include <QTimer>
 #include <iostream>
-#include <vector>
+// #include <vector>
 
 #include "PinCtrl.hpp"
 #include "Settings.hpp"
@@ -29,10 +29,15 @@ struct LogicImpl {
   qint64 elapsed = 0;
   QList<Event> events;
 
-  void dispense(bool hasGPIO, QTimer* timerEndDispense);
+  enum struct DispenseMode { Automatic, Manual };
+
+  void dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mode);
   void logEvent(QString const& event);
   std::function<void(int)> updateGuiCallback = nullptr;
 };
+
+using DispenseMode = LogicImpl::DispenseMode;
+
 namespace {
   LogicImpl* impl = nullptr;
 }
@@ -99,11 +104,10 @@ void Logic::connect(std::function<void(int)> updateGuiCallback) {
   QObject::connect(timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
 }
 
-void Logic::manualDispense() { impl->dispense(hasGPIO, timerEndDispense); }
+void Logic::manualDispense() { impl->dispense(hasGPIO, timerEndDispense, DispenseMode::Manual); }
 
-void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense) {
+void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mode) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
-  // pinctrl("-p");
   if (hasGPIO) {
     pinctrl("set 17 op dh");
   }
@@ -111,20 +115,21 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense) {
 
   auto now = QDateTime::currentDateTime();
 
-  auto log = QString{">> Dispense, elapsed "};
-  log += QString::number(previousDispense.has_value() ? previousDispense.value().secsTo(now) : -1);
-  log += QString{", "} + now.toString();
-  logEvent(log);
-
   previousDispense = now;
   dispensedIsEaten = false;
+
   events.append({now, {}});
   while (events.size() > 100) {
     events.removeFirst();
   }
+
+  auto log = now.toString();
+  log += ", dispense, ";
+  log += mode == DispenseMode::Automatic ? "automatic" : "manual";
+  logEvent(log);
 }
 
-void Logic::update(std::optional<double> weightTarred, double tare, bool& dispensed) {
+void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& dispensed) {
   auto& dispenseTime = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
@@ -135,41 +140,34 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   auto timeAboveThreshold = elapsedSeconds > impl->delaySeconds;
   impl->elapsed = elapsedSeconds;
 
-  // impl->durationDispenseRelayMilliseconds;
-
   auto justAte = impl->previousDispense.has_value() &&                                       //
                  impl->dispensedIsEaten == false &&                                          //
                  elapsedSeconds > (impl->durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
                  weightBelowThreshold == true;
   if (justAte) {
-    // qDebug() << "elapsed seconds" << elapsedSeconds;
-    // qDebug() << "weight"
-    //          << (weightTarred.has_value()  //
-    //                  ? QString::number(weightTarred.value())
-    //                  : "n/a");
     impl->dispensedIsEaten = true;
-    if (impl->events.empty() == false) {
+    if (impl->events.empty() == false) {  // must be true
       auto& event = impl->events[impl->events.size() - 1];
       event.timeEaten = now;
+      impl->logEvent(now.toString() + ", eat");
     }
   }
 
-  auto log = QString{};
-  for (auto toLog : vector<QString>{
-           now.time().toString(),
-           weightTarred.has_value() ? QString::number(weightTarred.value()) : QString{"no weight"},
-           QString{"tare: "} + QString::number(tare),
-           QString{"dispense: "} +
-               (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
-           QString{"elapsed: "} + QString::number(elapsedSeconds),
-           QString{"justAte: "} + QString::number((int)justAte),
-       }) {
-    log += toLog + ", ";
-  }
-  impl->logEvent(log);
+  // auto log = QString{};
+  // for (auto toLog : vector<QString>{
+  //          now.time().toString(),
+  //          weightTarred.has_value() ? QString::number(weightTarred.value()) : QString{"no
+  //          weight"}, QString{"tare: "} + QString::number(tare), QString{"dispense: "} +
+  //              (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
+  //          QString{"elapsed: "} + QString::number(elapsedSeconds),
+  //          QString{"justAte: "} + QString::number((int)justAte),
+  //      }) {
+  //   log += toLog + ", ";
+  // }
+  // impl->logEvent(log);
 
   if (timeAboveThreshold && weightBelowThreshold) {
-    impl->dispense(hasGPIO, timerEndDispense);
+    impl->dispense(hasGPIO, timerEndDispense, DispenseMode::Automatic);
     dispensed = true;
   }
 }
