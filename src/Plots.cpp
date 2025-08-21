@@ -32,9 +32,13 @@ namespace {
       auto weight = items[1].toDouble();
       listRaw << weight;
 
-      if (listRaw.size() == 10000 / 2) {
+      if (listRaw.size() == 2000 /* 5000 */) {
         break;
       }
+    }
+
+    for (int i = 0; i < 500; ++i) {
+      listRaw.removeFirst();
     }
 
     auto raw = new QLineSeries;
@@ -104,11 +108,11 @@ namespace {
 
     for (auto series : {
              raw,  //
-             // average10,  //
+             average10,
              // average50,   //
              // average100,  //
-             median10,  //
-             median20,
+             median10,
+             // median20,
              // median30,  //
              // median50,  //
              // median100    //
