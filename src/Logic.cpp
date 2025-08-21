@@ -31,6 +31,7 @@ struct LogicImpl {
   qint64 elapsed = 0;
   QList<Event> events;
   double dispensedWeight = 0.0;
+  double weightThreshold = 0.4;
 
   enum struct DispenseMode { Automatic, Manual };
 
@@ -63,6 +64,13 @@ Logic::Logic() {
                   1000,
                   [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
                   {20, {}}});
+  Settings::load({"WeightThresholdEaten",
+                  "Poids Minimum Mangé",
+                  "Poids en dessous duquel on détecte que c'est mangé",
+                  "Déci-Grammes",
+                  4,
+                  [&](QVariant v) { impl->weightThreshold = (double)v.toInt() / 10; },
+                  {1, 20}});
   timerUpdate->start();
 }
 
@@ -146,8 +154,9 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
 
   auto now = QDateTime::currentDateTime();
 
-  auto weightBelowThreshold =
-      weightTarred.has_value() ? (weightTarred.value() < 0.4) : (hasGPIO ? false : true);
+  auto weightBelowThreshold = weightTarred.has_value()
+                                  ? (weightTarred.value() < impl->weightThreshold)
+                                  : (hasGPIO ? false : true);
   auto start = previousDispense.value_or(impl->startTime);
   auto elapsedSeconds = start.secsTo(now);
   auto timeAboveThreshold = elapsedSeconds > impl->delaySeconds;

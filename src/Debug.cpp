@@ -109,7 +109,7 @@ Debug::Debug() {
   Widget::FontSized(this, 15);
   auto layout = new QGridLayout;
   setLayout(layout);
-  auto const itemsPerRow = 3;
+  auto const itemsPerRow = 4;
   int index = 0;
 
   QList<QString> obsoleteKeys;

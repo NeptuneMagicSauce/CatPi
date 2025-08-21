@@ -7,16 +7,10 @@ ninja
 
 # TODO
 
-- debug setting "minWeightThreshold"
-
 - logic: dont dispense right after eating, have a delay
   needs to detect eat events
   which needs a reliable weight signal
   which needs the processing
-
-- bug B: sometimes dispense zero or very little
-  detect it and dispense again
-  needs to detect eat events
 
 - auto run on boot
 
@@ -25,6 +19,10 @@ ninja
   and not forever: max X times per Y period
 
 # TODO but later for V2
+
+- bug B: sometimes dispense zero or very little
+  detect it and dispense again
+  needs to detect eat events
 
 - computing the dispensed weight is slightly inaccurate
   because it is the maximum seen in the 10 seconds following a dispense
@@ -246,3 +244,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   one log file per day (or hour)
   log dispensed weight
   per day, per 24 hours : number of events and weight in the GUI
+- debug setting minWeightThreshold
