@@ -45,7 +45,9 @@ Temperature::Temperature() {
       }
       // volts = "volt=0.9260V";
 
-      label->setText(temperature + "\n" + volts);
+      // using HTML in QLabel because it has normal line height
+      // otherwise it does not fit with big line height of default / non-html
+      label->setText("<p>" + temperature + "<br>" + volts + "</p>");
     }
   });
 }
