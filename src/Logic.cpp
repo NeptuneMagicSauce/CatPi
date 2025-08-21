@@ -24,6 +24,7 @@ struct LogicImpl {
   QFile logFile;
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
+  const int durationDispenseRelayMilliseconds = 4000;
   int delaySeconds = 0;
   qint64 elapsed = 0;
   QList<Event> events;
@@ -38,9 +39,10 @@ namespace {
 
 Logic::Logic() {
   AssertSingleton();
+  impl = new LogicImpl;
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
-  timerEndDispense->setInterval(4000);
+  timerEndDispense->setInterval(impl->durationDispenseRelayMilliseconds);
   timerUpdate = new QTimer;
   timerUpdate->setSingleShot(false);
   Settings::load({"LogicInterval",
@@ -51,7 +53,6 @@ Logic::Logic() {
                   [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
                   {20, {}}});
   timerUpdate->start();
-  impl = new LogicImpl;
 }
 
 int Logic::delaySeconds() { return impl->delaySeconds; }
@@ -127,17 +128,25 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
   auto& dispenseTime = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
-  auto weightAboveThreshold =
-      weightTarred.has_value() ? (weightTarred.value() < 0.8) : (hasGPIO ? false : true);
+  auto weightBelowThreshold =
+      weightTarred.has_value() ? (weightTarred.value() < 0.4) : (hasGPIO ? false : true);
   auto& start = dispenseTime.has_value() ? dispenseTime.value() : impl->startTime;
-  auto elapsed = start.secsTo(now);
-  auto timeAboveThreshold = elapsed > impl->delaySeconds;
-  impl->elapsed = elapsed;
+  auto elapsedSeconds = start.secsTo(now);
+  auto timeAboveThreshold = elapsedSeconds > impl->delaySeconds;
+  impl->elapsed = elapsedSeconds;
 
-  auto justAte = impl->previousDispense.has_value() &&  //
-                 impl->dispensedIsEaten == false &&     //
-                 weightAboveThreshold == false;
+  // impl->durationDispenseRelayMilliseconds;
+
+  auto justAte = impl->previousDispense.has_value() &&                                       //
+                 impl->dispensedIsEaten == false &&                                          //
+                 elapsedSeconds > (impl->durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
+                 weightBelowThreshold == true;
   if (justAte) {
+    // qDebug() << "elapsed seconds" << elapsedSeconds;
+    // qDebug() << "weight"
+    //          << (weightTarred.has_value()  //
+    //                  ? QString::number(weightTarred.value())
+    //                  : "n/a");
     impl->dispensedIsEaten = true;
     if (impl->events.empty() == false) {
       auto& event = impl->events[impl->events.size() - 1];
@@ -152,14 +161,14 @@ void Logic::update(std::optional<double> weightTarred, double tare, bool& dispen
            QString{"tare: "} + QString::number(tare),
            QString{"dispense: "} +
                (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
-           QString{"elapsed: "} + QString::number(elapsed),
+           QString{"elapsed: "} + QString::number(elapsedSeconds),
            QString{"justAte: "} + QString::number((int)justAte),
        }) {
     log += toLog + ", ";
   }
   impl->logEvent(log);
 
-  if (timeAboveThreshold && weightAboveThreshold) {
+  if (timeAboveThreshold && weightBelowThreshold) {
     impl->dispense(hasGPIO, timerEndDispense);
     dispensed = true;
   }
