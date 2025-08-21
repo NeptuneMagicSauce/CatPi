@@ -17,7 +17,6 @@ using namespace std;
 
 struct WeightImpl {
   WeightImpl();
-  void connect();
 
   optional<double> weightTarred;
   QLabel *label = new QLabel;
