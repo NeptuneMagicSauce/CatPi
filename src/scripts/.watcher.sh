@@ -1,4 +1,4 @@
-f=~/.local/share/CatPi/logs.txt
+f=~/.local/share/CatPi/logs/$(date +"%Y-%m-%d").txt
 
 du -h $f
 echo ""

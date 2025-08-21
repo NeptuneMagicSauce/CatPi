@@ -10,11 +10,9 @@ ninja
 - logging
   log eat events
   log dispense events
+  one log file per day (or hour)
   log dispensed weight
-  per day, per 24 hours : number of events and weight
-  log weight signal raw and processed
-  rotate / compress the logs for disk
-  one file per day, compress at end of day
+  per day, per 24 hours : number of events and weight in the GUI
 
 - debug setting "minWeightThreshold"
 
@@ -35,9 +33,13 @@ ninja
 
 # TODO but later for V2
 
-- display relevant logs in menu screen
-  short summary
-  plot in submenu maybe?
+- compress previous log file, when it's a new day (new log file)
+
+- log weight signal raw and processed, to check noise is inhibited
+
+- plot the dispense and eat events in a sub screen
+  or in a web page
+  with the total weight per day and per 24 hours
 
 - bug A: sometimes it dispenses soon after starting
   maybe after fiddling with the delay timer?

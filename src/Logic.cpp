@@ -1,6 +1,7 @@
 #include "Logic.hpp"
 
 #include <QDateTime>
+#include <QDir>
 #include <QFile>
 #include <QStandardPaths>
 #include <QTimer>
@@ -21,6 +22,7 @@ struct LogicImpl {
 
   optional<QDateTime> previousDispense;
   bool dispensedIsEaten = false;
+  QDir logDirectory;
   QFile logFile;
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
@@ -33,7 +35,10 @@ struct LogicImpl {
 
   void dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mode);
   void logEvent(QString const& event);
+
   std::function<void(int)> updateGuiCallback = nullptr;
+
+  void updateLogFile();
 };
 
 using DispenseMode = LogicImpl::DispenseMode;
@@ -62,14 +67,21 @@ Logic::Logic() {
 
 int Logic::delaySeconds() { return impl->delaySeconds; }
 
-LogicImpl::LogicImpl()
-    : logFile(
-          QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
-              .first() +
-          "/logs.txt") {
-  if (logFile.exists()) {
-    logFile.remove();
+void LogicImpl::updateLogFile() {
+  auto const fileName = QDateTime::currentDateTime().date().toString(Qt::ISODate);
+  auto const path = logDirectory.path() + "/" + fileName + ".txt";
+  if (logFile.fileName().isEmpty() == false && logFile.fileName() != path) {
+    logFile.close();
   }
+  logFile.setFileName(path);
+}
+
+LogicImpl::LogicImpl() {
+  logDirectory =
+      QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
+          .first() +
+      "/logs";
+  updateLogFile();
   cout << "Log: " << logFile.fileName().toStdString() << endl;
 
   auto logDirectory = logFile.filesystemFileName().parent_path();
@@ -174,6 +186,7 @@ void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& di
 
 void LogicImpl::logEvent(QString const& event) {
   // cout << log.toStdString() << endl;
+  updateLogFile();
   auto& file = impl->logFile;
   file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
   file.write((event + "\n").toUtf8());
