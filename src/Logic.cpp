@@ -30,6 +30,7 @@ struct LogicImpl {
   int delaySeconds = 0;
   qint64 elapsed = 0;
   QList<Event> events;
+  double dispensedWeight = 0.0;
 
   enum struct DispenseMode { Automatic, Manual };
 
@@ -129,8 +130,9 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mo
 
   previousDispense = now;
   dispensedIsEaten = false;
+  dispensedWeight = 0;
 
-  events.append({now, {}});
+  events.append({now, 0, {}});
   while (events.size() > 100) {
     events.removeFirst();
   }
@@ -142,17 +144,26 @@ void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mo
 }
 
 void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& dispensed) {
-  auto& dispenseTime = impl->previousDispense;
+  auto& previousDispense = impl->previousDispense;
   auto now = QDateTime::currentDateTime();
 
   auto weightBelowThreshold =
       weightTarred.has_value() ? (weightTarred.value() < 0.4) : (hasGPIO ? false : true);
-  auto& start = dispenseTime.has_value() ? dispenseTime.value() : impl->startTime;
+  auto start = previousDispense.value_or(impl->startTime);
   auto elapsedSeconds = start.secsTo(now);
   auto timeAboveThreshold = elapsedSeconds > impl->delaySeconds;
   impl->elapsed = elapsedSeconds;
 
-  auto justAte = impl->previousDispense.has_value() &&                                       //
+  if (previousDispense.has_value() && elapsedSeconds < 10 && weightTarred.has_value()) {
+    // compute and store the dispensed weight
+    impl->dispensedWeight = std::max(weightTarred.value(), impl->dispensedWeight);
+    if (impl->events.empty() == false) {  // must be true
+      auto& event = impl->events[impl->events.size() - 1];
+      event.grams = impl->dispensedWeight;
+    }
+  }
+
+  auto justAte = previousDispense.has_value() &&                                             //
                  impl->dispensedIsEaten == false &&                                          //
                  elapsedSeconds > (impl->durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
                  weightBelowThreshold == true;

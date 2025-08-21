@@ -2,6 +2,8 @@
 
 #include <QBoxLayout>
 #include <QTableWidget>
+#include <iomanip>
+#include <iostream>
 
 #include "System.hpp"
 #include "Widget.hpp"
@@ -9,8 +11,8 @@
 namespace {
   QTableWidget* table = nullptr;
 
-  auto dateTimeToItem(const QDateTime& dateTime) {
-    auto ret = new QTableWidgetItem(dateTime.time().toString());
+  auto stringToItem(const QString& str) {
+    auto ret = new QTableWidgetItem(str);
     ret->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
     return ret;
   }
@@ -28,9 +30,9 @@ Logs::Logs() {
   table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
   table->setRowCount(8);
-  table->setColumnCount(2);
+  table->setColumnCount(3);
 
-  table->setHorizontalHeaderLabels({"Distribué", "Mangé"});
+  table->setHorizontalHeaderLabels({"Distribué", "Grammes", "Mangé"});
 
   table->setSelectionMode(QAbstractItemView::NoSelection);
 
@@ -38,6 +40,8 @@ Logs::Logs() {
   // table->setSizePolicy({QSizePolicy::Policy::Minimum, table->sizePolicy().verticalPolicy()});
 
   Widget::FontSized(table, 15);
+
+  setMinimumWidth(350);
 }
 
 void Logs::updateLogs(const QList<Event>& events) {
@@ -54,10 +58,20 @@ void Logs::updateLogs(const QList<Event>& events) {
   }
   while (eventIndex < events.size()) {
     auto const& event = events[eventIndex];
-    table->setItem(row, 0, dateTimeToItem(event.timeDispensed));
+
+    // dispense
+    table->setItem(row, 0, stringToItem(event.timeDispensed.time().toString()));
+
+    // weight
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(1) << event.grams;
+    table->setItem(row, 1, stringToItem(QString::fromStdString(ss.str())));
+
+    // eat
     if (event.timeEaten.has_value()) {
-      table->setItem(row, 1, dateTimeToItem(event.timeEaten.value()));
+      table->setItem(row, 2, stringToItem(event.timeEaten.value().time().toString()));
     }
+
     ++row;
     ++eventIndex;
   }
