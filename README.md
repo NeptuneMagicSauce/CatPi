@@ -7,13 +7,6 @@ ninja
 
 # TODO
 
-- detect eat events
-
-- logic: dont dispense right after eating, have a delay
-  needs to detect eat events
-  which needs a reliable weight signal
-  which needs the processing
-
 - logging
   log eat events
   log dispense events
@@ -22,9 +15,16 @@ ninja
   log weight signal raw and processed
   rotate / compress the logs for disk
 
-- display relevant logs in menu screen
-  short summary
-  plot in submenu maybe?
+- debug setting "minWeightThreshold"
+
+- logic: dont dispense right after eating, have a delay
+  needs to detect eat events
+  which needs a reliable weight signal
+  which needs the processing
+
+- bug B: sometimes dispense zero or very little
+  detect it and dispense again
+  needs to detect eat events
 
 - auto run on boot
 
@@ -32,12 +32,16 @@ ninja
   but not on quit
   and not forever: max X times per Y period
 
+# TODO but later for V2
+
+- display relevant logs in menu screen
+  short summary
+  plot in submenu maybe?
+
 - bug A: sometimes it dispenses soon after starting
   maybe after fiddling with the delay timer?
-
-- bug B: sometimes dispense zero or very little
-  detect it and dispense again
-  needs to detect eat events
+  or is it working as expected?
+  because when we decrease the delay, we can trigger a dispense event!
 
 - have inertia in the Dial
   so that it's easy to use for small and big changes
@@ -233,3 +237,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   xor display it over something
   xor display it smaller
   xor do not display status messages
+- detect eat events
