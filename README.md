@@ -7,29 +7,24 @@ ninja
 
 # TODO
 
-- bug A: sometimes it dispenses soon after starting
-  maybe after fiddling with the delay timer?
-
-- signal of weight is noisy
-  it easily goes over threshold because of spikes
-  average, median: research a bit
-  still display both the raw and the processed
+- detect eat events
 
 - logic: dont dispense right after eating, have a delay
   needs to detect eat events
   which needs a reliable weight signal
   which needs the processing
 
-- why not do auto-tare at this moment:
-  auto-tare = when we detect it's empty and we should dispense
-  because then, we want to detect "dispensed portion is eaten"
-  so it's really "weight increase when we served went back"
+- logging
+  log eat events
+  log dispense events
+  log dispensed weight
+  per day, per 24 hours
+  log weight signal raw and processed
+  rotate / compress the logs for disk
 
-- logic: bug sometimes dispense zero or very little: detect and dispense again
-  needs to detect eat events
-
-- have interia in the Dial
-  so that it's easy to use for small and big changes
+- display relevant logs in menu screen
+  short summary
+  plot in submenu maybe?
 
 - auto run on boot
 
@@ -37,24 +32,15 @@ ninja
   but not on quit
   and not forever: max X times per Y period
 
-- logging
-  log eat events and dispense events
-  log weight signal raw and processed
-  rotate / compress the logs for disk
+- bug A: sometimes it dispenses soon after starting
+  maybe after fiddling with the delay timer?
 
-- plot, histograms
-  eat events
-  dispense events
-  dispensed grams (needs reliable weight signal)
+- bug B: sometimes dispense zero or very little
+  detect it and dispense again
+  needs to detect eat events
 
-- status message (tare, calib result) is off screen (resizes window)
-  reproduced on wsl -> detect window resize more than pi screen size
-  fix =
-  make window not resizable
-  print on detect window resized
-  either make permanent room for status message
-  xor display it over something
-  xor display it smaller
+- have inertia in the Dial
+  so that it's easy to use for small and big changes
 
 - libhx711: what happens when unplugged? crashes
  - start unplugged
@@ -231,3 +217,19 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - bug: when screen saver is on (screen turned off)
   waking by touching does fire the buttons
   fix = set MainWindow QWidget::disabled when screen saver is on
+- signal of weight is noisy
+  it easily goes over threshold because of spikes
+  with the median algorithm
+- why not do auto-tare at this moment:
+  auto-tare = when we detect it's empty and we should dispense
+  because then, we want to detect "dispensed portion is eaten"
+  so it's really "weight increase when we served went back"
+- status message (tare, calib result) is off screen (resizes window)
+  reproduced on wsl -> detect window resize more than pi screen size
+  fix =
+  make window not resizable
+  print on detect window resized
+  either make permanent room for status message
+  xor display it over something
+  xor display it smaller
+  xor do not display status messages

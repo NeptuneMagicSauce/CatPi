@@ -14,7 +14,7 @@
 #include <iostream>
 
 namespace {
-  void foobar() {
+  void plotLogs() {
     qDebug() << Q_FUNC_INFO;
     auto f = QFile{
         QStandardPaths::standardLocations(QStandardPaths::StandardLocation::HomeLocation).first() +
@@ -129,5 +129,5 @@ namespace {
 void Logs::connect(QMainWindow* window) {
   auto shortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F2), window);
   shortcut->setContext(Qt::ApplicationShortcut);
-  QObject::connect(shortcut, &QShortcut::activated, qApp, [&]() { foobar(); });
+  QObject::connect(shortcut, &QShortcut::activated, qApp, [&]() { plotLogs(); });
 }
