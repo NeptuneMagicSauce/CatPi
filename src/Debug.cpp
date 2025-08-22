@@ -59,6 +59,7 @@ struct Setting : public QWidget {
 
   void updateValue() {
     auto newValue = Settings::get(key);
+    qDebug() << key << QMetaType{newValue.userType()}.name() << newValue;
     value->setText(newValue.toString());
     resetButton->setEnabled(newValue != defaultValue);
   }

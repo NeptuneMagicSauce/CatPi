@@ -17,6 +17,8 @@ ninja
   do auto-tare on start
 
 // button tare in debug settings is borken
+// because tare print in debug is too big
+// also it overflows the screen
 // time to dispense goes negative when it's not empty (but eaten!?)
 
 - auto run on boot
