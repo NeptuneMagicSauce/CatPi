@@ -25,7 +25,7 @@ namespace {
   };
   auto items = QMap<QString, Item>{};
 
-  auto breakLines(const QString& line, auto maxLength) {
+  auto breakLines(const auto& line, auto maxLength) {
     auto ret = QString{};
     auto lineLength = 0;
     for (auto word : line.split(" ")) {
@@ -39,6 +39,18 @@ namespace {
     }
 
     return ret.trimmed();
+  }
+  auto breakWord(const auto& word, auto maxLength) {
+    auto ret = QString{};
+    auto index = 0;
+    for (auto c : word) {
+      ret += c;
+      if ((index % maxLength) == maxLength - 1) {
+        ret += "\n";
+      }
+      ++index;
+    }
+    return ret;
   }
 }
 
@@ -59,8 +71,7 @@ struct Setting : public QWidget {
 
   void updateValue() {
     auto newValue = Settings::get(key);
-    qDebug() << key << QMetaType{newValue.userType()}.name() << newValue;
-    value->setText(newValue.toString());
+    value->setText(breakWord(newValue.toString(), 12));
     resetButton->setEnabled(newValue != defaultValue);
   }
 
