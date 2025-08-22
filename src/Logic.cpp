@@ -105,8 +105,7 @@ LogicImpl::LogicImpl() {
 
   Settings::load({delayKey,
                   "Attente Ouverture",
-                  "Temps d'attente entre chaque ouverture (basé sur la derniere ouverture ou "
-                  "la dernière fois que c'était vide?)",
+                  "Temps d'attente pour une ouverture après que ça été mangé",
                   "Secondes",
                   15 * 60,
                   [&](QVariant v) {
