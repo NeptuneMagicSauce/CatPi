@@ -45,6 +45,8 @@ Weight::Weight()
   setLayout(impl->layout);
 
   QObject::connect(impl->tare.button.finished, &QTimer::timeout, [&] { doTare(); });
+
+  setEnabled(false);
 }
 
 WeightImpl::WeightImpl() {

@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
         if (filterweight.isInitializingFinished() && doFirstTare) {
           doFirstTare = false;
           weight->doTare();
+          weight->setEnabled(true);
         }
       } else {
         weight->update(filterweight.value());
