@@ -7,25 +7,6 @@ ninja
 
 # TODO
 
-- timer is now incorrect in GUI
-  because time threshold depends on time of eating
-  fix is:
-  start delay timer on eat event
-  do not use "time since eating" in Logic
-  but "delay is finished"
-  and rename "elapsedSecondsSinceDispense" to something more relevant
-  do auto-tare on start
-   button tare in debug settings is borken
-  because tare print in debug is too big
-  also it overflows the screen
-  time to dispense goes negative when it's not empty (but eaten!?)
-  should it dispense because eaten and waited
-  or should it not because not empty
-  yes dispense, because the reasons we can be in this situation imply yes:
-    if more croquette were added physically, with the hands
-    if the balance bowl moved around and 'changed' its weight
-    if the load sensor is too noisy
-
 - auto run on boot
 
 - auto restart on crash
@@ -33,6 +14,12 @@ ninja
   and not forever: max X times per Y period
 
 # TODO but later for V2
+
+- frequencies, performance:
+  is load cell updating really only every 1000 milliseconds?
+  how is increasing the logic frequency making a more accurate weight measure then?
+  do not update the GUI as frequently, it only needs every 1 second
+  <-> do not update the Logic as frequently
 
 - bug B: sometimes dispense zero or very little
   detect it and dispense again
@@ -263,3 +250,21 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   needs to detect eat events
   which needs a reliable weight signal
   which needs the processing
+- timer is now incorrect in GUI
+  because time threshold depends on time of eating
+  fix is:
+  start delay timer on eat event
+  do not use "time since eating" in Logic
+  but "delay is finished"
+  and rename "elapsedSecondsSinceDispense" to something more relevant
+  do auto-tare on start
+   button tare in debug settings is borken
+  because tare print in debug is too big
+  also it overflows the screen
+  time to dispense goes negative when it's not empty (but eaten!?)
+  should it dispense because eaten and waited
+  or should it not because not empty
+  yes dispense, because the reasons we can be in this situation imply yes:
+    if more croquette were added physically, with the hands
+    if the balance bowl moved around and 'changed' its weight
+    if the load sensor is too noisy

@@ -21,7 +21,6 @@ struct Logic {
   void changeDelay(int delta);
   void setDelaySeconds(int delaySeconds);
 
-  // int timeToDispenseToRemove();
   std::optional<int> timeToDispenseSeconds() const;
 
   static void closeRelay();

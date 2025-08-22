@@ -23,12 +23,6 @@ struct LogicImpl {
   const QString delayKey = "Delay";
   const int durationDispenseRelayMilliseconds = 4000;
 
-  // optional<QDateTime> timeOfDispense;
-  // optional<QDateTime> timeOfEating;
-  // double dispensedWeight = 0.0;
-  // bool dispensedIsEaten = false;  // to remove
-  // qint64 elapsedSeconds = 0;
-
   optional<int> timeToDispenseSeconds;
 
   QDir logDirectory;
@@ -160,17 +154,7 @@ optional<int> Logic::timeToDispenseSeconds() const {
   }
 
   return impl->timeToDispenseSeconds;
-  // if (impl->timeOfEating.has_value() == false && impl->events.empty() == false) {
-  //   // not eaten, and already dispensed -> no ETA
-  //   return {};
-  // }
-  // auto start = impl->timeOfEating.value_or(impl->startTime);
-  // return start.secsTo(QDateTime::currentDateTime());
 }
-
-// int Logic::timeToDispenseToRemove() {
-//   return std::max(0, impl->delaySeconds - (int)impl->elapsedSeconds);
-// }
 
 void Logic::manualDispense() {
   impl->dispense(DispenseMode::Manual);
@@ -184,11 +168,6 @@ void LogicImpl::dispense(DispenseMode mode) {
   }
 
   auto now = QDateTime::currentDateTime();
-
-  // timeOfDispense = now;
-  // timeOfEating = {};
-  // dispensedIsEaten = false;
-  // dispensedWeight = 0;
 
   events.append({now, 0, {}});
 
@@ -211,12 +190,6 @@ void Logic::update(std::optional<double> weightTarred, bool& dispensed) {
 }
 
 void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
-  // TODO frequencies, performance:
-  // is load cell updating really only every 1000 milliseconds?
-  // how is increasing the logic frequency making a more accurate weight measure then?
-  // do not update the GUI as frequently, it only needs every 1 second
-  // <-> do not update the Logic as frequently
-
   auto now = QDateTime::currentDateTime();
 
   auto timeOfDispense = optional<QDateTime>{};
@@ -246,21 +219,6 @@ void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
     weightBelowThreshold = true;
   }
 
-  // to remove
-  // auto start = timeOfDispense.value_or(startTime);
-  // elapsedSeconds = start.secsTo(now);
-
-  // // time threshold should not depend only on time since dispense
-  // // because then it will re-dispense right after eating
-  // // time threshold should depend on time since eating
-  // auto timeAboveThreshold = false;
-  // if (events.empty() == false && events.last().timeEaten.has_value()) {
-  //   auto elapsedSecondsSinceEating = events.last().timeEaten.value().secsTo(now);
-  //   timeAboveThreshold = elapsedSecondsSinceEating > delaySeconds;
-  // } else {
-  //   timeAboveThreshold = elapsedSeconds > delaySeconds;
-  // }
-
   if (timeOfDispense.has_value()) {
     // time since dispense
     auto timeSinceDispenseSeconds = timeOfDispense.value().secsTo(now);
@@ -282,43 +240,6 @@ void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
       logEvent(now.toString() + ", eat");
     }
   }
-
-  // compute the dispensed weight
-  // if (timeOfDispense.has_value() && elapsedSeconds < 10 && weightTarred.has_value()) {
-  //   dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
-  //   if (events.empty() == false) {  // must be true
-  //     events.last().grams = dispensedWeight;
-  //   }
-  // }
-
-  // auto justAte = timeOfDispense.has_value() &&                                         //
-  //                dispensedIsEaten == false &&                                          //
-  //                elapsedSeconds > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
-  //                weightBelowThreshold == true;
-  // if (justAte) {
-  //   timeOfEating = now;
-  //   dispensedIsEaten = true;
-  //   if (events.empty() == false) {  // must be true
-  //     auto& event = events[events.size() - 1];
-  //     event.timeEaten = now;
-  //     logEvent(now.toString() + ", eat");
-  //   }
-  // }
-
-  // auto log = QString{};
-  // for (auto toLog : vector<QString>{
-  //          now.time().toString(),
-  //          weightTarred.has_value() ? QString::number(weightTarred.value()) : QString{"no
-  //          weight"}, QString{"tare: "} + QString::number(tare), QString{"dispense: "} +
-  //              (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
-  //          QString{"elapsed: "} + QString::number(elapsedSeconds),
-  //          QString{"justAte: "} + QString::number((int)justAte),
-  //      }) {
-  //   log += toLog + ", ";
-  // }
-  // logEvent(log);
-
-  // if (timeAboveThreshold && weightBelowThreshold) {
 
   // dispense if it is time
   // do not check that weight is below threshold
