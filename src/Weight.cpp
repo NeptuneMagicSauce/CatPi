@@ -75,6 +75,7 @@ WeightImpl::WeightImpl() {
 double Weight::getTare() { return impl->tare.value; }
 
 void Weight::doTare() {
+  // qDebug() << Q_FUNC_INFO << impl->tare.value << "->" << impl->massGrams;
   impl->tare.value = impl->massGrams;
   Settings::set(impl->tare.key, impl->tare.value);
 }

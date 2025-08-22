@@ -14,6 +14,10 @@ ninja
   do not use "time since eating" in Logic
   but "delay is finished"
   and rename "elapsedSecondsSinceDispense" to something more relevant
+  do auto-tare on start
+
+// button tare in debug settings is borken
+// time to dispense goes negative when it's not empty (but eaten!?)
 
 - auto run on boot
 

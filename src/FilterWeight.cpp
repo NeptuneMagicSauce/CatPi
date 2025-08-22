@@ -12,6 +12,7 @@ namespace {
   vector<double> values;
   int indexSamples = 0;
   int sampleCount = 10 + 1;  // this algo works on odd counts
+  int numberOfCallsToFillBuffer = 0;
 }
 
 FilterWeight::FilterWeight() {
@@ -34,8 +35,16 @@ FilterWeight::FilterWeight() {
                   {1, 30}});
 }
 
+bool FilterWeight::isInitializingFinished() const {
+  return numberOfCallsToFillBuffer >= sampleCount;
+}
+
 double FilterWeight::update(double value) {
   // invariant: the vector values is always full of values
+
+  if (isInitializingFinished() == false) {
+    ++numberOfCallsToFillBuffer;
+  }
 
   // if empty, initialize it with the first value
   if (values.empty()) {

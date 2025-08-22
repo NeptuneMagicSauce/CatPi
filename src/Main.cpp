@@ -125,6 +125,11 @@ int main(int argc, char** argv) {
       if (auto data = loadcell->read()) {
         weight->update(filterweight.update(data.value().value));
         calibration->update(data.value().reading);
+        static auto doFirstTare = true;
+        if (filterweight.isInitializingFinished() && doFirstTare) {
+          doFirstTare = false;
+          weight->doTare();
+        }
       } else {
         weight->update(filterweight.value());
         calibration->update({});
