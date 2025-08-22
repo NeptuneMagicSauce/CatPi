@@ -18,7 +18,14 @@ ninja
    button tare in debug settings is borken
   because tare print in debug is too big
   also it overflows the screen
-// time to dispense goes negative when it's not empty (but eaten!?)
+
+  time to dispense goes negative when it's not empty (but eaten!?)
+  should it dispense because eaten and waited
+  or should it not because not empty
+  yes dispense, because the reasons we can be in this situation imply yes:
+    if more croquette were added physically, with the hands
+    if the balance bowl moved around and 'changed' its weight
+    if the load sensor is too noisy
 
 - auto run on boot
 

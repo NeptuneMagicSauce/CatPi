@@ -155,6 +155,10 @@ void Logic::setDelaySeconds(int delaySeconds) {
 const QList<Event>& Logic::events() const { return impl->events; }
 
 optional<int> Logic::timeToDispenseSeconds() const {
+  if (impl->timeToDispenseSeconds.value_or(1) < 0) {
+    return 0;
+  }
+
   return impl->timeToDispenseSeconds;
   // if (impl->timeOfEating.has_value() == false && impl->events.empty() == false) {
   //   // not eaten, and already dispensed -> no ETA

@@ -109,7 +109,6 @@ void Delay::setRemaining(std::optional<int> seconds) {
   impl->textRemaining =  //"Attente: " +
       impl->FormatTime(seconds);
   impl->updateLabel();
-  // TODO check this
   impl->progress->setValue(seconds.has_value() ? (impl->progress->maximum() - seconds.value()) : 0);
 }
 
