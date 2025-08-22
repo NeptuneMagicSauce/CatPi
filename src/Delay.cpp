@@ -19,7 +19,7 @@ struct DelayImpl {
   QProgressBar* progress = new QProgressBar;
   QString textDelay, textRemaining;
 
-  static QString FormatTime(int seconds);
+  static QString FormatTime(std::optional<int> seconds);
 
   void buildSubWidget(Delay* parent);
   void updateLabel();
@@ -87,7 +87,11 @@ DelayImpl::DelayImpl(Delay* parent) {
   progress->setSizePolicy({QSizePolicy::Policy::Minimum, progress->sizePolicy().verticalPolicy()});
 }
 
-QString DelayImpl::FormatTime(int seconds) {
+QString DelayImpl::FormatTime(std::optional<int> secondsOptional) {
+  if (secondsOptional.has_value() == false) {
+    return "--";
+  }
+  auto const& seconds = secondsOptional.value();
   if (seconds >= 60) {
     auto minutes = std::round((double)seconds / 60);
     return QString::number(minutes) + " minute" + (minutes > 1 ? "s" : "");
@@ -101,11 +105,12 @@ void Delay::setDelay(int seconds) {
   impl->progress->setMaximum(seconds);
 }
 
-void Delay::setRemaining(int seconds) {
+void Delay::setRemaining(std::optional<int> seconds) {
   impl->textRemaining =  //"Attente: " +
       impl->FormatTime(seconds);
   impl->updateLabel();
-  impl->progress->setValue(impl->progress->maximum() - seconds);
+  // TODO check this
+  impl->progress->setValue(seconds.has_value() ? (impl->progress->maximum() - seconds.value()) : 0);
 }
 
 void DelayImpl::updateLabel() { label->setText(textRemaining + "<br>" + textDelay); }

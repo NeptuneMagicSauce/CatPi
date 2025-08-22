@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     Logic::hasGPIO = loadcell->hasGPIO();
 
     // update Delay so that it's displayed on startup, no wait for first tick
-    delay->setRemaining(logic->timeToDispense());
+    delay->setRemaining(logic->timeToDispenseSeconds());
 
     brightness.setCallbackOnChange([window](bool isOn) {
       if (isOn == false) {
@@ -120,13 +120,6 @@ int main(int argc, char** argv) {
                      [&]() { central->setPage(calibration); });
     QObject::connect(menu->debug, &QAbstractButton::released, [&] { central->setPage(debug); });
 
-    // Dispense
-    QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
-      mainscreen->dispenseButton->setEnabled(false);
-      logic->manualDispense();
-      weight->doTare();
-    });
-
     // LoadCell
     QObject::connect(loadcell->timer, &QTimer::timeout, [&]() {
       if (auto data = loadcell->read()) {
@@ -168,20 +161,29 @@ int main(int argc, char** argv) {
     });
     calibration->connect();
 
+    auto afterDispenseCallback = [&] {
+      mainscreen->dispenseButton->setEnabled(false);
+      weight->doTare();
+    };
+
+    // Manual Dispense
+    QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
+      logic->manualDispense();
+      afterDispenseCallback();
+    });
+
     // Logic
     logic->connect([&](int newDelay) { delay->setDelay(newDelay); });
     QObject::connect(logic->timerEndDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
-      delay->setRemaining(logic->timeToDispense());
+      delay->setRemaining(logic->timeToDispenseSeconds());
 
-      auto tare = weight->getTare();
       auto weightTarred = weight->weightTarred();
       auto dispensed = false;
-      logic->update(weightTarred, tare, dispensed);
+      logic->update(weightTarred, dispensed);
       if (dispensed) {
-        mainscreen->dispenseButton->setEnabled(false);
-        weight->doTare();
+        afterDispenseCallback();
       }
 
       menu->logs->updateLogs(logic->events());

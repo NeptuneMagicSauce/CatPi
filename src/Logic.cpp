@@ -6,7 +6,6 @@
 #include <QStandardPaths>
 #include <QTimer>
 #include <iostream>
-// #include <vector>
 
 #include "PinCtrl.hpp"
 #include "Settings.hpp"
@@ -20,25 +19,32 @@ bool Logic::hasGPIO = false;
 struct LogicImpl {
   LogicImpl();
 
-  optional<QDateTime> previousDispense;
-  bool dispensedIsEaten = false;
-  QDir logDirectory;
-  QFile logFile;
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
   const int durationDispenseRelayMilliseconds = 4000;
+
+  // optional<QDateTime> timeOfDispense;
+  // optional<QDateTime> timeOfEating;
+  // double dispensedWeight = 0.0;
+  // bool dispensedIsEaten = false;  // to remove
+  // qint64 elapsedSeconds = 0;
+
+  optional<int> timeToDispenseSeconds;
+
+  QDir logDirectory;
+  QFile logFile;
   int delaySeconds = 0;
-  qint64 elapsedSeconds = 0;
   QList<Event> events;
-  double dispensedWeight = 0.0;
   double weightThreshold = 0.4;
 
   enum struct DispenseMode { Automatic, Manual };
 
-  void dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mode);
+  void update(optional<double> weightTarred, bool& dispensed);
+  void dispense(DispenseMode mode);
   void logEvent(QString const& event);
 
-  std::function<void(int)> updateGuiCallback = nullptr;
+  function<void(int)> updateGuiCallback = nullptr;
+  function<void()> afterDispenseCallback = nullptr;
 
   void updateLogFile();
 };
@@ -52,6 +58,7 @@ namespace {
 Logic::Logic() {
   AssertSingleton();
   impl = new LogicImpl;
+  impl->afterDispenseCallback = [&] { timerEndDispense->start(); };
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
   timerEndDispense->setInterval(impl->durationDispenseRelayMilliseconds);
@@ -125,100 +132,6 @@ void Logic::connect(std::function<void(int)> updateGuiCallback) {
   QObject::connect(timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
 }
 
-void Logic::manualDispense() { impl->dispense(hasGPIO, timerEndDispense, DispenseMode::Manual); }
-
-void LogicImpl::dispense(bool hasGPIO, QTimer* timerEndDispense, DispenseMode mode) {
-  // std::cout << __PRETTY_FUNCTION__ << std::endl;
-  if (hasGPIO) {
-    pinctrl("set 17 op dh");
-  }
-  timerEndDispense->start();
-
-  auto now = QDateTime::currentDateTime();
-
-  previousDispense = now;
-  dispensedIsEaten = false;
-  dispensedWeight = 0;
-
-  events.append({now, 0, {}});
-
-  auto log = now.toString();
-  log += ", dispense, ";
-  log += mode == DispenseMode::Automatic ? "automatic" : "manual";
-  logEvent(log);
-}
-
-void Logic::update(std::optional<double> weightTarred, double /*tare*/, bool& dispensed) {
-  auto& previousDispense = impl->previousDispense;
-  auto& events = impl->events;
-  auto& elapsedSecondsSinceDispense = impl->elapsedSeconds;
-
-  auto now = QDateTime::currentDateTime();
-
-  auto weightBelowThreshold = weightTarred.has_value()
-                                  ? (weightTarred.value() < impl->weightThreshold)
-                                  : (hasGPIO ? false : true);
-  auto start = previousDispense.value_or(impl->startTime);
-  elapsedSecondsSinceDispense = start.secsTo(now);
-
-  // time threshold should not dependi only on time since dispense
-  // because then it will re-dispense right after eating
-  // time threshold should depend on time since eating
-  auto timeAboveThreshold = false;
-  if (events.empty() == false && events.last().timeEaten.has_value()) {
-    auto elapsedSecondsSinceEating = events.last().timeEaten.value().secsTo(now);
-    timeAboveThreshold = elapsedSecondsSinceEating > impl->delaySeconds;
-  } else {
-    timeAboveThreshold = elapsedSecondsSinceDispense > impl->delaySeconds;
-  }
-
-  if (previousDispense.has_value() && elapsedSecondsSinceDispense < 10 &&
-      weightTarred.has_value()) {
-    // compute and store the dispensed weight
-    impl->dispensedWeight = std::max(weightTarred.value(), impl->dispensedWeight);
-    if (events.empty() == false) {  // must be true
-      events.last().grams = impl->dispensedWeight;
-    }
-  }
-
-  auto justAte =
-      previousDispense.has_value() &&                                                          //
-      impl->dispensedIsEaten == false &&                                                       //
-      elapsedSecondsSinceDispense > (impl->durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
-      weightBelowThreshold == true;
-  if (justAte) {
-    impl->dispensedIsEaten = true;
-    if (events.empty() == false) {  // must be true
-      auto& event = events[events.size() - 1];
-      event.timeEaten = now;
-      impl->logEvent(now.toString() + ", eat");
-    }
-  }
-
-  // auto log = QString{};
-  // for (auto toLog : vector<QString>{
-  //          now.time().toString(),
-  //          weightTarred.has_value() ? QString::number(weightTarred.value()) : QString{"no
-  //          weight"}, QString{"tare: "} + QString::number(tare), QString{"dispense: "} +
-  //              (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
-  //          QString{"elapsed: "} + QString::number(elapsedSeconds),
-  //          QString{"justAte: "} + QString::number((int)justAte),
-  //      }) {
-  //   log += toLog + ", ";
-  // }
-  // impl->logEvent(log);
-
-  if (timeAboveThreshold && weightBelowThreshold) {
-    impl->dispense(hasGPIO, timerEndDispense, DispenseMode::Automatic);
-    dispensed = true;
-  }
-
-  // remove events older than 24 hours
-  while (events.isEmpty() == false && events.first().timeDispensed.secsTo(now) > 60 * 60 * 24) {
-    events.removeFirst();
-  }
-}
-
 void LogicImpl::logEvent(QString const& event) {
   // cout << log.toStdString() << endl;
   updateLogFile();
@@ -227,8 +140,6 @@ void LogicImpl::logEvent(QString const& event) {
   file.write((event + "\n").toUtf8());
   file.close();
 }
-
-int Logic::timeToDispense() { return std::max(0, impl->delaySeconds - (int)impl->elapsedSeconds); }
 
 void Logic::changeDelay(int delta) {
   if (impl->delaySeconds >= 60) {
@@ -243,3 +154,176 @@ void Logic::setDelaySeconds(int delaySeconds) {
 }
 
 const QList<Event>& Logic::events() const { return impl->events; }
+
+optional<int> Logic::timeToDispenseSeconds() const {
+  return impl->timeToDispenseSeconds;
+  // if (impl->timeOfEating.has_value() == false && impl->events.empty() == false) {
+  //   // not eaten, and already dispensed -> no ETA
+  //   return {};
+  // }
+  // auto start = impl->timeOfEating.value_or(impl->startTime);
+  // return start.secsTo(QDateTime::currentDateTime());
+}
+
+// int Logic::timeToDispenseToRemove() {
+//   return std::max(0, impl->delaySeconds - (int)impl->elapsedSeconds);
+// }
+
+void Logic::manualDispense() {
+  impl->dispense(DispenseMode::Manual);
+  impl->afterDispenseCallback();
+}
+
+void LogicImpl::dispense(DispenseMode mode) {
+  // std::cout << __PRETTY_FUNCTION__ << std::endl;
+  if (Logic::hasGPIO) {
+    pinctrl("set 17 op dh");
+  }
+
+  auto now = QDateTime::currentDateTime();
+
+  // timeOfDispense = now;
+  // timeOfEating = {};
+  // dispensedIsEaten = false;
+  // dispensedWeight = 0;
+
+  events.append({now, 0, {}});
+
+  // when there is no weight sensor: consider it is eaten right away
+  if (Logic::hasGPIO == false) {
+    events.last().timeEaten = now;
+  }
+
+  auto log = now.toString();
+  log += ", dispense, ";
+  log += mode == DispenseMode::Automatic ? "automatic" : "manual";
+  logEvent(log);
+}
+
+void Logic::update(std::optional<double> weightTarred, bool& dispensed) {
+  impl->update(weightTarred, dispensed);
+  if (dispensed) {
+    impl->afterDispenseCallback();
+  }
+}
+
+void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
+  // TODO frequencies, performance:
+  // is load cell updating really only every 1000 milliseconds?
+  // how is increasing the logic frequency making a more accurate weight measure then?
+  // do not update the GUI as frequently, it only needs every 1 second
+  // <-> do not update the Logic as frequently
+
+  auto now = QDateTime::currentDateTime();
+
+  auto timeOfDispense = optional<QDateTime>{};
+  if (events.empty() == false) {
+    timeOfDispense = events.last().timeDispensed;
+  }
+
+  // compute time to dispense
+  if (timeOfDispense.has_value() == false) {
+    // never dispensed anything
+    timeToDispenseSeconds = delaySeconds - startTime.secsTo(now);
+  } else if (events.last().timeEaten.has_value() == false) {
+    // dispensed something, it is not eaten
+    timeToDispenseSeconds = {};
+  } else {
+    // dispensed something, it was eaten
+    timeToDispenseSeconds = delaySeconds - events.last().timeEaten.value().secsTo(now);
+  }
+
+  // compute if weight is below threshold
+  auto weightBelowThreshold = false;
+  if (weightTarred.has_value()) {
+    // if weight is available
+    weightBelowThreshold = weightTarred.value() < weightThreshold;
+  } else if (Logic::hasGPIO == false) {
+    // if there is no weight sensor
+    weightBelowThreshold = true;
+  }
+
+  // to remove
+  // auto start = timeOfDispense.value_or(startTime);
+  // elapsedSeconds = start.secsTo(now);
+
+  // // time threshold should not depend only on time since dispense
+  // // because then it will re-dispense right after eating
+  // // time threshold should depend on time since eating
+  // auto timeAboveThreshold = false;
+  // if (events.empty() == false && events.last().timeEaten.has_value()) {
+  //   auto elapsedSecondsSinceEating = events.last().timeEaten.value().secsTo(now);
+  //   timeAboveThreshold = elapsedSecondsSinceEating > delaySeconds;
+  // } else {
+  //   timeAboveThreshold = elapsedSeconds > delaySeconds;
+  // }
+
+  if (timeOfDispense.has_value()) {
+    // time since dispense
+    auto timeSinceDispenseSeconds = timeOfDispense.value().secsTo(now);
+
+    auto& lastEvent = events.last();
+
+    // dispensed weight
+    if (timeSinceDispenseSeconds < 10 && weightTarred.has_value()) {
+      auto& dispensedWeight = lastEvent.grams;
+      dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
+    }
+
+    // just ate ?
+    if (lastEvent.timeEaten.has_value() == false &&                                     //
+        timeSinceDispenseSeconds > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
+        weightBelowThreshold) {
+      // yes
+      lastEvent.timeEaten = now;
+      logEvent(now.toString() + ", eat");
+    }
+  }
+
+  // compute the dispensed weight
+  // if (timeOfDispense.has_value() && elapsedSeconds < 10 && weightTarred.has_value()) {
+  //   dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
+  //   if (events.empty() == false) {  // must be true
+  //     events.last().grams = dispensedWeight;
+  //   }
+  // }
+
+  // auto justAte = timeOfDispense.has_value() &&                                         //
+  //                dispensedIsEaten == false &&                                          //
+  //                elapsedSeconds > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
+  //                weightBelowThreshold == true;
+  // if (justAte) {
+  //   timeOfEating = now;
+  //   dispensedIsEaten = true;
+  //   if (events.empty() == false) {  // must be true
+  //     auto& event = events[events.size() - 1];
+  //     event.timeEaten = now;
+  //     logEvent(now.toString() + ", eat");
+  //   }
+  // }
+
+  // auto log = QString{};
+  // for (auto toLog : vector<QString>{
+  //          now.time().toString(),
+  //          weightTarred.has_value() ? QString::number(weightTarred.value()) : QString{"no
+  //          weight"}, QString{"tare: "} + QString::number(tare), QString{"dispense: "} +
+  //              (dispenseTime.has_value() ? dispenseTime.value().time().toString() : QString{""}),
+  //          QString{"elapsed: "} + QString::number(elapsedSeconds),
+  //          QString{"justAte: "} + QString::number((int)justAte),
+  //      }) {
+  //   log += toLog + ", ";
+  // }
+  // logEvent(log);
+
+  // if (timeAboveThreshold && weightBelowThreshold) {
+  if (timeToDispenseSeconds.value_or(1) <= 0 &&  // time below threshold
+      weightBelowThreshold) {
+    dispense(DispenseMode::Automatic);
+    dispensed = true;
+  }
+
+  // remove events older than 24 hours
+  while (events.isEmpty() == false && events.first().timeDispensed.secsTo(now) > 60 * 60 * 24) {
+    events.removeFirst();
+  }
+}

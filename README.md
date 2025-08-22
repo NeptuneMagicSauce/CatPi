@@ -7,6 +7,14 @@ ninja
 
 # TODO
 
+- timer is now incorrect in GUI
+  because time threshold depends on time of eating
+  fix is:
+  start delay timer on eat event
+  do not use "time since eating" in Logic
+  but "delay is finished"
+  and rename "elapsedSecondsSinceDispense" to something more relevant
+
 - auto run on boot
 
 - auto restart on crash

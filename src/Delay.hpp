@@ -3,6 +3,7 @@ struct DeltaDial;
 struct QAbstractButton;
 
 #include <QGroupBox>
+#include <optional>
 
 struct Delay : public QGroupBox {
   Delay();
@@ -15,5 +16,5 @@ struct Delay : public QGroupBox {
   int delayNightSeconds = 0;
 
   void setDelay(int seconds);
-  void setRemaining(int seconds);
+  void setRemaining(std::optional<int> seconds);
 };
