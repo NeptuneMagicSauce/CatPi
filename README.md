@@ -18,7 +18,6 @@ ninja
    button tare in debug settings is borken
   because tare print in debug is too big
   also it overflows the screen
-
   time to dispense goes negative when it's not empty (but eaten!?)
   should it dispense because eaten and waited
   or should it not because not empty

@@ -319,8 +319,11 @@ void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
   // logEvent(log);
 
   // if (timeAboveThreshold && weightBelowThreshold) {
-  if (timeToDispenseSeconds.value_or(1) <= 0 &&  // time below threshold
-      weightBelowThreshold) {
+
+  // dispense if it is time
+  // do not check that weight is below threshold
+  // because when it is time, dispensed has been eaten
+  if (timeToDispenseSeconds.value_or(1) <= 0) {
     dispense(DispenseMode::Automatic);
     dispensed = true;
   }
