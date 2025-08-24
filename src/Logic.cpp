@@ -30,6 +30,7 @@ struct LogicImpl {
   QFile logFile;
   int delaySeconds = 0;
   QList<Event> events;
+  QTimer timerDispensedWeight;
 
   enum struct DispenseMode { Automatic, Manual };
 
@@ -93,6 +94,15 @@ LogicImpl::LogicImpl() {
 
   auto logDirectory = logFile.filesystemFileName().parent_path();
   std::filesystem::create_directories(logDirectory);
+
+  timerDispensedWeight.setSingleShot(true);
+  timerDispensedWeight.setInterval(10 * 1000);  // 10 seconds
+
+  QObject::connect(&timerDispensedWeight, &QTimer::timeout, [&] {
+    ostringstream ss;
+    ss << fixed << setprecision(1) << events.last().grams;
+    logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
+  });
 
   Settings::load({delayKey,
                   "Attente Ouverture",
@@ -212,19 +222,18 @@ void LogicImpl::update(std::optional<double> weightTarred,  //
 
   if (timeOfDispense.has_value()) {
     // time since dispense
-    auto timeSinceDispenseSeconds = timeOfDispense.value().secsTo(now);
 
     auto& lastEvent = events.last();
 
     // dispensed weight
-    if (timeSinceDispenseSeconds < 10 && weightTarred.has_value()) {
+    if (timerDispensedWeight.isActive() && weightTarred.has_value()) {
       auto& dispensedWeight = lastEvent.grams;
       dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
     }
 
     // just ate ?
-    if (lastEvent.timeEaten.has_value() == false &&                                     //
-        timeSinceDispenseSeconds > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
+    if (lastEvent.timeEaten.has_value() == false &&                                               //
+        timeOfDispense.value().secsTo(now) > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
         isWeightBelowThreshold) {
       // yes
       lastEvent.timeEaten = now;
@@ -239,6 +248,7 @@ void LogicImpl::update(std::optional<double> weightTarred,  //
   if (timeToDispenseSeconds.value_or(1) <= 0) {
     dispense(DispenseMode::Automatic);
     dispensed = true;
+    timerDispensedWeight.start();
   }
 
   // remove events older than 24 hours

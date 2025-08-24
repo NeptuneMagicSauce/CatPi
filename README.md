@@ -274,3 +274,5 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - on event eat: log measured weight
   and recent values also
   to debug why it detects event eat
+- consider justAte if weight has been below threshold for a bit of time
+- log dispensed weight
