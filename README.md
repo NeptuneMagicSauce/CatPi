@@ -9,6 +9,8 @@ ninja
 
 - redo layout main/menu
 
+- counter weight behind for no tipping-over
+
 - auto run on boot
 
 - auto restart on crash
