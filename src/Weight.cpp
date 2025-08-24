@@ -1,5 +1,6 @@
 #include "Weight.hpp"
 
+#include <QDateTime>
 #include <QElapsedTimer>
 #include <QLabel>
 #include <QPushButton>
@@ -29,6 +30,21 @@ struct WeightImpl {
     double value = 0;
     const QString key = "Tare";
   } tare;
+
+  struct Measures {
+    struct Measure {
+      QDateTime dateTime;
+      optional<double> value;
+    };
+    QList<Measure> data;
+  } measures;
+
+  struct {
+    double weightThresholdValue = 0.4;
+    int weightThresholdDurationMilliSecs = 0;
+  } settings;
+
+  bool isBelowThreshold() const;
 };
 
 namespace {
@@ -69,6 +85,22 @@ WeightImpl::WeightImpl() {
                   0.0,
                   [&](QVariant v) { tare.value = v.toDouble(); },
                   {{}, {}}});
+  Settings::load({"WeightThresholdValue",
+                  "Poids Minimum Mangé",
+                  "Poids en dessous duquel on détecte que c'est mangé",
+                  "Déci-Grammes",
+                  4,
+                  [&](QVariant v) { settings.weightThresholdValue = (double)v.toInt() / 10; },
+                  {1, 20}});
+  Settings::load(
+      {"WeightThresholdDuration",
+       "Durée Détection Vide",
+       "Temps passé avec le poids en dessous du seuil pour considérer que la gamelle est vide",
+       "Secondes",
+       2,
+       [&](QVariant v) { settings.weightThresholdDurationMilliSecs = v.toInt() * 1000; },
+       {1, 10}});
+
   layout->addWidget(label);
   layout->addWidget(labelFooter);
   layout->addWidget(&tare.button);
@@ -88,13 +120,70 @@ void Weight::update(std::optional<double> value) {
   if (value.has_value() == false) {
     impl->weightTarred = {};
     impl->label->setText("--");
-    return;
+  } else {
+    ostringstream massSs;
+    impl->weightTarred = value.value() - impl->tare.value;
+    massSs << fixed << setprecision(1) << impl->weightTarred.value();
+    impl->label->setText(QString::fromStdString(massSs.str()));
+
+    impl->massGrams = value.value();
   }
 
-  ostringstream massSs;
-  impl->weightTarred = value.value() - impl->tare.value;
-  massSs << fixed << setprecision(1) << impl->weightTarred.value();
-  impl->label->setText(QString::fromStdString(massSs.str()));
+  // store recent measures
+  auto &measures = impl->measures.data;
+  auto const now = QDateTime::currentDateTime();
+  auto measure = WeightImpl::Measures::Measure{now, {}};
+  if (value.has_value()) {
+    measure.value = impl->weightTarred;
+  }
+  measures.append(measure);
 
-  impl->massGrams = value.value();
+  // remove old measures
+  while (measures.empty() == false && measures.first().dateTime.secsTo(now) > 30) {
+    measures.removeFirst();
+  }
+}
+
+bool Weight::isBelowThreshold() const { return impl->isBelowThreshold(); }
+
+bool WeightImpl::isBelowThreshold() const {
+  if (measures.data.empty()) {
+    return true;
+  }
+
+  auto const now = QDateTime::currentDateTime();
+  int index = measures.data.size() - 1;
+  while (index >= 0) {
+    auto const &measure = measures.data[index];
+    if (measure.dateTime.msecsTo(now) > settings.weightThresholdDurationMilliSecs) {
+      break;
+    }
+    if (measure.value.value_or(0) > settings.weightThresholdValue) {
+      return false;
+    }
+    --index;
+  }
+  return true;
+}
+
+QString Weight::toString() const {
+  auto const now = QDateTime::currentDateTime();
+  ostringstream ss;
+  ss << "{MilliSecsAgo, Grams}: ";
+  int index = impl->measures.data.size() - 1;
+  while (index >= 0) {
+    auto const &measure = impl->measures.data[index];
+    if (measure.dateTime.msecsTo(now) > impl->settings.weightThresholdDurationMilliSecs) {
+      break;
+    }
+    ss << "{" << measure.dateTime.msecsTo(now) << ",";
+    if (measure.value.has_value()) {
+      ss << fixed << setprecision(2) << measure.value.value();
+    } else {
+      ss << "-";
+    }
+    ss << "}, ";
+    --index;
+  }
+  return QString::fromStdString(ss.str());
 }

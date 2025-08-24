@@ -2,6 +2,7 @@
 
 #include <QDateTime>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QStandardPaths>
 #include <QTimer>
@@ -29,11 +30,13 @@ struct LogicImpl {
   QFile logFile;
   int delaySeconds = 0;
   QList<Event> events;
-  double weightThreshold = 0.4;
 
   enum struct DispenseMode { Automatic, Manual };
 
-  void update(optional<double> weightTarred, bool& dispensed);
+  void update(std::optional<double> weightTarred,  //
+              bool isWeightBelowThreshold,         //
+              bool& dispensed,                     //
+              bool& justAte);
   void dispense(DispenseMode mode);
   void logEvent(QString const& event);
 
@@ -41,12 +44,6 @@ struct LogicImpl {
   function<void()> afterDispenseCallback = nullptr;
 
   void updateLogFile();
-
-  struct RecentWeights {
-    void storeWeight(optional<double> weight);
-    QList<optional<double>> data;
-    QString logString() const;
-  } recentWeights;
 };
 
 using DispenseMode = LogicImpl::DispenseMode;
@@ -71,13 +68,7 @@ Logic::Logic() {
                   1000,
                   [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
                   {20, {}}});
-  Settings::load({"WeightThresholdEaten",
-                  "Poids Minimum Mangé",
-                  "Poids en dessous duquel on détecte que c'est mangé",
-                  "Déci-Grammes",
-                  4,
-                  [&](QVariant v) { impl->weightThreshold = (double)v.toInt() / 10; },
-                  {1, 20}});
+
   timerUpdate->start();
 }
 
@@ -182,44 +173,24 @@ void LogicImpl::dispense(DispenseMode mode) {
     events.last().timeEaten = now;
   }
 
-  auto log = now.toString();
-  log += ", dispense, ";
-  log += mode == DispenseMode::Automatic ? "automatic" : "manual";
-  logEvent(log);
+  logEvent(now.toString() + ", dispense, " +
+           (mode == DispenseMode::Automatic ? "automatic" : "manual"));
 }
 
-void Logic::update(std::optional<double> weightTarred, bool& dispensed) {
-  impl->update(weightTarred, dispensed);
+void Logic::logWeights(const QString& weights) const { impl->logEvent(weights); }
+
+void Logic::update(std::optional<double> weightTarred, bool isWeightBelowThreshold, bool& dispensed,
+                   bool& justAte) {
+  impl->update(weightTarred, isWeightBelowThreshold, dispensed, justAte);
   if (dispensed) {
     impl->afterDispenseCallback();
   }
 }
 
-void LogicImpl::RecentWeights::storeWeight(optional<double> weight) {
-  data.append(weight);
-  while (data.size() > Settings::get("WeightFilterNbSamples").toInt()) {
-    data.removeFirst();
-  }
-}
-
-QString LogicImpl::RecentWeights::logString() const {
-  ostringstream ss;
-  ss << "[";
-  for (auto const& w : data) {
-    if (w.has_value()) {
-      ss << fixed << setprecision(2) << w.value();
-    } else {
-      ss << "-";
-    }
-    ss << ", ";
-  }
-  ss << "]";
-  return QString::fromStdString(ss.str());
-}
-
-void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
-  recentWeights.storeWeight(weightTarred);
-
+void LogicImpl::update(std::optional<double> weightTarred,  //
+                       bool isWeightBelowThreshold,         //
+                       bool& dispensed,                     //
+                       bool& justAte) {
   auto now = QDateTime::currentDateTime();
 
   auto timeOfDispense = optional<QDateTime>{};
@@ -239,16 +210,6 @@ void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
     timeToDispenseSeconds = delaySeconds - events.last().timeEaten.value().secsTo(now);
   }
 
-  // compute if weight is below threshold
-  auto weightBelowThreshold = false;
-  if (weightTarred.has_value()) {
-    // if weight is available
-    weightBelowThreshold = weightTarred.value() < weightThreshold;
-  } else if (Logic::hasGPIO == false) {
-    // if there is no weight sensor
-    weightBelowThreshold = true;
-  }
-
   if (timeOfDispense.has_value()) {
     // time since dispense
     auto timeSinceDispenseSeconds = timeOfDispense.value().secsTo(now);
@@ -264,10 +225,11 @@ void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
     // just ate ?
     if (lastEvent.timeEaten.has_value() == false &&                                     //
         timeSinceDispenseSeconds > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
-        weightBelowThreshold) {
+        isWeightBelowThreshold) {
       // yes
       lastEvent.timeEaten = now;
-      logEvent(now.toString() + ", eat, " + recentWeights.logString());
+      logEvent(now.toString() + ", eat");
+      justAte = true;
     }
   }
 

@@ -183,14 +183,18 @@ int main(int argc, char** argv) {
     QObject::connect(logic->timerEndDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
-      auto weightTarred = weight->weightTarred();
       auto dispensed = false;
+      auto justAte = false;
 
-      logic->update(weightTarred, dispensed);
+      logic->update(weight->weightTarred(), weight->isBelowThreshold(), dispensed, justAte);
 
       if (dispensed) {
         afterDispenseCallback();
       }
+      if (justAte) {
+        logic->logWeights(weight->toString());
+      }
+
       delay->setRemaining(logic->timeToDispenseSeconds());
       menu->logs->updateLogs(logic->events());
     });

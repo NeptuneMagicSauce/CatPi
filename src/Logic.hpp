@@ -17,7 +17,11 @@ struct Logic {
   int delaySeconds();
   void connect(std::function<void(int)> updateGuiCallback);
   void manualDispense();
-  void update(std::optional<double> weightTarred, bool& dispensed);
+  void update(std::optional<double> weightTarred,  //
+              bool isWeightBelowThreshold,         //
+              bool& dispensed,                     //
+              bool& justAte);
+  void logWeights(const QString& weights) const;
   void changeDelay(int delta);
   void setDelaySeconds(int delaySeconds);
 
