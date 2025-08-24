@@ -33,17 +33,15 @@ Temperature::Temperature() {
       process->waitForFinished();
       auto temperature = process->readAll();
       if (temperature.startsWith("temp=") == false) {
-        temperature = "temp=";
+        temperature = "temp=00.0'C";
       }
-      // temperature = "temp=49.6'C";
 
       process->start("vcgencmd", {"measure_volts"});
       process->waitForFinished();
       auto volts = process->readAll();
       if (volts.startsWith("volt=") == false) {
-        volts = "volts=";
+        volts = "volt=0.0000V";
       }
-      // volts = "volt=0.9260V";
 
       // using HTML in QLabel because it has normal line height
       // otherwise it does not fit with big line height of default / non-html
