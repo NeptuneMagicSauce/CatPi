@@ -93,7 +93,7 @@ LogicImpl::LogicImpl() {
   cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
 
   timerDispensedWeight.setSingleShot(true);
-  timerDispensedWeight.setInterval(10 * 1000);  // 10 seconds
+  timerDispensedWeight.setInterval(8 * 1000);  // 8 seconds
 
   QObject::connect(&timerDispensedWeight, &QTimer::timeout, [&] {
     ostringstream ss;
@@ -133,10 +133,15 @@ void Logic::connect(std::function<void(int)> updateGuiCallback) {
 
 void LogicImpl::logEvent(QString const& event) {
   // cout << log.toStdString() << endl;
+
+  // print log event to file
   updateLogFile();
   logFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
   logFile.write((event + "\n").toUtf8());
   logFile.close();
+
+  // print log event to console
+  cout << event.toStdString() << endl;
 }
 
 void Logic::changeDelay(int delta) {
