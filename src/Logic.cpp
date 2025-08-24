@@ -41,6 +41,12 @@ struct LogicImpl {
   function<void()> afterDispenseCallback = nullptr;
 
   void updateLogFile();
+
+  struct RecentWeights {
+    void storeWeight(optional<double> weight);
+    QList<optional<double>> data;
+    QString logString() const;
+  } recentWeights;
 };
 
 using DispenseMode = LogicImpl::DispenseMode;
@@ -189,7 +195,31 @@ void Logic::update(std::optional<double> weightTarred, bool& dispensed) {
   }
 }
 
+void LogicImpl::RecentWeights::storeWeight(optional<double> weight) {
+  data.append(weight);
+  while (data.size() > Settings::get("WeightFilterNbSamples").toInt()) {
+    data.removeFirst();
+  }
+}
+
+QString LogicImpl::RecentWeights::logString() const {
+  ostringstream ss;
+  ss << "[";
+  for (auto const& w : data) {
+    if (w.has_value()) {
+      ss << fixed << setprecision(2) << w.value();
+    } else {
+      ss << "-";
+    }
+    ss << ", ";
+  }
+  ss << "]";
+  return QString::fromStdString(ss.str());
+}
+
 void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
+  recentWeights.storeWeight(weightTarred);
+
   auto now = QDateTime::currentDateTime();
 
   auto timeOfDispense = optional<QDateTime>{};
@@ -237,7 +267,7 @@ void LogicImpl::update(std::optional<double> weightTarred, bool& dispensed) {
         weightBelowThreshold) {
       // yes
       lastEvent.timeEaten = now;
-      logEvent(now.toString() + ", eat");
+      logEvent(now.toString() + ", eat, " + recentWeights.logString());
     }
   }
 

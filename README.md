@@ -7,11 +7,6 @@ ninja
 
 # TODO
 
-- on event eat: log measured weight
-  and recent values also
-  recent values: both raw and filtered
-  to debug why it detects event eat
-
 - redo layout main/menu
 
 - auto run on boot
@@ -276,3 +271,6 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
     if the balance bowl moved around and 'changed' its weight
     if the load sensor is too noisy
 - center buttons on the left, in menu screen
+- on event eat: log measured weight
+  and recent values also
+  to debug why it detects event eat
