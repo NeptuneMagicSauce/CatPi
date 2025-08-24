@@ -17,15 +17,15 @@ ninja
 
 # TODO but later for V2
 
+- bug B: sometimes dispense zero or very little
+  detect it and dispense again
+  needs to detect eat events
+
 - frequencies, performance:
   is load cell updating really only every 1000 milliseconds?
   how is increasing the logic frequency making a more accurate weight measure then?
   do not update the GUI as frequently, it only needs every 1 second
   <-> do not update the Logic as frequently
-
-- bug B: sometimes dispense zero or very little
-  detect it and dispense again
-  needs to detect eat events
 
 - computing the dispensed weight is slightly inaccurate
   because it is the maximum seen in the 10 seconds following a dispense

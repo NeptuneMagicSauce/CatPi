@@ -89,11 +89,8 @@ LogicImpl::LogicImpl() {
       QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
           .first() +
       "/logs";
-  updateLogFile();
-  cout << "Log: " << logFile.fileName().toStdString() << endl;
-
-  auto logDirectory = logFile.filesystemFileName().parent_path();
-  std::filesystem::create_directories(logDirectory);
+  std::filesystem::create_directories(logDirectory.path().toStdString());
+  cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
 
   timerDispensedWeight.setSingleShot(true);
   timerDispensedWeight.setInterval(10 * 1000);  // 10 seconds
@@ -116,6 +113,8 @@ LogicImpl::LogicImpl() {
                     }
                   },
                   {10, {}}});
+
+  logEvent("=== boot === " + QDateTime::currentDateTime().toString());
 }
 
 void Logic::closeRelay() {
@@ -135,10 +134,9 @@ void Logic::connect(std::function<void(int)> updateGuiCallback) {
 void LogicImpl::logEvent(QString const& event) {
   // cout << log.toStdString() << endl;
   updateLogFile();
-  auto& file = impl->logFile;
-  file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
-  file.write((event + "\n").toUtf8());
-  file.close();
+  logFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
+  logFile.write((event + "\n").toUtf8());
+  logFile.close();
 }
 
 void Logic::changeDelay(int delta) {

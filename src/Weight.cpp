@@ -169,7 +169,7 @@ bool WeightImpl::isBelowThreshold() const {
 QString Weight::toString() const {
   auto const now = QDateTime::currentDateTime();
   ostringstream ss;
-  ss << "{MilliSecsAgo, Grams}: ";
+  ss << now.toString().toStdString() + ", recent Weights {MilliSecsAgo, Grams}, ";
   int index = impl->measures.data.size() - 1;
   while (index >= 0) {
     auto const &measure = impl->measures.data[index];
