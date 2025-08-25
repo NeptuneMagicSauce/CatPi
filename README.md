@@ -11,6 +11,8 @@ ninja
 
 - counter weight behind for no tipping-over
 
+- verify calibration with the independent source of truth
+
 - auto run on boot
 
 - auto restart on crash

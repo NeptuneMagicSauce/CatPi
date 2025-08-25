@@ -4,11 +4,10 @@
 #include <QGroupBox>
 #include <QToolButton>
 
-#include "Logs.hpp"
 #include "Temperature.hpp"
 #include "Widget.hpp"
 
-Menu::Menu() {
+Menu::Menu(QWidget* secondWidget) {
   calibration = new QToolButton;
   calibration->setIcon(QIcon{QPixmap{"://weightbalance.png"}});
   calibration->setText("Calibration");
@@ -31,8 +30,8 @@ Menu::Menu() {
   auto rightSide = new QGroupBox;
   auto rightLayout = new QVBoxLayout;
   rightSide->setLayout(rightLayout);
-  logs = new Logs;
-  rightLayout->addWidget(logs);
+
+  rightLayout->addWidget(secondWidget);
 
   auto layout = new QHBoxLayout;
   setLayout(layout);

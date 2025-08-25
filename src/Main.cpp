@@ -58,10 +58,11 @@ int main(int argc, char** argv) {
   auto calibration = new Calibration;
   auto logic = new Logic;
   auto delay = new Delay;
-  auto logs = new Plots;
+  auto plots = new Plots;
   auto toolbar = new ToolBar;
   auto debug = new Debug;
-  auto menu = new Menu;
+  auto logs = new Logs;
+  auto menu = new Menu{logs};
   auto mainscreen = new MainScreen{weight, delay};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
                                     new SubScreen("Menu", menu),                //
@@ -196,7 +197,7 @@ int main(int argc, char** argv) {
       }
 
       delay->setRemaining(logic->timeToDispenseSeconds());
-      menu->logs->updateLogs(logic->events());
+      logs->updateLogs(logic->events());
     });
 
     // Delay
@@ -224,7 +225,7 @@ int main(int argc, char** argv) {
     QObject::connect(crashShortcut, &QShortcut::activated, app, [&]() { crashTester->show(); });
 
     // Plots
-    logs->connect(window);
+    plots->connect(window);
   }
 
   // Initializing that needs the signals connected

@@ -7,7 +7,7 @@
 #include "ProtectedButton.hpp"
 #include "Widget.hpp"
 
-MainScreen::MainScreen(QWidget* weight, QWidget* delay) {
+MainScreen::MainScreen(QWidget* weight, QWidget* secondWidget) {
   dispenseButton = new ProtectedButton;
   dispenseButton->button->setText("Croquettes !");
   Widget::FontSized(dispenseButton, 25);
@@ -25,5 +25,5 @@ MainScreen::MainScreen(QWidget* weight, QWidget* delay) {
   auto layoutMain = new QHBoxLayout;
   setLayout(layoutMain);
   layoutMain->addLayout(layoutLeft);
-  layoutMain->addWidget(delay);
+  layoutMain->addWidget(secondWidget);
 }
