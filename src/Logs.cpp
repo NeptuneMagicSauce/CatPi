@@ -40,15 +40,12 @@ Logs::Logs() {
   table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  table->setRowCount(7);
+  table->setRowCount(10);
   table->setColumnCount(3);
 
   table->setHorizontalHeaderLabels({"Distribué", "Grammes", "Mangé"});
 
   table->setSelectionMode(QAbstractItemView::NoSelection);
-
-  // size policy: not needed with spacer in class that composites me (Menu)
-  // table->setSizePolicy({QSizePolicy::Policy::Minimum, table->sizePolicy().verticalPolicy()});
 
   setMinimumWidth(350);
 
