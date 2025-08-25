@@ -22,8 +22,13 @@ MainScreen::MainScreen(QWidget* weight, QWidget* secondWidget) {
   layoutLeft->addWidget(weight);
   layoutLeft->addWidget(dispense);
 
+  auto layoutRight = new QVBoxLayout;
+  auto widgetRight = new QGroupBox;
+  widgetRight->setLayout(layoutRight);
+  layoutRight->addWidget(secondWidget);
+
   auto layoutMain = new QHBoxLayout;
   setLayout(layoutMain);
   layoutMain->addLayout(layoutLeft);
-  layoutMain->addWidget(secondWidget);
+  layoutMain->addWidget(widgetRight);
 }

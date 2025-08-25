@@ -62,8 +62,8 @@ int main(int argc, char** argv) {
   auto toolbar = new ToolBar;
   auto debug = new Debug;
   auto logs = new Logs;
-  auto menu = new Menu{logs};
-  auto mainscreen = new MainScreen{weight, delay};
+  auto menu = new Menu{delay};
+  auto mainscreen = new MainScreen{weight, logs};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
                                     new SubScreen("Menu", menu),                //
                                     new SubScreen("Calibration", calibration),  //

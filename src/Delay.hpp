@@ -2,10 +2,10 @@ struct QLabel;
 struct DeltaDial;
 struct QAbstractButton;
 
-#include <QGroupBox>
+#include <QWidget>
 #include <optional>
 
-struct Delay : public QGroupBox {
+struct Delay : public QWidget {
   Delay();
 
   DeltaDial* delayDial = nullptr;
