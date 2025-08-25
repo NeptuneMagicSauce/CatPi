@@ -177,6 +177,8 @@ void LogicImpl::dispense(DispenseMode mode) {
     pinctrl("set 17 op dh");
   }
 
+  timerDispensedWeight.start();
+
   auto now = QDateTime::currentDateTime();
 
   events.append({now, 0, {}});
@@ -251,7 +253,6 @@ void LogicImpl::update(std::optional<double> weightTarred,  //
   if (timeToDispenseSeconds.value_or(1) <= 0) {
     dispense(DispenseMode::Automatic);
     dispensed = true;
-    timerDispensedWeight.start();
   }
 
   // remove events older than 24 hours
