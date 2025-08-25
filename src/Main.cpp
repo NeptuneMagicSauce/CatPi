@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
   auto debug = new Debug;
   auto logs = new Logs;
   auto menu = new Menu{delay};
-  auto mainscreen = new MainScreen{weight, logs};
+  auto mainscreen = new MainScreen{weight, logs, delay->textAndButtons, delay->progress};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
                                     new SubScreen("", menu),                    //
                                     new SubScreen("Calibration", calibration),  //
@@ -116,8 +116,10 @@ int main(int argc, char** argv) {
     });
     QObject::connect(toolbar->menu, &QAction::triggered, [&](bool checked) {
       if (checked) {
+        delay->attachWidgets();
         central->setPage(menu);
       } else {
+        mainscreen->attachWidgets();
         central->setPage(mainscreen);
       }
     });

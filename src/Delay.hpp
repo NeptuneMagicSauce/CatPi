@@ -12,9 +12,15 @@ struct Delay : public QWidget {
 
   QAbstractButton* buttonDay = nullptr;
   QAbstractButton* buttonNight = nullptr;
+
+  QWidget* textAndButtons = nullptr;
+  QWidget* progress = nullptr;
+
   int delayDaySeconds = 0;
   int delayNightSeconds = 0;
 
   void setDelay(int seconds);
   void setRemaining(std::optional<int> seconds);
+
+  void attachWidgets();
 };

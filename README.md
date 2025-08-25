@@ -7,8 +7,6 @@ ninja
 
 # TODO
 
-- redo layout main/menu
-
 - counter weight behind for no tipping-over
 
 - verify calibration with the independent source of truth
@@ -280,3 +278,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   to debug why it detects event eat
 - consider justAte if weight has been below threshold for a bit of time
 - log dispensed weight
+- redo layout main/menu

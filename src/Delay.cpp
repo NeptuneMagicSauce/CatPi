@@ -15,13 +15,13 @@ struct DelayImpl {
   DelayImpl(Delay* parent);
 
   QLabel* label = new QLabel;
-  QWidget* subwidget = new QWidget;
+  QWidget* textAndButtons = new QWidget;
   QProgressBar* progress = new QProgressBar;
   QString textDelay, textRemaining;
 
   static QString FormatTime(std::optional<int> seconds);
 
-  void buildSubWidget(Delay* parent);
+  void buildTextAndButtons(Delay* parent);
   void updateLabel();
 };
 
@@ -40,12 +40,12 @@ Delay::Delay() {
   impl = new DelayImpl(this);
 }
 
-void DelayImpl::buildSubWidget(Delay* parent) {
-  auto layoutSubWidget = new QHBoxLayout;
-  subwidget->setLayout(layoutSubWidget);
-  layoutSubWidget->addWidget(label);
-  layoutSubWidget->addWidget(parent->buttonDay);
-  layoutSubWidget->addWidget(parent->buttonNight);
+void DelayImpl::buildTextAndButtons(Delay* parent) {
+  auto layoutTextAndButtons = new QHBoxLayout;
+  textAndButtons->setLayout(layoutTextAndButtons);
+  layoutTextAndButtons->addWidget(label);
+  layoutTextAndButtons->addWidget(parent->buttonDay);
+  layoutTextAndButtons->addWidget(parent->buttonNight);
 
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   label->setTextFormat(Qt::RichText);
@@ -55,6 +55,8 @@ void DelayImpl::buildSubWidget(Delay* parent) {
 
   parent->buttonDay->setIconSize({50, 50});
   parent->buttonNight->setIconSize(parent->buttonDay->iconSize());
+
+  Widget::FontSized(textAndButtons, 20);
 
   Settings::load({"DelayDayButton",
                   "Bouton Jour",
@@ -73,18 +75,24 @@ void DelayImpl::buildSubWidget(Delay* parent) {
 }
 
 DelayImpl::DelayImpl(Delay* parent) {
-  Widget::FontSized(parent, 20);
   auto layout = new QVBoxLayout;
   parent->setLayout(layout);
 
-  buildSubWidget(parent);
-
-  layout->addWidget(parent->delayDial);
-  layout->addWidget(subwidget);
-  layout->addWidget(progress);
+  buildTextAndButtons(parent);
 
   progress->setTextVisible(false);
   progress->setSizePolicy({QSizePolicy::Policy::Minimum, progress->sizePolicy().verticalPolicy()});
+  progress->setMaximumHeight(27);
+
+  parent->textAndButtons = textAndButtons;
+  parent->progress = progress;
+}
+
+void Delay::attachWidgets() {
+  auto layout = this->layout();
+  layout->addWidget(delayDial);
+  layout->addWidget(textAndButtons);
+  layout->addWidget(progress);
 }
 
 QString DelayImpl::FormatTime(std::optional<int> secondsOptional) {

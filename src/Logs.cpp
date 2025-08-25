@@ -32,7 +32,7 @@ Logs::Logs() {
   auto layout = new QVBoxLayout;
   setLayout(layout);
 
-  Widget::FontSized(this, 15);
+  Widget::FontSized(this, 14);
 
   table = new QTableWidget;
   layout->addWidget(table);
@@ -40,14 +40,14 @@ Logs::Logs() {
   table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-  table->setRowCount(10);
+  table->setRowCount(6);
   table->setColumnCount(3);
 
   table->setHorizontalHeaderLabels({"Distribué", "Grammes", "Mangé"});
 
   table->setSelectionMode(QAbstractItemView::NoSelection);
 
-  setMinimumWidth(350);
+  setMinimumWidth(335);
 
   summary = new QLabel;
   layout->addWidget(summary);
