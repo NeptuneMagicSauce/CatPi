@@ -29,6 +29,7 @@ ToolBar::ToolBar() {
   menu = new QAction;
   menu->setIcon(QIcon{QPixmap{"://burgermenu.png"}});
   menu->setText("Menu");
+  menu->setCheckable(true);
 
   quit = new QAction();
   quit->setIcon(QIcon{QPixmap{"://quit.png"}});

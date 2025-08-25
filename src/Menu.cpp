@@ -23,9 +23,13 @@ Menu::Menu(QWidget* secondWidget) {
   auto leftSide = new QGroupBox;
   auto leftLayout = new QVBoxLayout;
   leftSide->setLayout(leftLayout);
+  leftLayout->addWidget(Widget::Spacer());
   leftLayout->addWidget(debug);
+  leftLayout->addWidget(Widget::Spacer());
   leftLayout->addWidget(calibration);
+  leftLayout->addWidget(Widget::Spacer());
   leftLayout->addWidget(new Temperature);
+  leftLayout->addWidget(Widget::Spacer());
 
   auto rightSide = new QGroupBox;
   auto rightLayout = new QVBoxLayout;

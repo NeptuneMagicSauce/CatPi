@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
   auto menu = new Menu{delay};
   auto mainscreen = new MainScreen{weight, logs};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
-                                    new SubScreen("Menu", menu),                //
+                                    new SubScreen("", menu),                    //
                                     new SubScreen("Calibration", calibration),  //
                                     new SubScreen("Debug", debug)}};
   auto window = new MainWindow{central, toolbar};
@@ -114,7 +114,13 @@ int main(int argc, char** argv) {
       window->toggleFullscreen(isFullscreen);
       toolbar->fullscreen->setIcon(ToolBar::fullScreenIcon(isFullscreen));
     });
-    QObject::connect(toolbar->menu, &QAction::triggered, [&] { central->setPage(menu); });
+    QObject::connect(toolbar->menu, &QAction::triggered, [&](bool checked) {
+      if (checked) {
+        central->setPage(menu);
+      } else {
+        central->setPage(mainscreen);
+      }
+    });
 
     // Menu
     QObject::connect(menu->calibration, &QAbstractButton::released,
