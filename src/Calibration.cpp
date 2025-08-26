@@ -37,7 +37,7 @@ namespace {
 Calibration::Calibration() {
   AssertSingleton();
 
-  setStyleSheet("QWidget{font-size: 20pt; } ");
+  Widget::FontSized(this, 20);
 
   knownWeightLabel = new QLabel;
   Settings::load({knownWeightKey,
