@@ -78,28 +78,31 @@ WeightImpl::WeightImpl() {
   // tare.button.button->setIcon(QIcon{QPixmap("://weightbalance.png")});
   tare.button.button->setIconSize({40, 40});
 
-  Settings::load({tare.key,
-                  "Tare",
-                  "Tare de la balance",
-                  "Grammes",
-                  0.0,
-                  [&](QVariant v) { tare.value = v.toDouble(); },
-                  {{}, {}}});
-  Settings::load({"WeightThresholdValue",
-                  "Poids Minimum Mangé",
-                  "Poids en dessous duquel on détecte que c'est mangé",
-                  "Déci-Grammes",
-                  4,
-                  [&](QVariant v) { settings.weightThresholdValue = (double)v.toInt() / 10; },
-                  {1, 20}});
+  Settings::load({.key = tare.key,
+                  .name = "Tare",
+                  .prompt = "Tare de la balance",
+                  .unit = "Grammes",
+                  .defaultValue = 0.0,
+                  .callback = [&](QVariant v) { tare.value = v.toDouble(); },
+                  .limits = {.minimum = {}, .maximum = {}}});
   Settings::load(
-      {"WeightThresholdDuration",
-       "Durée Détection Vide",
-       "Temps passé avec le poids en dessous du seuil pour considérer que la gamelle est vide",
-       "Secondes",
-       2,
-       [&](QVariant v) { settings.weightThresholdDurationMilliSecs = v.toInt() * 1000; },
-       {1, 10}});
+      {.key = "WeightThresholdValue",
+       .name = "Poids Minimum Mangé",
+       .prompt = "Poids en dessous duquel on détecte que c'est mangé",
+       .unit = "Déci-Grammes",
+       .defaultValue = 4,
+       .callback = [&](QVariant v) { settings.weightThresholdValue = (double)v.toInt() / 10; },
+       .limits = {.minimum = 1, .maximum = 20}});
+  Settings::load(
+      {.key = "WeightThresholdDuration",
+       .name = "Durée Détection Vide",
+       .prompt =
+           "Temps passé avec le poids en dessous du seuil pour considérer que la gamelle est vide",
+       .unit = "Secondes",
+       .defaultValue = 2,
+       .callback =
+           [&](QVariant v) { settings.weightThresholdDurationMilliSecs = v.toInt() * 1000; },
+       .limits = {.minimum = 1, .maximum = 10}});
 
   layout->addWidget(label);
   layout->addWidget(labelFooter);
@@ -132,7 +135,7 @@ void Weight::update(std::optional<double> value) {
   // store recent measures
   auto &measures = impl->measures.data;
   auto const now = QDateTime::currentDateTime();
-  auto measure = WeightImpl::Measures::Measure{now, {}};
+  auto measure = WeightImpl::Measures::Measure{.dateTime = now, .value = {}};
   if (value.has_value()) {
     measure.value = impl->weightTarred;
   }

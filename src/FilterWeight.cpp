@@ -17,22 +17,23 @@ namespace {
 
 FilterWeight::FilterWeight() {
   AssertSingleton();
-  Settings::load({"WeightFilterNbSamples",
-                  "Filtre Poids Nb Samples",
-                  "Nombre d'échantillons pour le filtre du poids",
-                  "Nombre",
-                  10,
-                  [&](QVariant v) {
-                    auto newCount = v.toInt();
-                    if ((newCount % 2) == 0) {
-                      ++newCount;  // must be odd
-                    }
-                    sampleCount = newCount;
+  Settings::load({.key = "WeightFilterNbSamples",
+                  .name = "Filtre Poids Nb Samples",
+                  .prompt = "Nombre d'échantillons pour le filtre du poids",
+                  .unit = "Nombre",
+                  .defaultValue = 10,
+                  .callback =
+                      [&](QVariant v) {
+                        auto newCount = v.toInt();
+                        if ((newCount % 2) == 0) {
+                          ++newCount;  // must be odd
+                        }
+                        sampleCount = newCount;
 
-                    indexSamples = 0;
-                    values.clear();
-                  },
-                  {1, 30}});
+                        indexSamples = 0;
+                        values.clear();
+                      },
+                  .limits = {.minimum = 1, .maximum = 30}});
 }
 
 bool FilterWeight::isInitializingFinished() const {

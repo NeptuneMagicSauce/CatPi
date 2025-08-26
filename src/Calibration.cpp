@@ -40,16 +40,17 @@ Calibration::Calibration() {
   Widget::FontSized(this, 20);
 
   knownWeightLabel = new QLabel;
-  Settings::load({knownWeightKey,
-                  "Poids de référence",
-                  "Poids de référence pour la calibration",
-                  "Grammes",
-                  200,
-                  [&](QVariant v) {
-                    knownWeight = v.toInt();
-                    updateLabel();
-                  },
-                  {{}, {}}});
+  Settings::load({.key = knownWeightKey,
+                  .name = "Poids de référence",
+                  .prompt = "Poids de référence pour la calibration",
+                  .unit = "Grammes",
+                  .defaultValue = 200,
+                  .callback =
+                      [&](QVariant v) {
+                        knownWeight = v.toInt();
+                        updateLabel();
+                      },
+                  .limits = {.minimum = {}, .maximum = {}}});
 
   buttons.step1 = new QPushButton;
   buttons.step2 = new QPushButton;

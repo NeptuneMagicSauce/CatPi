@@ -35,13 +35,13 @@ LoadCell::LoadCell() {
   impl = new LoadCellImpl;
 
   timer = new QTimer;
-  Settings::load({impl->intervalSettingName,
-                  "Période Balance",
-                  "Temps d'attente entre les mesures du poids de la balance",
-                  "Millisecondes",
-                  200,
-                  [&](QVariant v) { timer->setInterval(v.toInt()); },
-                  {20, {}}});
+  Settings::load({.key = impl->intervalSettingName,
+                  .name = "Période Balance",
+                  .prompt = "Temps d'attente entre les mesures du poids de la balance",
+                  .unit = "Millisecondes",
+                  .defaultValue = 200,
+                  .callback = [&](QVariant v) { timer->setInterval(v.toInt()); },
+                  .limits = {.minimum = 20, .maximum = {}}});
   timer->setSingleShot(false);
   timer->start();
 }
@@ -80,20 +80,22 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
       refUnit = newCalibrationData.value().first;
       offset = newCalibrationData.value().second;
     } else {
-      Settings::load({keyRefUnit,
-                      "Calibration Référence",
-                      "Données de calibration, remettre à defaut si on a une mauvaise calibration",
-                      "",
-                      defaultData.first,
-                      [&](QVariant v) { refUnit = v.toInt(); },
-                      {{}, {}}});
-      Settings::load({keyOffset,
-                      "Calibration Décalage",
-                      "Données de calibration, remettre à defaut si on a une mauvaise calibration",
-                      "",
-                      defaultData.second,
-                      [&](QVariant v) { offset = v.toInt(); },
-                      {{}, {}}});
+      Settings::load(
+          {.key = keyRefUnit,
+           .name = "Calibration Référence",
+           .prompt = "Données de calibration, remettre à defaut si on a une mauvaise calibration",
+           .unit = "",
+           .defaultValue = defaultData.first,
+           .callback = [&](QVariant v) { refUnit = v.toInt(); },
+           .limits = {.minimum = {}, .maximum = {}}});
+      Settings::load(
+          {.key = keyOffset,
+           .name = "Calibration Décalage",
+           .prompt = "Données de calibration, remettre à defaut si on a une mauvaise calibration",
+           .unit = "",
+           .defaultValue = defaultData.second,
+           .callback = [&](QVariant v) { offset = v.toInt(); },
+           .limits = {.minimum = {}, .maximum = {}}});
     }
 
     if (status != nullptr) {
@@ -141,6 +143,7 @@ optional<LoadCell::Data> readInMode(const Options &options) noexcept {
   // un-normalize
   auto reading = (value * impl->hx711->getReferenceUnit()) + impl->hx711->getOffset();
 
+#warning "TODO here"
   return LoadCell::Data{value, reading};
 }
 

@@ -62,13 +62,13 @@ Logic::Logic() {
   timerEndDispense->setInterval(impl->durationDispenseRelayMilliseconds);
   timerUpdate = new QTimer;
   timerUpdate->setSingleShot(false);
-  Settings::load({"LogicInterval",
-                  "Période Logique",
-                  "Période de rafraichissement de la boucle principale",
-                  "Millisecondes",
-                  1000,
-                  [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
-                  {20, {}}});
+  Settings::load({.key = "LogicInterval",
+                  .name = "Période Logique",
+                  .prompt = "Période de rafraichissement de la boucle principale",
+                  .unit = "Millisecondes",
+                  .defaultValue = 1000,
+                  .callback = [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
+                  .limits = {.minimum = 20, .maximum = {}}});
 
   timerUpdate->start();
 }
@@ -101,18 +101,19 @@ LogicImpl::LogicImpl() {
     logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
   });
 
-  Settings::load({delayKey,
-                  "Attente Ouverture",
-                  "Temps d'attente pour une ouverture après que ça été mangé",
-                  "Secondes",
-                  15 * 60,
-                  [&](QVariant v) {
-                    delaySeconds = v.toInt();
-                    if (updateGuiCallback != nullptr) {
-                      updateGuiCallback(delaySeconds);
-                    }
-                  },
-                  {10, {}}});
+  Settings::load({.key = delayKey,
+                  .name = "Attente Ouverture",
+                  .prompt = "Temps d'attente pour une ouverture après que ça été mangé",
+                  .unit = "Secondes",
+                  .defaultValue = 15 * 60,
+                  .callback =
+                      [&](QVariant v) {
+                        delaySeconds = v.toInt();
+                        if (updateGuiCallback != nullptr) {
+                          updateGuiCallback(delaySeconds);
+                        }
+                      },
+                  .limits = {.minimum = 10, .maximum = {}}});
 
   logEvent("=== boot === " + QDateTime::currentDateTime().toString());
 }
@@ -181,7 +182,11 @@ void LogicImpl::dispense(DispenseMode mode) {
 
   auto now = QDateTime::currentDateTime();
 
-  events.append({now, 0, {}});
+  events.append({
+      .timeDispensed = now,  //
+      .grams = 0,            //
+      .timeEaten = {}        //
+  });
 
   // when there is no weight sensor: consider it is eaten right away
   if (Logic::hasGPIO == false) {

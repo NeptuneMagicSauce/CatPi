@@ -55,25 +55,26 @@ namespace {
 ScreenBrightness::ScreenBrightness() {
   AssertSingleton();
 
-  Settings::load({"ScreenBrightness",
-                  "Luminosité de l'écran",
-                  "",
-                  "Pourcentage",
-                  rangeMax,
-                  [&](QVariant v) { change(v.toInt()); },
-                  {rangeMin, rangeMax}});
+  Settings::load({.key = "ScreenBrightness",
+                  .name = "Luminosité de l'écran",
+                  .prompt = "",
+                  .unit = "Pourcentage",
+                  .defaultValue = rangeMax,
+                  .callback = [&](QVariant v) { change(v.toInt()); },
+                  .limits = {.minimum = rangeMin, .maximum = rangeMax}});
 
-  Settings::load({"ScreenSaverDelay",
-                  "Attente éteinte écran",
-                  "Temps d'atteinte après lequel l'écran s'éteint",
-                  "Minutes",
-                  5,
-                  [&](QVariant v) {
-                    delayScreenSaverMinutes = v.toInt();
-                    timerInactive.setInterval(delayScreenSaverMinutes * 1000 * 60);
-                    timerInactive.start();
-                  },
-                  {0, 20}});
+  Settings::load({.key = "ScreenSaverDelay",
+                  .name = "Attente éteinte écran",
+                  .prompt = "Temps d'atteinte après lequel l'écran s'éteint",
+                  .unit = "Minutes",
+                  .defaultValue = 5,
+                  .callback =
+                      [&](QVariant v) {
+                        delayScreenSaverMinutes = v.toInt();
+                        timerInactive.setInterval(delayScreenSaverMinutes * 1000 * 60);
+                        timerInactive.start();
+                      },
+                  .limits = {.minimum = 0, .maximum = 20}});
 
   // install watcher to detect activity
   timerInactive.setSingleShot(true);

@@ -58,20 +58,20 @@ void DelayImpl::buildTextAndButtons(Delay* parent) {
 
   Widget::FontSized(textAndButtons, 20);
 
-  Settings::load({"DelayDayButton",
-                  "Bouton Jour",
-                  "Attente ouverture du bouton Jour",
-                  "Minutes",
-                  15,
-                  [parent](QVariant v) { parent->delayDaySeconds = v.toInt(); },
-                  {5, 60}});
-  Settings::load({"DelayNightButton",
-                  "Bouton Nuit",
-                  "Attente ouverture du bouton Nuit",
-                  "Minutes",
-                  60,
-                  [parent](QVariant v) { parent->delayNightSeconds = v.toInt(); },
-                  {30, 120}});
+  Settings::load({.key = "DelayDayButton",
+                  .name = "Bouton Jour",
+                  .prompt = "Attente ouverture du bouton Jour",
+                  .unit = "Minutes",
+                  .defaultValue = 15,
+                  .callback = [parent](QVariant v) { parent->delayDaySeconds = v.toInt(); },
+                  .limits = {.minimum = 5, .maximum = 60}});
+  Settings::load({.key = "DelayNightButton",
+                  .name = "Bouton Nuit",
+                  .prompt = "Attente ouverture du bouton Nuit",
+                  .unit = "Minutes",
+                  .defaultValue = 60,
+                  .callback = [parent](QVariant v) { parent->delayNightSeconds = v.toInt(); },
+                  .limits = {.minimum = 30, .maximum = 120}});
 }
 
 DelayImpl::DelayImpl(Delay* parent) {

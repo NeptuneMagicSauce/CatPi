@@ -70,8 +70,11 @@ namespace {
     auto function = match.captured(3);
     auto address = match.captured(5);
     auto fileinfo = QFileInfo{objectFile};
-    frames.append(
-        {function, objectFile, address, fileinfo.canonicalFilePath(), fileinfo.fileName()});
+    frames.append({.function = function,
+                   .objectFile = objectFile,
+                   .address = address,
+                   .canonicalPath = fileinfo.canonicalFilePath(),
+                   .filename = fileinfo.fileName()});
     // qDebug() << match.captured(1) << match.captured(2) << match.captured(3) << match.captured(4)
     // << match.captured(5);
     return;
@@ -93,7 +96,11 @@ namespace {
     auto sourceFile =
         sourceFileLine.contains(":") ? sourceFileLine.split(":").first() : sourceFileLine;
 
-    frames.append({function, sourceFile, sourceFileLine});
+    frames.append({
+        .function = function,             //
+        .sourceFile = sourceFile,         //
+        .sourceFileLine = sourceFileLine  //
+    });
     return;
 #endif
   }
