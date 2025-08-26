@@ -25,8 +25,8 @@ MainScreen::MainScreen(QWidget* weight,               //
   dispenseButton = new ProtectedButton;
   dispenseButton->button->setText("Croquettes !");
   Widget::FontSized(dispenseButton, 25);
-  dispenseButton->button->setSizePolicy(
-      {QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum});
+  dispenseButton->button->setSizePolicy(QSizePolicy::Policy::Expanding,
+                                        QSizePolicy::Policy::Minimum);
   auto dispense = new QGroupBox;
   auto dispenseLayout = new QHBoxLayout;
   dispenseLayout->addWidget(dispenseButton);

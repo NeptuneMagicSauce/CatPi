@@ -46,13 +46,13 @@ ProtectedButtonImpl::ProtectedButtonImpl(QTimer& finished, QPushButton& button)
   progress.setEnabled(false);
 
   progress.setMaximumHeight(15);
-  progress.setSizePolicy({QSizePolicy::Policy::Minimum, progress.sizePolicy().verticalPolicy()});
+  progress.setSizePolicy(QSizePolicy::Policy::Minimum, progress.sizePolicy().verticalPolicy());
 
   // Vertical progress bar:
   // progress.setOrientation(Qt::Vertical);
   // progress.setMaximumWidth(15);
   // // progress.setMaximumHeight(100); bad
-  // progress.setSizePolicy({button.sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Minimum});
+  // progress.setSizePolicy(button.sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Minimum);
 
   QObject::connect(&button, &QAbstractButton::pressed, [this]() {
     buttonPressedTicks = 0;

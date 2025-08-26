@@ -12,13 +12,13 @@ Menu::Menu(QWidget* secondWidget) {
   calibration->setIcon(QIcon{QPixmap{"://weightbalance.png"}});
   calibration->setText("Calibration");
   calibration->setIconSize({100, 100});
-  calibration->setSizePolicy({QSizePolicy::Expanding, calibration->sizePolicy().verticalPolicy()});
+  calibration->setSizePolicy(QSizePolicy::Expanding, calibration->sizePolicy().verticalPolicy());
 
   debug = new QToolButton;
   debug->setIcon(QIcon{QPixmap{"://bug.png"}});
   debug->setText("Debug");
   debug->setIconSize({100, 100});
-  debug->setSizePolicy({QSizePolicy::Expanding, debug->sizePolicy().verticalPolicy()});
+  debug->setSizePolicy(QSizePolicy::Expanding, debug->sizePolicy().verticalPolicy());
 
   auto leftSide = new QGroupBox;
   auto leftLayout = new QVBoxLayout;

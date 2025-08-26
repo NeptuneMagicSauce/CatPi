@@ -33,8 +33,8 @@ Delay::Delay() {
   AssertSingleton();
   setMinimumWidth(380);
   delayDial = new DeltaDial;
-  delayDial->setSizePolicy(
-      {delayDial->sizePolicy().horizontalPolicy(), QSizePolicy::Policy::Expanding});
+  delayDial->setSizePolicy(delayDial->sizePolicy().horizontalPolicy(),
+                           QSizePolicy::Policy::Expanding);
   buttonDay = new QToolButton;
   buttonNight = new QToolButton;
   impl = new DelayImpl(this);
@@ -81,7 +81,7 @@ DelayImpl::DelayImpl(Delay* parent) {
   buildTextAndButtons(parent);
 
   progress->setTextVisible(false);
-  progress->setSizePolicy({QSizePolicy::Policy::Minimum, progress->sizePolicy().verticalPolicy()});
+  progress->setSizePolicy(QSizePolicy::Policy::Minimum, progress->sizePolicy().verticalPolicy());
   progress->setMaximumHeight(27);
 
   parent->textAndButtons = textAndButtons;
