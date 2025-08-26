@@ -6,16 +6,13 @@
 #include <QString>
 #include <QWidget>
 
-namespace {
-  QWidget* StyleSheeted(QWidget* widget, const QString& styleSheet) {
-    widget->setStyleSheet(styleSheet);
-    return widget;
-  }
+QString Widget::StyleSheetFontSize(int fontSize) {
+  return QString{"QWidget{font-size: "} + QString::number(fontSize) + QString{"pt; }"};
 }
 
 QWidget* Widget::FontSized(QWidget* widget, int fontSize) {
-  return StyleSheeted(
-      widget, QString("QWidget{font-size: ") + QString::number(fontSize) + QString("pt; }"));
+  widget->setStyleSheet(StyleSheetFontSize(fontSize));
+  return widget;
 }
 
 QWidget* Widget::AlignCentered(QLabel* widget) {

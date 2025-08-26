@@ -25,6 +25,7 @@
 #include "SubScreen.hpp"
 #include "ToolBar.hpp"
 #include "Weight.hpp"
+#include "Widget.hpp"
 
 using namespace std;
 
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
 
   // Initialize globals
   {
-    app->setStyleSheet("QWidget{font-size: 48pt;} ");
+    app->setStyleSheet(Widget::StyleSheetFontSize(48));
 
     Logic::hasGPIO = loadcell->hasGPIO();
 
