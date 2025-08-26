@@ -62,7 +62,7 @@ struct Setting : public QWidget {
   const std::optional<int> minimum;
   const std::optional<int> maximum;
   const std::function<void(QVariant)> callback;
-  QLabel* description = new QLabel;
+  QLabel* prompt = new QLabel;
   QLabel* value = new QLabel;
   QLabel* unit = new QLabel;
   QToolButton* resetButton = new QToolButton;
@@ -75,22 +75,22 @@ struct Setting : public QWidget {
     resetButton->setEnabled(newValue != defaultValue);
   }
 
-  Setting(const Settings::Load& load)
-      : key(load.key),
-        defaultValue(load.defaultValue),
-        minimum(load.limits.minimum),
-        maximum(load.limits.maximum),
-        callback(load.callback) {
+  Setting(const Settings::Description& description)
+      : key(description.key),
+        defaultValue(description.defaultValue),
+        minimum(description.limits.minimum),
+        maximum(description.limits.maximum),
+        callback(description.callback) {
     Widget::FontSized(this, 20);
 
-    for (auto widget : QList<QLabel*>{value, unit, description}) {
+    for (auto widget : QList<QLabel*>{value, unit, prompt}) {
       Widget::AlignCentered(widget);
     }
     Widget::FontSized(value, 30);
 
-    description->setText(breakLines(load.description, 45));
+    prompt->setText(breakLines(description.prompt, 45));
     updateValue();
-    unit->setText(load.unit);
+    unit->setText(description.unit);
     resetButton->setText("Reset");
     resetButton->setIcon(QIcon{QPixmap{"://reset.png"}});
     resetButton->setIconSize({100, 100});
@@ -99,7 +99,7 @@ struct Setting : public QWidget {
     auto valueLayout = new QVBoxLayout;
     valueWithUnit->setLayout(valueLayout);
     valueLayout->addWidget(value);
-    if (load.unit.isEmpty() == false) {
+    if (description.unit.isEmpty() == false) {
       valueLayout->addWidget(unit);
     }
 
@@ -112,7 +112,7 @@ struct Setting : public QWidget {
 
     auto layout = new QVBoxLayout;
     setLayout(layout);
-    layout->addWidget(description, 1);
+    layout->addWidget(prompt, 1);
     layout->addWidget(bottom, 2);
   }
 };
@@ -134,11 +134,11 @@ Debug::Debug() {
     std::cout << "Setting: " << key.toStdString() << " = "
               << Settings::get(key).toString().toStdString() << std::endl;
 
-    const auto& load = Settings::Load::get(key);
+    const auto& item = Settings::Description::get(key);
 
-    auto setting = new Setting{load};
-    auto button = new QPushButton{breakLines(load.name, 12)};
-    auto screen = new SubScreen{load.name, setting};
+    auto setting = new Setting{item};
+    auto button = new QPushButton{breakLines(item.name, 12)};
+    auto screen = new SubScreen{item.name, setting};
     items[key] = {setting, button, screen};
 
     auto row = index / itemsPerRow;

@@ -3,10 +3,10 @@
 #include <optional>
 
 struct Settings {
-  struct Load {
+  struct Description {
     QString key;
     QString name;
-    QString description;
+    QString prompt;
     QString unit;
     QVariant defaultValue;
     std::function<void(QVariant)> callback;
@@ -15,10 +15,10 @@ struct Settings {
       std::optional<int> maximum = {};
     } limits;
 
-    static const Load& get(const QString& key);
+    static const Description& get(const QString& key);
   };
 
-  static void load(Load);
+  static void load(Description);
 
   static QVariant get(const QString& key);
   static void set(const QString& key, const QVariant& value, bool updateDebugScreen = true);
