@@ -5,23 +5,41 @@ ninja
 ./CatPi
 ```
 
+# BUGS
+
+- if screen is sleeping and app is not active -> can not go out of fullscreen
+
+- bug B: sometimes dispense zero or very little
+  detect it and dispense again
+
+- mask LEDs that are too bright in the night
+
+- needs cord extension, une rallonge
+
+- needs detailed logs, last 6 events is not enough
+
+- load old logs from file, do not have only logs from runtime
+
+- needs auto update button in the GUI
+
+- auto run on boot
+
+- when cat eats just after dispense,
+  it pushes on the scale
+  and the scale detects too much
+  as high as 4.0 grams
+
 # TODO
 
 - counter weight behind for no tipping-over
 
 - verify calibration with the independent source of truth
 
-- auto run on boot
-
 - auto restart on crash
   but not on quit
   and not forever: max X times per Y period
 
 # TODO but later for V2
-
-- bug B: sometimes dispense zero or very little
-  detect it and dispense again
-  needs to detect eat events
 
 - frequencies, performance:
   is load cell updating really only every 1000 milliseconds?
