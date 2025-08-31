@@ -5,7 +5,8 @@ ninja
 ./CatPi
 ```
 
-# BUGS
+
+# TODO
 
 - if screen is sleeping and app is not active -> can not go out of fullscreen
 
@@ -29,17 +30,27 @@ ninja
   and the scale detects too much
   as high as 4.0 grams
 
-# TODO
-
 - counter weight behind for no tipping-over
 
 - verify calibration with the independent source of truth
 
+- have a maximum weight per day
+  maybe 55 grams (a changeable setting)
+  but using the sliding window total
+  so that the clamping is smoothed over time
+
+- go out of night mode automatically
+  into day mode
+  maybe at 6:30 AM (a changeable setting)
+  but then, it's not "day/night buttons"
+  it's "day/night modes"
+  -> not a default push button, but with property checkable ?!
+
+# TODO but later for V2
+
 - auto restart on crash
   but not on quit
   and not forever: max X times per Y period
-
-# TODO but later for V2
 
 - frequencies, performance:
   is load cell updating really only every 1000 milliseconds?
