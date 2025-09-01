@@ -25,6 +25,18 @@ ninja
 
 - auto run on boot
 
+- update capability: in the GUI?
+  it needs to be bullet-proof for reverting broken updates
+  maybe dedicated external gui:
+  list commits of branch main
+  list branches
+  or: use a gui for git, then compile
+
+- `upgrade_cat_pi`:
+  git fetch to get new tags
+  git stash if dirty
+  git pull --rebase if force pushed
+
 - when cat eats just after dispense,
   it pushes on the scale
   and the scale detects too much
