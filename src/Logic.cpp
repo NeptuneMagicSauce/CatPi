@@ -42,7 +42,7 @@ struct LogicImpl {
   void logEvent(QString const& event);
 
   function<void(int)> updateGuiCallback = nullptr;
-  function<void()> afterDispenseCallback = nullptr;
+  function<void()> onDispenseCallback = nullptr;
 
   void updateLogFile();
 };
@@ -56,7 +56,7 @@ namespace {
 Logic::Logic() {
   AssertSingleton();
   impl = new LogicImpl;
-  impl->afterDispenseCallback = [&] { timerEndDispense->start(); };
+  impl->onDispenseCallback = [&] { timerEndDispense->start(); };
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
   Settings::load(
@@ -182,10 +182,7 @@ optional<int> Logic::timeToDispenseSeconds() const {
   return impl->timeToDispenseSeconds;
 }
 
-void Logic::manualDispense() {
-  impl->dispense(DispenseMode::Manual);
-  impl->afterDispenseCallback();
-}
+void Logic::manualDispense() { impl->dispense(DispenseMode::Manual); }
 
 void LogicImpl::dispense(DispenseMode mode) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -194,6 +191,7 @@ void LogicImpl::dispense(DispenseMode mode) {
     pinctrl("set 17 op dh");
   }
 
+  onDispenseCallback();
   timerDetectDispensed.start();
 
   auto now = QDateTime::currentDateTime();
@@ -220,9 +218,6 @@ void Logic::update(optional<double> weightTarred,  //
                    bool& dispensed,                //
                    bool& justAte) {
   impl->update(weightTarred, isWeightBelowThreshold, dispensed, justAte);
-  if (dispensed) {
-    impl->afterDispenseCallback();
-  }
 }
 
 void LogicImpl::update(optional<double> weightTarred,  //
