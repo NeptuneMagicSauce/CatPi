@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
     });
     calibration->connect();
 
-    auto afterDispenseCallback = [&] {
+    auto onDispenseCallback = [&] {
       mainscreen->dispenseButton->setEnabled(false);
       weight->doTare();
     };
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
     // Manual Dispense
     QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
       logic->manualDispense();
-      afterDispenseCallback();
+      onDispenseCallback();
     });
 
     // Logic
@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
       logic->update(weight->weightTarred(), weight->isBelowThreshold(), dispensed, justAte);
 
       if (dispensed) {
-        afterDispenseCallback();
+        onDispenseCallback();
       }
       if (justAte) {
         logic->logWeights(weight->toString());

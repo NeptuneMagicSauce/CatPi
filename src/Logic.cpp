@@ -30,7 +30,7 @@ struct LogicImpl {
   QFile logFile;
   int delaySeconds = 0;
   QList<Event> events;
-  QTimer timerDispensedWeight;
+  QTimer timerDetectDispensed;  // fires after a dispense and a delay
 
   enum struct DispenseMode { Automatic, Manual };
 
@@ -104,10 +104,10 @@ LogicImpl::LogicImpl() {
   std::filesystem::create_directories(logDirectory.path().toStdString());
   cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
 
-  timerDispensedWeight.setSingleShot(true);
-  timerDispensedWeight.setInterval(8 * 1000);  // 8 seconds
+  timerDetectDispensed.setSingleShot(true);
+  timerDetectDispensed.setInterval(8 * 1000);  // 8 seconds
 
-  QObject::connect(&timerDispensedWeight, &QTimer::timeout, [&] {
+  QObject::connect(&timerDetectDispensed, &QTimer::timeout, [&] {
     ostringstream ss;
     ss << fixed << setprecision(1) << events.last().grams;
     logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
@@ -194,7 +194,7 @@ void LogicImpl::dispense(DispenseMode mode) {
     pinctrl("set 17 op dh");
   }
 
-  timerDispensedWeight.start();
+  timerDetectDispensed.start();
 
   auto now = QDateTime::currentDateTime();
 
@@ -215,7 +215,9 @@ void LogicImpl::dispense(DispenseMode mode) {
 
 void Logic::logWeights(const QString& weights) const { impl->logEvent(weights); }
 
-void Logic::update(std::optional<double> weightTarred, bool isWeightBelowThreshold, bool& dispensed,
+void Logic::update(optional<double> weightTarred,  //
+                   bool isWeightBelowThreshold,    //
+                   bool& dispensed,                //
                    bool& justAte) {
   impl->update(weightTarred, isWeightBelowThreshold, dispensed, justAte);
   if (dispensed) {
@@ -223,9 +225,9 @@ void Logic::update(std::optional<double> weightTarred, bool isWeightBelowThresho
   }
 }
 
-void LogicImpl::update(std::optional<double> weightTarred,  //
-                       bool isWeightBelowThreshold,         //
-                       bool& dispensed,                     //
+void LogicImpl::update(optional<double> weightTarred,  //
+                       bool isWeightBelowThreshold,    //
+                       bool& dispensed,                //
                        bool& justAte) {
   auto now = QDateTime::currentDateTime();
 
@@ -252,7 +254,7 @@ void LogicImpl::update(std::optional<double> weightTarred,  //
     auto& lastEvent = events.last();
 
     // dispensed weight
-    if (timerDispensedWeight.isActive() && weightTarred.has_value()) {
+    if (timerDetectDispensed.isActive() && weightTarred.has_value()) {
       auto& dispensedWeight = lastEvent.grams;
       dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
     }
