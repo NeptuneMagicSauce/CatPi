@@ -143,7 +143,6 @@ optional<LoadCell::Data> readInMode(const Options &options) noexcept {
   // un-normalize
   auto reading = (value * impl->hx711->getReferenceUnit()) + impl->hx711->getOffset();
 
-#warning "TODO here"
   return LoadCell::Data{value, reading};
 }
 
