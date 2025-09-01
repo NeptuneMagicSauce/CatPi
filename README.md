@@ -11,15 +11,21 @@ ninja
 - bug B: sometimes dispense zero or very little
   detect it and dispense again
 
+- to validate, test this exploit:
+  eat right away
+  isn't it detected as a mechanical issue and doesn't it repeat the dispense?
+
 - if screen is sleeping and app is not active -> can not go out of fullscreen
-
-- mask LEDs that are too bright in the night
-
-- needs cord extension, une rallonge
 
 - needs detailed logs, last 6 events is not enough
 
 - load old logs from file, do not have only logs from runtime
+
+
+
+- mask LEDs that are too bright in the night
+
+- needs cord extension, une rallonge
 
 - needs auto update button in the GUI
 

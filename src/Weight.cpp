@@ -109,6 +109,8 @@ WeightImpl::WeightImpl() {
   layout->addWidget(&tare.button);
 }
 
+const double &Weight::weightThresholdGrams() const { return impl->settings.weightThresholdValue; }
+
 double Weight::getTare() { return impl->tare.value; }
 
 void Weight::doTare() {

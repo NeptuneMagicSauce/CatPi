@@ -7,6 +7,7 @@
 #include <QStandardPaths>
 #include <QTimer>
 #include <iostream>
+#include <map>
 
 #include "PinCtrl.hpp"
 #include "Settings.hpp"
@@ -18,47 +19,103 @@ using PinCtrl::pinctrl;
 bool Logic::hasGPIO = false;
 
 struct LogicImpl {
-  LogicImpl();
+  LogicImpl(const double& weightThresholdGrams);
 
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
-  int durationDispenseRelayMilliseconds = 4000;
 
+  const double& weightThresholdGrams;  // reference from owner class
+
+  int durationDispenseRelayMilliseconds = 4000;
   optional<int> timeToDispenseSeconds;
 
   QDir logDirectory;
   QFile logFile;
   int delaySeconds = 0;
   QList<Event> events;
-  QTimer timerDetectDispensed;  // fires after a dispense and a delay
+  QTimer timerEndDispense;          // close relay
+  QTimer timerDetectDispensed;      // detect if and how much has been dispensed
+  QTimer timerAllowManualDispense;  // notify GUI
+  int numberOfDispenseRepeats = 0;
 
-  enum struct DispenseMode { Automatic, Manual };
+  Logic::Callbacks callbacks;
+
+  enum struct Mode { Automatic, Manual, Repeat };
+  const map<Mode, QString> modeNames = {
+      {Mode::Automatic, "Automatic"},
+      {Mode::Manual, "Manual"},
+      {Mode::Repeat, "Repeat"},
+  };
 
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
-              bool& dispensed,                     //
               bool& justAte);
-  void dispense(DispenseMode mode);
+  void dispense(Mode mode);
+  void endDetectDispense();
+  bool needsRepeat() const;
   void logEvent(QString const& event);
-
-  function<void(int)> updateGuiCallback = nullptr;
-  function<void()> onDispenseCallback = nullptr;
 
   void updateLogFile();
 };
-
-using DispenseMode = LogicImpl::DispenseMode;
 
 namespace {
   LogicImpl* impl = nullptr;
 }
 
-Logic::Logic() {
+Logic::Logic(const double& weightThresholdGrams) {
   AssertSingleton();
-  impl = new LogicImpl;
-  impl->onDispenseCallback = [&] { timerEndDispense->start(); };
-  timerEndDispense = new QTimer;
-  timerEndDispense->setSingleShot(true);
+  impl = new LogicImpl{weightThresholdGrams};
+
+  timerAllowManualDispense = &impl->timerAllowManualDispense;
+
+  timerUpdate = new QTimer;
+  timerUpdate->setSingleShot(false);
+  timerUpdate->start();
+
+  Settings::load({.key = "LogicInterval",
+                  .name = "Période Logique",
+                  .prompt = "Période de rafraichissement de la boucle principale",
+                  .unit = "Millisecondes",
+                  .defaultValue = 1000,
+                  .callback = [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
+                  .limits = {.minimum = 20, .maximum = {}}});
+}
+
+LogicImpl::LogicImpl(const double& weightThresholdGrams)
+    : weightThresholdGrams(weightThresholdGrams) {
+  logDirectory =
+      QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
+          .first() +
+      "/logs";
+  std::filesystem::create_directories(logDirectory.path().toStdString());
+  cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
+
+  timerAllowManualDispense.setSingleShot(true);
+  timerAllowManualDispense.setInterval(0);
+
+  timerDetectDispensed.setSingleShot(true);
+  QObject::connect(&timerDetectDispensed, &QTimer::timeout, [&] { endDetectDispense(); });
+
+  timerEndDispense.setSingleShot(true);
+  QObject::connect(&timerEndDispense, &QTimer::timeout, [&] {
+    // qDebug() << "CLOSE RELAY" << QDateTime::currentDateTime().time();
+    Logic::closeRelay();
+  });
+
+  Settings::load({.key = delayKey,
+                  .name = "Attente Ouverture",
+                  .prompt = "Temps d'attente pour une ouverture après que ça été mangé",
+                  .unit = "Secondes",
+                  .defaultValue = 15 * 60,
+                  .callback =
+                      [&](QVariant v) {
+                        delaySeconds = v.toInt();
+                        if (callbacks.updateGuiDelay != nullptr) {
+                          callbacks.updateGuiDelay(delaySeconds);
+                        }
+                      },
+                  .limits = {.minimum = 10, .maximum = {}}});
+
   Settings::load(
       {.key = "DurationRelayImpulse",
        .name = "Durée Rotation Hélice",
@@ -67,22 +124,21 @@ Logic::Logic() {
        .defaultValue = 4,
        .callback =
            [&](QVariant v) {
-             impl->durationDispenseRelayMilliseconds = v.toInt() * 1000;
-             timerEndDispense->setInterval(impl->durationDispenseRelayMilliseconds);
+             durationDispenseRelayMilliseconds = v.toInt() * 1000;
+             timerEndDispense.setInterval(durationDispenseRelayMilliseconds);
+
+             // duration of "detect dispense" period = duration of "active dispense" + 3 seconds
+             timerDetectDispensed.setInterval(timerEndDispense.interval() + 3000);
            },
        .limits = {.minimum = 1, .maximum = 20}});
 
-  timerUpdate = new QTimer;
-  timerUpdate->setSingleShot(false);
-  Settings::load({.key = "LogicInterval",
-                  .name = "Période Logique",
-                  .prompt = "Période de rafraichissement de la boucle principale",
-                  .unit = "Millisecondes",
-                  .defaultValue = 1000,
-                  .callback = [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
-                  .limits = {.minimum = 20, .maximum = {}}});
+  logEvent("=== boot === " + QDateTime::currentDateTime().toString());
+}
 
-  timerUpdate->start();
+void Logic::closeRelay() {
+  if (hasGPIO) {
+    pinctrl("set 17 op dl");
+  }
 }
 
 int Logic::delaySeconds() { return impl->delaySeconds; }
@@ -96,55 +152,11 @@ void LogicImpl::updateLogFile() {
   logFile.setFileName(path);
 }
 
-LogicImpl::LogicImpl() {
-  logDirectory =
-      QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
-          .first() +
-      "/logs";
-  std::filesystem::create_directories(logDirectory.path().toStdString());
-  cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
+void Logic::connect(const Callbacks& callbacks) {
+  impl->callbacks = callbacks;
 
-  timerDetectDispensed.setSingleShot(true);
-  timerDetectDispensed.setInterval(8 * 1000);  // 8 seconds
-
-  QObject::connect(&timerDetectDispensed, &QTimer::timeout, [&] {
-    ostringstream ss;
-    ss << fixed << setprecision(1) << events.last().grams;
-    logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
-  });
-
-  Settings::load({.key = delayKey,
-                  .name = "Attente Ouverture",
-                  .prompt = "Temps d'attente pour une ouverture après que ça été mangé",
-                  .unit = "Secondes",
-                  .defaultValue = 15 * 60,
-                  .callback =
-                      [&](QVariant v) {
-                        delaySeconds = v.toInt();
-                        if (updateGuiCallback != nullptr) {
-                          updateGuiCallback(delaySeconds);
-                        }
-                      },
-                  .limits = {.minimum = 10, .maximum = {}}});
-
-  logEvent("=== boot === " + QDateTime::currentDateTime().toString());
-}
-
-void Logic::closeRelay() {
-  if (hasGPIO) {
-    pinctrl("set 17 op dl");
-  }
-}
-
-void Logic::connect(std::function<void(int)> updateGuiCallback) {
-  impl->updateGuiCallback = updateGuiCallback;
-  updateGuiCallback(impl->delaySeconds);
+  impl->callbacks.updateGuiDelay(impl->delaySeconds);
   // call it right away because it was not available earlier, in the constructor
-
-  QObject::connect(timerEndDispense, &QTimer::timeout, [&] {
-    // qDebug() << "CLOSE RELAY" << QDateTime::currentDateTime().time();
-    closeRelay();
-  });
 }
 
 void LogicImpl::logEvent(QString const& event) {
@@ -182,47 +194,80 @@ optional<int> Logic::timeToDispenseSeconds() const {
   return impl->timeToDispenseSeconds;
 }
 
-void Logic::manualDispense() { impl->dispense(DispenseMode::Manual); }
+void Logic::logWeights(const QString& weights) const { impl->logEvent(weights); }
 
-void LogicImpl::dispense(DispenseMode mode) {
+void Logic::update(optional<double> weightTarred,  //
+                   bool isWeightBelowThreshold,    //
+                   bool& justAte) {
+  impl->update(weightTarred, isWeightBelowThreshold, justAte);
+}
+
+void Logic::manualDispense() { impl->dispense(LogicImpl::Mode::Manual); }
+
+void LogicImpl::dispense(Mode mode) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
   // qDebug() << "OPEN RELAY" << QDateTime::currentDateTime().time();
   if (Logic::hasGPIO) {
     pinctrl("set 17 op dh");
   }
 
-  onDispenseCallback();
+  callbacks.onDispense(mode != Mode::Repeat);  // do tare if not mode repeat in order to accumulate
+  timerEndDispense.start();
   timerDetectDispensed.start();
 
   auto now = QDateTime::currentDateTime();
 
-  events.append({
-      .timeDispensed = now,  //
-      .grams = 0,            //
-      .timeEaten = {}        //
-  });
+  if (mode == Mode::Repeat) {
+    ++numberOfDispenseRepeats;
+  } else {
+    numberOfDispenseRepeats = 1;
 
-  // when there is no weight sensor: consider it is eaten right away
-  if (Logic::hasGPIO == false) {
-    events.last().timeEaten = now;
+    // do not create a new event on repeat
+    // because it owns "dispensed weihgt"
+    // which must accumulate on repeats
+    events.append({
+        .timeDispensed = now,  //
+        .grams = 0,            //
+        .timeEaten = {}        //
+    });
   }
 
-  logEvent(now.toString() + ", dispense, " +
-           (mode == DispenseMode::Automatic ? "automatic" : "manual"));
+  //   // when there is no weight sensor: consider it is eaten right away
+  //   if (Logic::hasGPIO == false) {
+  // #error "see next line"
+  //     // update() assumes if detecting-dispense or needs-repeat, do not compute just-ate
+  //     // so with no weight sensor, we can not set just-ate here
+  //     // otherwise we would never go through the repeat code
+  //     events.last().timeEaten = now;
+  //   }
+
+  logEvent(now.toString() + ", dispense, " + modeNames.at(mode));
 }
 
-void Logic::logWeights(const QString& weights) const { impl->logEvent(weights); }
+bool LogicImpl::needsRepeat() const {
+  return events.last().grams < weightThresholdGrams &&  //
+         numberOfDispenseRepeats < 3;
+}
 
-void Logic::update(optional<double> weightTarred,  //
-                   bool isWeightBelowThreshold,    //
-                   bool& dispensed,                //
-                   bool& justAte) {
-  impl->update(weightTarred, isWeightBelowThreshold, dispensed, justAte);
+void LogicImpl::endDetectDispense() {
+  auto dispensedWeight = events.last().grams;
+
+  // log the dispensed weight
+  ostringstream ss;
+  ss << fixed << setprecision(1) << dispensedWeight;
+  logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
+
+  // if it's not enough, there may have been a mechanical issue
+  // -> dispense again
+  if (needsRepeat()) {
+    dispense(Mode::Repeat);
+  } else {
+    timerAllowManualDispense.start();
+  }
 }
 
 void LogicImpl::update(optional<double> weightTarred,  //
                        bool isWeightBelowThreshold,    //
-                       bool& dispensed,                //
                        bool& justAte) {
   auto now = QDateTime::currentDateTime();
 
@@ -255,9 +300,11 @@ void LogicImpl::update(optional<double> weightTarred,  //
     }
 
     // just ate ?
-    if (lastEvent.timeEaten.has_value() == false &&                                               //
-        timeOfDispense.value().secsTo(now) > (durationDispenseRelayMilliseconds / 1000) + 2.0 &&  //
-        isWeightBelowThreshold) {
+    // first detect needs-repeat, then detect just-ate, because it's the same test
+    if (lastEvent.timeEaten.has_value() == false &&  // not yet detected just-ate
+        timerDetectDispensed.isActive() == false &&  // not still detecting dispensed weight
+        needsRepeat() == false &&                    // not still needing repeat dispense
+        isWeightBelowThreshold) {                    //
       // yes
       lastEvent.timeEaten = now;
       logEvent(now.toString() + ", eat");
@@ -269,8 +316,7 @@ void LogicImpl::update(optional<double> weightTarred,  //
   // do not check that weight is below threshold
   // because when it is time, dispensed has been eaten
   if (timeToDispenseSeconds.value_or(1) <= 0) {
-    dispense(DispenseMode::Automatic);
-    dispensed = true;
+    dispense(Mode::Automatic);
   }
 
   // remove events older than 24 hours

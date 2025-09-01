@@ -16,5 +16,6 @@ class Weight : public QGroupBox {
   void doTare();
   std::optional<double> weightTarred();
   bool isBelowThreshold() const;
+  const double& weightThresholdGrams() const;
   QString toString() const;
 };

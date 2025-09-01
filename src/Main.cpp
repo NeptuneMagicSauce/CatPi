@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   auto loadcell = new LoadCell;
   auto weight = new Weight;
   auto calibration = new Calibration;
-  auto logic = new Logic;
+  auto logic = new Logic{weight->weightThresholdGrams()};
   auto delay = new Delay;
   auto plots = new Plots;
   auto toolbar = new ToolBar;
@@ -177,30 +177,27 @@ int main(int argc, char** argv) {
     });
     calibration->connect();
 
-    auto onDispenseCallback = [&] {
-      mainscreen->dispenseButton->setEnabled(false);
-      weight->doTare();
-    };
-
     // Manual Dispense
-    QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout, [&]() {
-      logic->manualDispense();
-      onDispenseCallback();
-    });
+    QObject::connect(mainscreen->dispenseButton->finished, &QTimer::timeout,
+                     [&]() { logic->manualDispense(); });
 
     // Logic
-    logic->connect([&](int newDelay) { delay->setDelay(newDelay); });
-    QObject::connect(logic->timerEndDispense, &QTimer::timeout,
+    logic->connect({.updateGuiDelay = [&](int newDelay) { delay->setDelay(newDelay); },
+                    .onDispense =
+                        [&](bool doTare) {
+                          mainscreen->dispenseButton->setEnabled(false);
+                          if (doTare) {
+                            weight->doTare();
+                          }
+                        }});
+
+    QObject::connect(logic->timerAllowManualDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
-      auto dispensed = false;
       auto justAte = false;
 
-      logic->update(weight->weightTarred(), weight->isBelowThreshold(), dispensed, justAte);
+      logic->update(weight->weightTarred(), weight->isBelowThreshold(), justAte);
 
-      if (dispensed) {
-        onDispenseCallback();
-      }
       if (justAte) {
         logic->logWeights(weight->toString());
       }
