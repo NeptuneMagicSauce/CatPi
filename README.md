@@ -8,10 +8,10 @@ ninja
 
 # TODO
 
-- if screen is sleeping and app is not active -> can not go out of fullscreen
-
 - bug B: sometimes dispense zero or very little
   detect it and dispense again
+
+- if screen is sleeping and app is not active -> can not go out of fullscreen
 
 - mask LEDs that are too bright in the night
 
@@ -308,3 +308,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - consider justAte if weight has been below threshold for a bit of time
 - log dispensed weight
 - redo layout main/menu
+- have a Setting: duration of motor rotating!

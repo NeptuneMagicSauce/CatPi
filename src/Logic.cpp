@@ -22,7 +22,7 @@ struct LogicImpl {
 
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
-  const int durationDispenseRelayMilliseconds = 4000;
+  int durationDispenseRelayMilliseconds = 4000;
 
   optional<int> timeToDispenseSeconds;
 
@@ -59,7 +59,19 @@ Logic::Logic() {
   impl->afterDispenseCallback = [&] { timerEndDispense->start(); };
   timerEndDispense = new QTimer;
   timerEndDispense->setSingleShot(true);
-  timerEndDispense->setInterval(impl->durationDispenseRelayMilliseconds);
+  Settings::load(
+      {.key = "DurationRelayImpulse",
+       .name = "Durée Rotation Hélice",
+       .prompt = "Durée pendant laquelle le moteur tourne l'hélice à chaque distribution",
+       .unit = "Secondes",
+       .defaultValue = 4,
+       .callback =
+           [&](QVariant v) {
+             impl->durationDispenseRelayMilliseconds = v.toInt() * 1000;
+             timerEndDispense->setInterval(impl->durationDispenseRelayMilliseconds);
+           },
+       .limits = {.minimum = 1, .maximum = 20}});
+
   timerUpdate = new QTimer;
   timerUpdate->setSingleShot(false);
   Settings::load({.key = "LogicInterval",
@@ -129,7 +141,10 @@ void Logic::connect(std::function<void(int)> updateGuiCallback) {
   updateGuiCallback(impl->delaySeconds);
   // call it right away because it was not available earlier, in the constructor
 
-  QObject::connect(timerEndDispense, &QTimer::timeout, [&] { closeRelay(); });
+  QObject::connect(timerEndDispense, &QTimer::timeout, [&] {
+    // qDebug() << "CLOSE RELAY" << QDateTime::currentDateTime().time();
+    closeRelay();
+  });
 }
 
 void LogicImpl::logEvent(QString const& event) {
@@ -174,6 +189,7 @@ void Logic::manualDispense() {
 
 void LogicImpl::dispense(DispenseMode mode) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
+  // qDebug() << "OPEN RELAY" << QDateTime::currentDateTime().time();
   if (Logic::hasGPIO) {
     pinctrl("set 17 op dh");
   }
