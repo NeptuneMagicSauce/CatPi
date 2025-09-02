@@ -8,13 +8,13 @@ ninja
 
 # TODO
 
-- to validate, test this exploit:
-  eat right away
-  isn't it detected as a mechanical issue and doesn't it repeat the dispense?
+- load old logs from file, do not have only logs from runtime
 
 - needs detailed logs, last 6 events is not enough
 
-- load old logs from file, do not have only logs from runtime
+- to validate, test this exploit:
+  eat right away
+  isn't it detected as a mechanical issue and doesn't it repeat the dispense?
 
 
 
