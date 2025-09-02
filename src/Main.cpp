@@ -14,7 +14,7 @@
 #include "FilterWeight.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
-#include "Logs.hpp"
+#include "LogsWidget.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "Menu.hpp"
@@ -62,9 +62,9 @@ int main(int argc, char** argv) {
   auto plots = new Plots;
   auto toolbar = new ToolBar;
   auto debug = new Debug;
-  auto logs = new Logs;
+  auto logswidget = new LogsWidget;
   auto menu = new Menu{delay};
-  auto mainscreen = new MainScreen{weight, logs, delay->textAndButtons, delay->progress};
+  auto mainscreen = new MainScreen{weight, logswidget, delay->textAndButtons, delay->progress};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
                                     new SubScreen("", menu),                    //
                                     new SubScreen("Calibration", calibration),  //
@@ -203,7 +203,7 @@ int main(int argc, char** argv) {
       }
 
       delay->setRemaining(logic->timeToDispenseSeconds());
-      logs->updateLogs(logic->events());
+      logswidget->update(logic->events());
     });
 
     // Delay

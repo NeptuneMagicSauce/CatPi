@@ -1,4 +1,4 @@
-#include "Logs.hpp"
+#include "LogsWidget.hpp"
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -26,7 +26,7 @@ namespace {
   }
 }
 
-Logs::Logs() {
+LogsWidget::LogsWidget() {
   AssertSingleton();
 
   auto layout = new QVBoxLayout;
@@ -53,7 +53,7 @@ Logs::Logs() {
   layout->addWidget(summary);
 }
 
-void Logs::updateLogs(const QList<Event>& events) {
+void LogsWidget::update(const QList<Event>& events) {
   // TODO measure cpu usage, only update on change
   if (events.isEmpty()) {
     return;
