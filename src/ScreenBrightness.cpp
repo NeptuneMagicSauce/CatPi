@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 #include <QTimer>
+#include <QWidget>
 
 #include "Settings.hpp"
 #include "System.hpp"
@@ -26,7 +27,7 @@ namespace {
   auto isOn = true;
   int delayScreenSaverMinutes = 1;
   QTimer timerInactive;
-  std::function<void(bool)> onChangeCallback = nullptr;
+  function<void(bool)> onChangeCallback;
 
   void change(int byte) {
     if (procfile.exists() == false) {
@@ -81,6 +82,13 @@ ScreenBrightness::ScreenBrightness() {
   QObject::connect(&timerInactive, &QTimer::timeout, [&] {
     if (delayScreenSaverMinutes == 0) {
       // that's a disabled screen saver
+      return;
+    }
+    auto activeWindow = qApp->activeWindow();
+    if (activeWindow == nullptr || activeWindow->isFullScreen() == false) {
+      // go to sleep if fullscreen and active
+      // otherwise we will fail to go out of sleep
+      // by interacting with the application
       return;
     }
     setIsOn(false);
