@@ -1,14 +1,12 @@
 #include "Logic.hpp"
 
 #include <QDateTime>
-#include <QDir>
 #include <QElapsedTimer>
-#include <QFile>
-#include <QStandardPaths>
 #include <QTimer>
 #include <iostream>
 #include <map>
 
+#include "Logs.hpp"
 #include "PinCtrl.hpp"
 #include "Settings.hpp"
 #include "System.hpp"
@@ -19,18 +17,17 @@ using PinCtrl::pinctrl;
 bool Logic::hasGPIO = false;
 
 struct LogicImpl {
-  LogicImpl(const double& weightThresholdGrams);
+  LogicImpl(const double& weightThresholdGrams, Logs& logs);
 
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
 
   const double& weightThresholdGrams;  // reference from owner class
+  Logs& logs;
 
   int durationDispenseRelayMilliseconds = 4000;
   optional<int> timeToDispenseSeconds;
 
-  QDir logDirectory;
-  QFile logFile;
   int delaySeconds = 0;
   QList<Event> events;
   QTimer timerEndDispense;          // close relay
@@ -53,18 +50,15 @@ struct LogicImpl {
   void dispense(Mode mode);
   void endDetectDispense();
   bool needsRepeat() const;
-  void logEvent(QString const& event);
-
-  void updateLogFile();
 };
 
 namespace {
   LogicImpl* impl = nullptr;
 }
 
-Logic::Logic(const double& weightThresholdGrams) {
+Logic::Logic(const double& weightThresholdGrams, Logs& logs) {
   AssertSingleton();
-  impl = new LogicImpl{weightThresholdGrams};
+  impl = new LogicImpl{weightThresholdGrams, logs};
 
   timerAllowManualDispense = &impl->timerAllowManualDispense;
 
@@ -81,15 +75,8 @@ Logic::Logic(const double& weightThresholdGrams) {
                   .limits = {.minimum = 20, .maximum = {}}});
 }
 
-LogicImpl::LogicImpl(const double& weightThresholdGrams)
-    : weightThresholdGrams(weightThresholdGrams) {
-  logDirectory =
-      QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
-          .first() +
-      "/logs";
-  std::filesystem::create_directories(logDirectory.path().toStdString());
-  cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
-
+LogicImpl::LogicImpl(const double& weightThresholdGrams, Logs& logs)
+    : weightThresholdGrams(weightThresholdGrams), logs(logs) {
   timerAllowManualDispense.setSingleShot(true);
   timerAllowManualDispense.setInterval(0);
 
@@ -132,7 +119,7 @@ LogicImpl::LogicImpl(const double& weightThresholdGrams)
            },
        .limits = {.minimum = 1, .maximum = 20}});
 
-  logEvent("=== boot === " + QDateTime::currentDateTime().toString());
+  logs.logEvent("=== boot === " + QDateTime::currentDateTime().toString());
 }
 
 void Logic::closeRelay() {
@@ -143,33 +130,11 @@ void Logic::closeRelay() {
 
 int Logic::delaySeconds() { return impl->delaySeconds; }
 
-void LogicImpl::updateLogFile() {
-  auto const fileName = QDateTime::currentDateTime().date().toString(Qt::ISODate);
-  auto const path = logDirectory.path() + "/" + fileName + ".txt";
-  if (logFile.fileName().isEmpty() == false && logFile.fileName() != path) {
-    logFile.close();
-  }
-  logFile.setFileName(path);
-}
-
 void Logic::connect(const Callbacks& callbacks) {
   impl->callbacks = callbacks;
 
   impl->callbacks.updateGuiDelay(impl->delaySeconds);
   // call it right away because it was not available earlier, in the constructor
-}
-
-void LogicImpl::logEvent(QString const& event) {
-  // cout << log.toStdString() << endl;
-
-  // print log event to file
-  updateLogFile();
-  logFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
-  logFile.write((event + "\n").toUtf8());
-  logFile.close();
-
-  // print log event to console
-  cout << event.toStdString() << endl;
 }
 
 void Logic::changeDelay(int delta) {
@@ -193,8 +158,6 @@ optional<int> Logic::timeToDispenseSeconds() const {
 
   return impl->timeToDispenseSeconds;
 }
-
-void Logic::logWeights(const QString& weights) const { impl->logEvent(weights); }
 
 void Logic::update(optional<double> weightTarred,  //
                    bool isWeightBelowThreshold,    //
@@ -241,7 +204,7 @@ void LogicImpl::dispense(Mode mode) {
   //     events.last().timeEaten = now;
   //   }
 
-  logEvent(now.toString() + ", dispense, " + modeNames.at(mode));
+  logs.logEvent(now.toString() + ", dispense, " + modeNames.at(mode));
 }
 
 bool LogicImpl::needsRepeat() const {
@@ -255,7 +218,7 @@ void LogicImpl::endDetectDispense() {
   // log the dispensed weight
   ostringstream ss;
   ss << fixed << setprecision(1) << dispensedWeight;
-  logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
+  logs.logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
 
   // if it's not enough, there may have been a mechanical issue
   // -> dispense again
@@ -307,7 +270,7 @@ void LogicImpl::update(optional<double> weightTarred,  //
         isWeightBelowThreshold) {                    //
       // yes
       lastEvent.timeEaten = now;
-      logEvent(now.toString() + ", eat");
+      logs.logEvent(now.toString() + ", eat");
       justAte = true;
     }
   }

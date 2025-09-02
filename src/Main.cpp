@@ -14,6 +14,7 @@
 #include "FilterWeight.hpp"
 #include "LoadCell.hpp"
 #include "Logic.hpp"
+#include "Logs.hpp"
 #include "LogsWidget.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
@@ -38,7 +39,7 @@ namespace {
 
 struct Application : public QApplication {
   Application(int& argc, char** argv) : QApplication(argc, argv) {
-    // app name is needed for AppData location, consumed by Logic for logging
+    // app name is needed for AppData location, consumed by Logs for logging location
     // otherwise it is derived from file name, which may be a varying symlink
     setApplicationName("CatPi");
   }
@@ -54,10 +55,11 @@ int main(int argc, char** argv) {
   auto onlyone = OnlyOneInstance{};
   auto brightness = ScreenBrightness{};
   auto filterweight = FilterWeight{};
+  auto logs = Logs{};
   auto loadcell = new LoadCell;
   auto weight = new Weight;
   auto calibration = new Calibration;
-  auto logic = new Logic{weight->weightThresholdGrams()};
+  auto logic = new Logic{weight->weightThresholdGrams(), logs};
   auto delay = new Delay;
   auto plots = new Plots;
   auto toolbar = new ToolBar;
@@ -199,7 +201,7 @@ int main(int argc, char** argv) {
       logic->update(weight->weightTarred(), weight->isBelowThreshold(), justAte);
 
       if (justAte) {
-        logic->logWeights(weight->toString());
+        logs.logEvent(weight->toString());
       }
 
       delay->setRemaining(logic->timeToDispenseSeconds());

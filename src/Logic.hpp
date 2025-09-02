@@ -1,13 +1,14 @@
 #pragma once
 
 struct QTimer;
+struct Logs;
 
 #include <optional>
 
 #include "Event.hpp"
 
 struct Logic {
-  Logic(const double& weightThresholdGrams);
+  Logic(const double& weightThresholdGrams, Logs& logs);
 
   static bool hasGPIO;
 
@@ -24,7 +25,6 @@ struct Logic {
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
               bool& justAte);
-  void logWeights(const QString& weights) const;
   void changeDelay(int delta);
   void setDelaySeconds(int delaySeconds);
 
