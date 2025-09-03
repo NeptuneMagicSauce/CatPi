@@ -9,5 +9,6 @@ struct ToolBar : public QToolBar {
 
   QAction* fullscreen = nullptr;
   QAction* menu = nullptr;
+  QAction* logs = nullptr;
   QAction* quit = nullptr;
 };

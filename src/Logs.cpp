@@ -13,25 +13,9 @@
 
 using namespace std;
 
-namespace {
-  struct Data {
-    enum struct Type {  //
-      Boot,
-      DispenseAuto,
-      DispenseManual,
-      Eat,
-    };
-    Type type;
-    QDateTime time;
-    double weight;
+using Type = Logs::Event::Type;
 
-    static const QSet<Type> dispenseTypes;
-  };
-}
-
-using Type = Data::Type;
-
-const QSet<Type> Data::dispenseTypes = {
+const QSet<Type> Logs::Event::dispenseTypes = {
     Type::DispenseAuto,  //
     Type::DispenseManual,
 };
@@ -41,13 +25,13 @@ struct LogsImpl {
 
   QDir logDirectory;
   QFile logFile;
-  QMap<qint64, QList<Data>> data;
+  QMap<qint64, QList<Logs::Event>> data;
 
   LogsImpl(Events& events);
   void updateLogFile();
   void logEvent(QString const& event);
   void readHistoricalData(auto const& day);
-  optional<Data*> findLatestDispense(auto& day);
+  optional<Logs::Event*> findLastDispense(auto& day);
   void populateHistoricalEvents(auto const& day, auto const& now);
 
   QString dateToFilePath(const QDate& date);
@@ -99,7 +83,7 @@ LogsImpl::LogsImpl(Events& events) : events(events) {
 void LogsImpl::populateHistoricalEvents(auto const& day, auto const& now) {
   for (auto const& historical : data[day.toJulianDay()]) {
     if (eventIsLessThan24HoursOld(historical.time, now)) {
-      if (Data::dispenseTypes.contains(historical.type)) {
+      if (Logs::Event::dispenseTypes.contains(historical.type)) {
         events.data.append({//
                             .timeDispensed = historical.time,
                             .grams = historical.weight,
@@ -113,9 +97,9 @@ void LogsImpl::populateHistoricalEvents(auto const& day, auto const& now) {
   }
 }
 
-optional<Data*> LogsImpl::findLatestDispense(auto& day) {
+optional<Logs::Event*> LogsImpl::findLastDispense(auto& day) {
   for (auto it = day.rbegin(); it != day.rend(); ++it) {
-    if (Data::dispenseTypes.contains(it->type)) {
+    if (Logs::Event::dispenseTypes.contains(it->type)) {
       return &(*it);
     }
   }
@@ -165,13 +149,25 @@ void LogsImpl::logEvent(QString const& event) {
   cout << event.toStdString() << endl;
 }
 
+QList<Logs::Event> const& Logs::readHistoricalData(QDate const& day) const {
+  impl->readHistoricalData(day);
+  return impl->data[day.toJulianDay()];
+}
+
 void LogsImpl::readHistoricalData(auto const& day) {
   auto f = QFile{dateToFilePath(day)};
   if (f.exists() == false) {
     return;
   }
 
+#warning "TODO"
+  // if the day is today -> clear and compute
+  // else {
+  //   if the day exists in data -> return
+  //   else compute
+
   auto& d = data[day.toJulianDay()];
+  d.clear();
 
   // === boot === Tue Sep 2 23:01:02 2025
   // Tue Sep 2 23:25:47 2025, dispense, Automatic
@@ -212,6 +208,16 @@ void LogsImpl::readHistoricalData(auto const& day) {
     // the manual or auto dispense event, not the repeated
     // TODO log in dispense event if it was repeated
 
+    // set the weight to the eat event from previous dispense
+    if (d.empty() == false) {
+      auto& lastEvent = d.last();
+      if (lastEvent.type == Type::Eat) {
+        if (auto lastDispense = findLastDispense(d)) {
+          lastEvent.weight = lastDispense.value()->weight;
+        }
+      }
+    }
+
     static auto const patternWeight = "DispensedWeight: ";
     if (line.contains(patternWeight)) {
       line.remove(patternWeight);
@@ -220,7 +226,7 @@ void LogsImpl::readHistoricalData(auto const& day) {
       auto weight = line.toDouble(&ok);
       if (ok) {
         // qDebug() << patternWeight << value;
-        if (auto lastDispense = findLatestDispense(d)) {
+        if (auto lastDispense = findLastDispense(d)) {
           // qDebug() << "last dispense" << (int)lastDispense->type << it->time.toString();
           lastDispense.value()->weight = weight;
         }

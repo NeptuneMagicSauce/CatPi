@@ -35,4 +35,7 @@
     <qresource>
         <file>burgermenu.png</file>
     </qresource>
+    <qresource>
+        <file>journal.png</file>
+    </qresource>
 </RCC>

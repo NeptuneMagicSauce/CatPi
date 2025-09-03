@@ -16,6 +16,7 @@
 #include "Logic.hpp"
 #include "Logs.hpp"
 #include "LogsSmallWidget.hpp"
+#include "LogsWidget.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "Menu.hpp"
@@ -64,11 +65,13 @@ int main(int argc, char** argv) {
   auto plots = new Plots;
   auto toolbar = new ToolBar;
   auto debug = new Debug;
-  auto logswidget = new LogsSmallWidget;
+  auto logsSmallWidget = new LogsSmallWidget;
+  auto logsWidget = new LogsWidget{logs};
   auto menu = new Menu{delay};
-  auto mainscreen = new MainScreen{weight, logswidget, delay->textAndButtons, delay->progress};
+  auto mainscreen = new MainScreen{weight, logsSmallWidget, delay->textAndButtons, delay->progress};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
                                     new SubScreen("", menu),                    //
+                                    new SubScreen("", logsWidget),              //
                                     new SubScreen("Calibration", calibration),  //
                                     new SubScreen("Debug", debug)}};
   auto window = new MainWindow{central, toolbar};
@@ -120,12 +123,27 @@ int main(int argc, char** argv) {
     QObject::connect(toolbar->menu, &QAction::triggered, [&](bool checked) {
       if (checked) {
         delay->attachWidgets();
-        central->setPage(menu);
       } else {
         mainscreen->attachWidgets();
-        central->setPage(mainscreen);
       }
     });
+    QObject::connect(toolbar->logs, &QAction::triggered, [&](bool checked) {
+      if (checked) {
+        logsWidget->loadData();
+      }
+    });
+    for (auto const& i : QList<pair<QAction*, QWidget*>>{
+             {toolbar->menu, menu},
+             {toolbar->logs, logsWidget},
+         }) {
+      QObject::connect(i.first, &QAction::triggered, [=](bool checked) {
+        if (checked) {
+          central->setPage(i.second);
+        } else {
+          central->setPage(mainscreen);
+        }
+      });
+    }
 
     // Menu
     QObject::connect(menu->calibration, &QAbstractButton::released,
@@ -205,7 +223,7 @@ int main(int argc, char** argv) {
       }
 
       delay->setRemaining(logic->timeToDispenseSeconds());
-      logswidget->update(logs.events.data);
+      logsSmallWidget->update(logs.events.data);
     });
 
     // Delay

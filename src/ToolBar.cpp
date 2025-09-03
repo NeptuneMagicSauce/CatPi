@@ -31,11 +31,19 @@ ToolBar::ToolBar() {
   menu->setText("Menu");
   menu->setCheckable(true);
 
+  logs = new QAction;
+  logs->setIcon(QIcon{QPixmap{"://journal.png"}});
+  logs->setText("Journal");
+  logs->setCheckable(true);
+
   quit = new QAction();
   quit->setIcon(QIcon{QPixmap{"://quit.png"}});
   quit->setText("Quit");
 
   addAction(menu);
+  addWidget(Widget::Spacer());
+  addAction(logs);
+  addWidget(Widget::Spacer());
   addAction(fullscreen);
   addWidget(Widget::Spacer());
   addAction(quit);
