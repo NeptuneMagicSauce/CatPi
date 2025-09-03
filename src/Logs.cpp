@@ -19,7 +19,6 @@ namespace {
       Boot,
       DispenseAuto,
       DispenseManual,
-      DispenseRepeat,
       Eat,
     };
     Type type;
@@ -33,24 +32,29 @@ namespace {
 using Type = Data::Type;
 
 const QSet<Type> Data::dispenseTypes = {
-    Type::DispenseAuto,
+    Type::DispenseAuto,  //
     Type::DispenseManual,
-    Type::DispenseRepeat,
 };
 
 struct LogsImpl {
+  Events& events;
+
   QDir logDirectory;
   QFile logFile;
   QMap<qint64, QList<Data>> data;
 
-  LogsImpl();
+  LogsImpl(Events& events);
   void updateLogFile();
   void logEvent(QString const& event);
-  void readHistoricalData(const QDate& date);
+  void readHistoricalData(auto const& day);
+  optional<Data*> findLatestDispense(auto& day);
+  void populateHistoricalEvents(auto const& day, auto const& now);
 
   QString dateToFilePath(const QDate& date);
   static QString dateToFileName(const QDate& date);
   static optional<QDate> fileNameToDate(const QString& fileName);
+
+  static bool eventIsLessThan24HoursOld(const QDateTime& event, const QDateTime& now);
 };
 
 namespace {
@@ -59,12 +63,12 @@ namespace {
 
 Logs::Logs() {
   AssertSingleton();
-  impl = new LogsImpl;
+  impl = new LogsImpl{events};
 }
 
 void Logs::logEvent(QString const& event) { impl->logEvent(event); }
 
-LogsImpl::LogsImpl() {
+LogsImpl::LogsImpl(Events& events) : events(events) {
   logDirectory =
       QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
           .first() +
@@ -72,15 +76,50 @@ LogsImpl::LogsImpl() {
   std::filesystem::create_directories(logDirectory.path().toStdString());
   cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
 
-  auto today = QDate::currentDate();
+  auto now = QDateTime::currentDateTime();
+  auto today = now.date();
   auto yesterday = today.addDays(-1);
-  readHistoricalData(yesterday);
-  readHistoricalData(today);
 
-#warning "TODO here"
-  // populate logic->events with relevant data: today or less than 24 hours old
-  // handle repeat dispenses: because they were not tarred, they must not be accumulated
-  // log more precise weights
+  for (auto const& dayToLoad : QList{yesterday, today}) {
+    readHistoricalData(dayToLoad);
+    populateHistoricalEvents(dayToLoad, now);
+  }
+
+  // qDebug() << "DATA:";
+  // for (auto& d : data[today.toJulianDay()]) {
+  //   qDebug() << (int)d.type << d.time << d.weight;
+  // }
+  // qDebug() << "EVENTS:";
+  // for (auto& e : events.data) {
+  //   qDebug() << e.grams << "GRAMS" << e.timeDispensed.toString()
+  //            << e.timeEaten.value_or(QDateTime{}).toString();
+  // }
+}
+
+void LogsImpl::populateHistoricalEvents(auto const& day, auto const& now) {
+  for (auto const& historical : data[day.toJulianDay()]) {
+    if (eventIsLessThan24HoursOld(historical.time, now)) {
+      if (Data::dispenseTypes.contains(historical.type)) {
+        events.data.append({//
+                            .timeDispensed = historical.time,
+                            .grams = historical.weight,
+                            .timeEaten = {}});
+      } else if (historical.type == Type::Eat) {
+        if (events.data.empty() == false) {
+          events.data.last().timeEaten = historical.time;
+        }
+      }
+    }
+  }
+}
+
+optional<Data*> LogsImpl::findLatestDispense(auto& day) {
+  for (auto it = day.rbegin(); it != day.rend(); ++it) {
+    if (Data::dispenseTypes.contains(it->type)) {
+      return &(*it);
+    }
+  }
+  return {};
 }
 
 QString LogsImpl::dateToFileName(const QDate& date) { return date.toString(Qt::ISODate) + ".txt"; }
@@ -126,13 +165,13 @@ void LogsImpl::logEvent(QString const& event) {
   cout << event.toStdString() << endl;
 }
 
-void LogsImpl::readHistoricalData(const QDate& date) {
-  auto f = QFile{dateToFilePath(date)};
+void LogsImpl::readHistoricalData(auto const& day) {
+  auto f = QFile{dateToFilePath(day)};
   if (f.exists() == false) {
     return;
   }
 
-  auto& d = data[date.toJulianDay()];
+  auto& d = data[day.toJulianDay()];
 
   // === boot === Tue Sep 2 23:01:02 2025
   // Tue Sep 2 23:25:47 2025, dispense, Automatic
@@ -147,6 +186,7 @@ void LogsImpl::readHistoricalData(const QDate& date) {
     auto line = QString{l};
 
     auto parseSimpleLine = [&](const auto& pattern, const auto type) {
+      // TODO use QRegularExpression
       if (line.contains(pattern)) {
         // qDebug() << line;
         line.remove(pattern);
@@ -165,9 +205,12 @@ void LogsImpl::readHistoricalData(const QDate& date) {
     };
     parseSimpleLine("=== boot === ", Type::Boot);
     parseSimpleLine(", eat", Type::Eat);
-    parseSimpleLine(", dispense, Manual", Type::DispenseManual);
-    parseSimpleLine(", dispense, Automatic", Type::DispenseAuto);
-    parseSimpleLine(", dispense, Repeat", Type::DispenseRepeat);
+    parseSimpleLine(", dispense, manual", Type::DispenseManual);
+    parseSimpleLine(", dispense, automatic", Type::DispenseAuto);
+    // do not create an event for repeat dispenses
+    // because the dispensed weight is owned by only one dispense event
+    // the manual or auto dispense event, not the repeated
+    // TODO log in dispense event if it was repeated
 
     static auto const patternWeight = "DispensedWeight: ";
     if (line.contains(patternWeight)) {
@@ -177,13 +220,9 @@ void LogsImpl::readHistoricalData(const QDate& date) {
       auto weight = line.toDouble(&ok);
       if (ok) {
         // qDebug() << patternWeight << value;
-        // find last dispense item
-        for (auto it = d.rbegin(); it != d.rend(); ++it) {
-          if (Data::dispenseTypes.contains(it->type)) {
-            // qDebug() << "latest dispense" << (int)it->type << it->time.toString();
-            it->weight = weight;
-            break;
-          }
+        if (auto lastDispense = findLatestDispense(d)) {
+          // qDebug() << "last dispense" << (int)lastDispense->type << it->time.toString();
+          lastDispense.value()->weight = weight;
         }
       } else {
         qDebug() << "invalid weight in line" << l;
@@ -198,10 +237,14 @@ void LogsImpl::readHistoricalData(const QDate& date) {
   // }
 }
 
+bool LogsImpl::eventIsLessThan24HoursOld(const QDateTime& event, const QDateTime& now) {
+  return event.secsTo(now) < 60 * 60 * 24;
+}
+
 void Logs::update(const QDateTime& now) {
   // remove events older than 24 hours
   while (events.data.isEmpty() == false &&
-         events.data.first().timeDispensed.secsTo(now) > 60 * 60 * 24) {
+         LogsImpl::eventIsLessThan24HoursOld(events.data.first().timeDispensed, now) == false) {
     events.data.removeFirst();
   }
 }

@@ -8,14 +8,14 @@ ninja
 
 # TODO
 
-- load old logs from file, do not have only logs from runtime
-
 - needs detailed logs, last 6 events is not enough
+  loading historical data on demand
 
 - to validate, test this exploit:
   eat right away
   isn't it detected as a mechanical issue and doesn't it repeat the dispense?
 
+- to validate: is loading historical data slow on boot?
 
 
 - mask LEDs that are too bright in the night
@@ -325,3 +325,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - bug B: sometimes dispense zero or very little
   detect it and dispense again
 - if screen is sleeping and app is not active -> can not go out of fullscreen
+- load old logs from file, do not have only logs from runtime

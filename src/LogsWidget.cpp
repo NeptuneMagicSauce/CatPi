@@ -75,9 +75,9 @@ void LogsWidget::update(const QList<Event>& events) {
     table->setItem(row, 1, stringToItem(formatWeight(event.grams)));
 
     // eat
-    if (event.timeEaten.has_value()) {
-      table->setItem(row, 2, stringToItem(event.timeEaten.value().time().toString()));
-    }
+    table->setItem(
+        row, 2,
+        stringToItem(event.timeEaten.has_value() ? event.timeEaten.value().time().toString() : ""));
 
     ++row;
     ++eventIndex;

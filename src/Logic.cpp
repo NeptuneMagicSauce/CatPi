@@ -38,9 +38,9 @@ struct LogicImpl {
 
   enum struct Mode { Automatic, Manual, Repeat };
   const map<Mode, QString> modeNames = {
-      {Mode::Automatic, "Automatic"},
-      {Mode::Manual, "Manual"},
-      {Mode::Repeat, "Repeat"},
+      {Mode::Automatic, "automatic"},
+      {Mode::Manual, "manual"},
+      {Mode::Repeat, "repeat"},
   };
 
   void update(std::optional<double> weightTarred,  //
@@ -185,7 +185,7 @@ void LogicImpl::dispense(Mode mode) {
     numberOfDispenseRepeats = 1;
 
     // do not create a new event on repeat
-    // because it owns "dispensed weihgt"
+    // because the event owns "dispensed weight"
     // which must accumulate on repeats
     events().append({
         .timeDispensed = now,  //
@@ -216,7 +216,7 @@ void LogicImpl::endDetectDispense() {
 
   // log the dispensed weight
   ostringstream ss;
-  ss << fixed << setprecision(1) << dispensedWeight;
+  ss << fixed << setprecision(3) << dispensedWeight;
   logs.logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
 
   // if it's not enough, there may have been a mechanical issue

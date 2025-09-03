@@ -7,7 +7,7 @@ struct Logs {
   Logs();
 
   void update(const QDateTime& now);
-  void logEvent(QString const& event);  // TODO rename
+  void logEvent(QString const& event);
 
   Events events;
 };
