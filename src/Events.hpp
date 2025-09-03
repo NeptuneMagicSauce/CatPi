@@ -9,3 +9,7 @@ struct Event {
   double grams;
   std::optional<QDateTime> timeEaten;
 };
+
+struct Events {
+  QList<Event> data;
+};

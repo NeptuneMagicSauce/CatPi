@@ -3,12 +3,11 @@
 struct QTimer;
 struct Logs;
 
+#include <functional>
 #include <optional>
 
-#include "Event.hpp"
-
 struct Logic {
-  Logic(const double& weightThresholdGrams, Logs& logs);
+  Logic(Logs& logs, const double& weightThresholdGrams);
 
   static bool hasGPIO;
 
@@ -31,5 +30,4 @@ struct Logic {
   std::optional<int> timeToDispenseSeconds() const;
 
   static void closeRelay();
-  const QList<Event>& events() const;
 };

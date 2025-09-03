@@ -1,6 +1,6 @@
 #include <QWidget>
 
-#include "Event.hpp"
+#include "Events.hpp"
 
 struct LogsWidget : public QWidget {
   LogsWidget();

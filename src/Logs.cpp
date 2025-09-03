@@ -116,8 +116,6 @@ void LogsImpl::updateLogFile() {
 }
 
 void LogsImpl::logEvent(QString const& event) {
-  // cout << log.toStdString() << endl;
-
   // print log event to file
   updateLogFile();
   logFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
@@ -198,4 +196,12 @@ void LogsImpl::readHistoricalData(const QDate& date) {
   //   qDebug() << (int)e.type << e.time.toString()
   //            << (Data::dispenseTypes.contains(e.type) ? QString::number(e.weight) : "");
   // }
+}
+
+void Logs::update(const QDateTime& now) {
+  // remove events older than 24 hours
+  while (events.data.isEmpty() == false &&
+         events.data.first().timeDispensed.secsTo(now) > 60 * 60 * 24) {
+    events.data.removeFirst();
+  }
 }

@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
   auto loadcell = new LoadCell;
   auto weight = new Weight;
   auto calibration = new Calibration;
-  auto logic = new Logic{weight->weightThresholdGrams(), logs};
+  auto logic = new Logic{logs, weight->weightThresholdGrams()};
   auto delay = new Delay;
   auto plots = new Plots;
   auto toolbar = new ToolBar;
@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
       }
 
       delay->setRemaining(logic->timeToDispenseSeconds());
-      logswidget->update(logic->events());
+      logswidget->update(logs.events.data);
     });
 
     // Delay

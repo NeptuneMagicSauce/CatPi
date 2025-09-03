@@ -17,19 +17,18 @@ using PinCtrl::pinctrl;
 bool Logic::hasGPIO = false;
 
 struct LogicImpl {
-  LogicImpl(const double& weightThresholdGrams, Logs& logs);
+  LogicImpl(Logs& logs, const double& weightThresholdGrams);
 
   const QDateTime startTime = QDateTime::currentDateTime();
   const QString delayKey = "Delay";
 
-  const double& weightThresholdGrams;  // reference from owner class
   Logs& logs;
+  const double& weightThresholdGrams;  // reference from owner class
 
   int durationDispenseRelayMilliseconds = 4000;
   optional<int> timeToDispenseSeconds;
 
   int delaySeconds = 0;
-  QList<Event> events;
   QTimer timerEndDispense;          // close relay
   QTimer timerDetectDispensed;      // detect if and how much has been dispensed
   QTimer timerAllowManualDispense;  // notify GUI
@@ -50,15 +49,17 @@ struct LogicImpl {
   void dispense(Mode mode);
   void endDetectDispense();
   bool needsRepeat() const;
+  auto& events() { return logs.events.data; }
+  auto& events() const { return logs.events.data; }
 };
 
 namespace {
   LogicImpl* impl = nullptr;
 }
 
-Logic::Logic(const double& weightThresholdGrams, Logs& logs) {
+Logic::Logic(Logs& logs, const double& weightThresholdGrams) {
   AssertSingleton();
-  impl = new LogicImpl{weightThresholdGrams, logs};
+  impl = new LogicImpl{logs, weightThresholdGrams};
 
   timerAllowManualDispense = &impl->timerAllowManualDispense;
 
@@ -75,8 +76,8 @@ Logic::Logic(const double& weightThresholdGrams, Logs& logs) {
                   .limits = {.minimum = 20, .maximum = {}}});
 }
 
-LogicImpl::LogicImpl(const double& weightThresholdGrams, Logs& logs)
-    : weightThresholdGrams(weightThresholdGrams), logs(logs) {
+LogicImpl::LogicImpl(Logs& logs, const double& weightThresholdGrams)
+    : logs(logs), weightThresholdGrams(weightThresholdGrams) {
   timerAllowManualDispense.setSingleShot(true);
   timerAllowManualDispense.setInterval(0);
 
@@ -149,8 +150,6 @@ void Logic::setDelaySeconds(int delaySeconds) {
   Settings::set(impl->delayKey, impl->delaySeconds);
 }
 
-const QList<Event>& Logic::events() const { return impl->events; }
-
 optional<int> Logic::timeToDispenseSeconds() const {
   if (impl->timeToDispenseSeconds.value_or(1) < 0) {
     return 0;
@@ -188,7 +187,7 @@ void LogicImpl::dispense(Mode mode) {
     // do not create a new event on repeat
     // because it owns "dispensed weihgt"
     // which must accumulate on repeats
-    events.append({
+    events().append({
         .timeDispensed = now,  //
         .grams = 0,            //
         .timeEaten = {}        //
@@ -201,19 +200,19 @@ void LogicImpl::dispense(Mode mode) {
   //     // update() assumes if detecting-dispense or needs-repeat, do not compute just-ate
   //     // so with no weight sensor, we can not set just-ate here
   //     // otherwise we would never go through the repeat code
-  //     events.last().timeEaten = now;
+  //     events().last().timeEaten = now;
   //   }
 
   logs.logEvent(now.toString() + ", dispense, " + modeNames.at(mode));
 }
 
 bool LogicImpl::needsRepeat() const {
-  return events.last().grams < weightThresholdGrams &&  //
+  return events().last().grams < weightThresholdGrams &&  //
          numberOfDispenseRepeats < 3;
 }
 
 void LogicImpl::endDetectDispense() {
-  auto dispensedWeight = events.last().grams;
+  auto dispensedWeight = events().last().grams;
 
   // log the dispensed weight
   ostringstream ss;
@@ -235,26 +234,26 @@ void LogicImpl::update(optional<double> weightTarred,  //
   auto now = QDateTime::currentDateTime();
 
   auto timeOfDispense = optional<QDateTime>{};
-  if (events.empty() == false) {
-    timeOfDispense = events.last().timeDispensed;
+  if (events().empty() == false) {
+    timeOfDispense = events().last().timeDispensed;
   }
 
   // compute time to dispense
   if (timeOfDispense.has_value() == false) {
     // never dispensed anything
     timeToDispenseSeconds = delaySeconds - startTime.secsTo(now);
-  } else if (events.last().timeEaten.has_value() == false) {
+  } else if (events().last().timeEaten.has_value() == false) {
     // dispensed something, it is not eaten
     timeToDispenseSeconds = {};
   } else {
     // dispensed something, it was eaten
-    timeToDispenseSeconds = delaySeconds - events.last().timeEaten.value().secsTo(now);
+    timeToDispenseSeconds = delaySeconds - events().last().timeEaten.value().secsTo(now);
   }
 
   if (timeOfDispense.has_value()) {
     // time since dispense
 
-    auto& lastEvent = events.last();
+    auto& lastEvent = events().last();
 
     // dispensed weight
     if (timerDetectDispensed.isActive() && weightTarred.has_value()) {
@@ -282,8 +281,5 @@ void LogicImpl::update(optional<double> weightTarred,  //
     dispense(Mode::Automatic);
   }
 
-  // remove events older than 24 hours
-  while (events.isEmpty() == false && events.first().timeDispensed.secsTo(now) > 60 * 60 * 24) {
-    events.removeFirst();
-  }
+  logs.update(now);
 }
