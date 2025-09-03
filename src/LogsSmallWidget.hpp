@@ -2,7 +2,7 @@
 
 #include "Events.hpp"
 
-struct LogsWidget : public QWidget {
-  LogsWidget();
+struct LogsSmallWidget : public QWidget {
+  LogsSmallWidget();
   void update(const QList<Event>& events);
 };

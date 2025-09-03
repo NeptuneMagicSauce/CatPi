@@ -15,7 +15,7 @@
 #include "LoadCell.hpp"
 #include "Logic.hpp"
 #include "Logs.hpp"
-#include "LogsWidget.hpp"
+#include "LogsSmallWidget.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "Menu.hpp"
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   auto plots = new Plots;
   auto toolbar = new ToolBar;
   auto debug = new Debug;
-  auto logswidget = new LogsWidget;
+  auto logswidget = new LogsSmallWidget;
   auto menu = new Menu{delay};
   auto mainscreen = new MainScreen{weight, logswidget, delay->textAndButtons, delay->progress};
   auto central = new CentralWidget{{new SubScreen("", mainscreen),              //
