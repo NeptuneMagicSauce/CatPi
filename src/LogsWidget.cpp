@@ -28,10 +28,6 @@ struct LogsWidgetImpl {
 
   static QString FormatDay(const auto& day);
   void loadData();
-
-  struct Main : public QWidget {
-    Main();
-  }* widget = nullptr;
 };
 
 namespace {
@@ -67,22 +63,22 @@ LogsWidget::LogsWidget(Logs const& logs) {
 
 LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   layout = new QVBoxLayout;
+  layout->setContentsMargins(0, 0, 0, 0);  // we will need all the space we can get
 
   auto titleParent = new QGroupBox;
   auto titleLayout = new QVBoxLayout;
   titleParent->setLayout(titleLayout);
+  titleParent->setMaximumHeight(60);
   title = new QLabel;
   titleLayout->addWidget(title);
-
-  layout->addWidget(titleParent);
 
   Widget::FontSized(title, 15);
   Widget::AlignCentered(title);
 
-  widget = new Main;
-
   chartView.setChart(&chart);
   barSeries.append(&bars);
+
+  layout->addWidget(titleParent);
   layout->addWidget(&chartView);
 }
 
@@ -122,16 +118,11 @@ void LogsWidgetImpl::loadData() {
   }
 
 #warning TODO
+  // have labels on both axis
   // histograms are collated per hour of day
   // - events dispense
   // - events eat
   // - weight eaten
   // with a checkbox to change between these
   // day navigation +/- with buttons around title
-}
-
-LogsWidgetImpl::Main::Main() {
-  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  // setLayout(new QHBoxLayout);
-  // layout()->addWidget(
 }

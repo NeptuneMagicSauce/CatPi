@@ -48,6 +48,7 @@ LogsSmallWidget::LogsSmallWidget() {
   table->setSelectionMode(QAbstractItemView::NoSelection);
 
   setMinimumWidth(335);
+  table->setMaximumHeight(208);
 
   summary = new QLabel;
   layout->addWidget(summary);

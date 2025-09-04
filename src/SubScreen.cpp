@@ -35,6 +35,8 @@ SubScreen::SubScreen(const QString& title, QWidget* contents) : contents(content
   };
 
   auto layout = new QVBoxLayout;
+  layout->setContentsMargins(0, 0, 0, 0);  // do not add more margins
+  // parent widget already has some
   setLayout(layout);
   if (title.isEmpty() == false) {
     layout->addWidget(topbar());
