@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QGroupBox>
 #include <QLabel>
+#include <QValueAxis>
 
 #include "Logs.hpp"
 #include "System.hpp"
@@ -23,7 +24,9 @@ struct LogsWidgetImpl {
 
   QBarSeries barSeries;
   QBarSet bars{""};
+
   QChart chart;
+  QValueAxis xAxis, yAxis;
   QChartView chartView;
 
   static QString FormatDay(const auto& day);
@@ -68,15 +71,26 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   auto titleParent = new QGroupBox;
   auto titleLayout = new QVBoxLayout;
   titleParent->setLayout(titleLayout);
-  titleParent->setMaximumHeight(60);
+  titleParent->setMaximumHeight(50);
   title = new QLabel;
   titleLayout->addWidget(title);
 
   Widget::FontSized(title, 15);
   Widget::AlignCentered(title);
 
+  chart.setMargins({0, 0, 0, 0});
+
   chartView.setChart(&chart);
   barSeries.append(&bars);
+
+  yAxis.setRange(0, 24);
+  yAxis.setTickCount(25);
+  yAxis.setLabelFormat("%d");
+  yAxis.setTitleText("Heures");
+  chart.addAxis(&yAxis, Qt::AlignBottom);
+
+  xAxis.setLabelFormat("%d");
+  chart.addAxis(&xAxis, Qt::AlignLeft);
 
   layout->addWidget(titleParent);
   layout->addWidget(&chartView);
@@ -92,11 +106,14 @@ void LogsWidgetImpl::loadData() {
 
   QMap<int, QList<Logs::Event>> eventsPerHour;
   QMap<int, double> eatenWeightsPerHour;
+  bars.setLabel("Grammes mangés par heure");
+  xAxis.setTitleText("Grammes");
   for (const auto& d : data) {
     if (d.type == Logs::Event::Type::Eat) {
       eventsPerHour[d.time.time().hour()].append(d);
     }
   }
+  auto maxPerHour = double{0};
   for (int hour = 0; hour < 24; ++hour) {
     auto total = double{0};
     if (eventsPerHour.contains(hour)) {
@@ -105,6 +122,7 @@ void LogsWidgetImpl::loadData() {
         total += e.weight;
       }
     }
+    maxPerHour = std::max(maxPerHour, total);
     eatenWeightsPerHour[hour] = total;
   }
   for (int hour = 0; hour < 24; ++hour) {
@@ -115,15 +133,17 @@ void LogsWidgetImpl::loadData() {
   // it fails when we add the series to the chart earlier in the constructor !?
   if (chart.series().empty()) {
     chart.addSeries(&barSeries);
+    barSeries.attachAxis(&xAxis);
+    // barSeries.attachAxis(&yAxis);
   }
+  auto maxXValue = (int)maxPerHour + 1;
+  xAxis.setMax(maxXValue);
+  xAxis.setTickCount(maxXValue + 1);
 
-#warning TODO
+  // TODO here
+  // include total of the view
   // day navigation +/- with buttons around title
-  // have labels on both axis
-
-  // histograms collated per hour of day:
-  // - events dispense
-  // - events eat
-  // - weight eaten
-  // with a checkbox to change between these
+  // other set: events eaten
+  // remember the settings: selected set, selected time scale
+  // other time scales: last 7 days, last 30 days, last year
 }

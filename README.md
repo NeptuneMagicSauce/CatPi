@@ -8,8 +8,7 @@ ninja
 
 # TODO
 
-- needs detailed logs, last 6 events is not enough
-  loading historical data on demand
+- plots ...
 
 - to validate, test this exploit:
   eat right away
@@ -326,3 +325,6 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   detect it and dispense again
 - if screen is sleeping and app is not active -> can not go out of fullscreen
 - load old logs from file, do not have only logs from runtime
+- needs detailed logs, last 6 events is not enough
+  loading historical data on demand
+  have labels on both axis and title
