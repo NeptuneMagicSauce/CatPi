@@ -30,7 +30,7 @@ struct LogsImpl {
   LogsImpl(Events& events);
   void updateLogFile();
   void logEvent(QString const& event);
-  void readHistoricalData(auto const& day);
+  void readHistoricalData(auto const& day, optional<QDate> today = {});
   optional<Logs::Event*> findLastDispense(auto& day);
   void populateHistoricalEvents(auto const& day, auto const& now);
 
@@ -150,23 +150,29 @@ void LogsImpl::logEvent(QString const& event) {
 }
 
 QList<Logs::Event> const& Logs::readHistoricalData(QDate const& day) const {
-  impl->readHistoricalData(day);
+  impl->readHistoricalData(day, QDate::currentDate());
   return impl->data[day.toJulianDay()];
 }
 
-void LogsImpl::readHistoricalData(auto const& day) {
+void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
+  auto dayIndex = day.toJulianDay();
+
   auto f = QFile{dateToFilePath(day)};
   if (f.exists() == false) {
+    if (data.contains(dayIndex)) {
+      data[dayIndex].clear();
+    }
     return;
   }
 
-#warning "TODO"
-  // if the day is today -> clear and compute
-  // else {
-  //   if the day exists in data -> return
-  //   else compute
+  if (today.has_value() &&        // today is known
+      day != today.value() &&     // loading a previous day
+      data.contains(dayIndex)) {  // the previous day is already loaded
+    // we do not reload historical data, it has not changed
+    return;
+  }
 
-  auto& d = data[day.toJulianDay()];
+  auto& d = data[dayIndex];
   d.clear();
 
   // === boot === Tue Sep 2 23:01:02 2025

@@ -121,7 +121,6 @@ void LogsWidgetImpl::loadData() {
   if (chart.series().empty()) {
     chart.addSeries(&barSeries);
   }
-#warning "why does renaming the file and refreshing still has bars?"
 
 #warning TODO
   // histograms are collated per hour of day
