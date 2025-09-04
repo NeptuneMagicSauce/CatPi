@@ -132,15 +132,19 @@ int main(int argc, char** argv) {
         logsWidget->loadData();
       }
     });
-    for (auto const& i : QList<pair<QAction*, QWidget*>>{
-             {toolbar->menu, menu},
-             {toolbar->logs, logsWidget},
-         }) {
+    auto const toolBarSubMenus = QList<pair<QAction*, QWidget*>>{
+        {toolbar->menu, menu},
+        {toolbar->logs, logsWidget},
+    };
+    for (auto const& i : toolBarSubMenus) {
       QObject::connect(i.first, &QAction::triggered, [=](bool checked) {
-#warning BUG
-        // both can be enabled, if we don't disable the first before enabling the second
         if (checked) {
           central->setPage(i.second);
+          for (auto& otherMenu : toolBarSubMenus) {
+            if (otherMenu.first != i.first) {
+              otherMenu.first->setChecked(false);
+            }
+          }
         } else {
           central->setPage(mainscreen);
         }
