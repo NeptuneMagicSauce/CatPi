@@ -83,7 +83,6 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
 
   chartView.setChart(&chart);
   barSeries.append(&bars);
-  // chart.addSeries(&barSeries);
   layout->addWidget(&chartView);
 }
 
@@ -106,18 +105,18 @@ void LogsWidgetImpl::loadData() {
     auto total = double{0};
     if (eventsPerHour.contains(hour)) {
       for (const auto& e : eventsPerHour[hour]) {
-        qDebug() << "EAT" << e.time.toString() << e.weight;
+        // qDebug() << "EAT" << e.time.toString() << e.weight;
         total += e.weight;
       }
     }
     eatenWeightsPerHour[hour] = total;
   }
   for (int hour = 0; hour < 24; ++hour) {
-    qDebug() << "hour" << hour << "weight" << eatenWeightsPerHour[hour];
+    // qDebug() << "hour" << hour << "weight" << eatenWeightsPerHour[hour];
     bars << eatenWeightsPerHour[hour];
   }
 
-#warning "how should we addSeries?"
+  // it fails when we add the series to the chart earlier in the constructor !?
   if (chart.series().empty()) {
     chart.addSeries(&barSeries);
   }
