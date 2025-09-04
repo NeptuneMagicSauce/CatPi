@@ -8,8 +8,9 @@ ninja
 
 # TODO
 
+- !! protect the big screws that are causing injuries
+
 - plots:
-  include total of the view
   other set: events eaten (in case dispensed is detected at zero)
   remember the settings: selected set, selected time scale
   other time scales: last 7 days, last 30 days, last year
@@ -334,3 +335,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   have labels on both axis and title
   day navigation +/- with buttons around title
   time navigation button disabled if it goes nowhere
+  include total of the view

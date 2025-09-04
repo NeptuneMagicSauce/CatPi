@@ -148,7 +148,6 @@ void LogsWidgetImpl::loadData() {
 
   QMap<int, QList<Logs::Event>> eventsPerHour;
   QMap<int, double> eatenWeightsPerHour;
-  bars.setLabel("Grammes mangés par heure");
   xAxis.setTitleText("Grammes");
   for (const auto& d : data) {
     if (d.type == Logs::Event::Type::Eat) {
@@ -156,16 +155,18 @@ void LogsWidgetImpl::loadData() {
     }
   }
   auto maxPerHour = double{0};
+  auto totalPeriod = double{0};
   for (int hour = 0; hour < 24; ++hour) {
-    auto total = double{0};
+    auto totalPerHour = double{0};
     if (eventsPerHour.contains(hour)) {
       for (const auto& e : eventsPerHour[hour]) {
         // qDebug() << "EAT" << e.time.toString() << e.weight;
-        total += e.weight;
+        totalPerHour += e.weight;
       }
     }
-    maxPerHour = std::max(maxPerHour, total);
-    eatenWeightsPerHour[hour] = total;
+    maxPerHour = std::max(maxPerHour, totalPerHour);
+    totalPeriod += totalPerHour;
+    eatenWeightsPerHour[hour] = totalPerHour;
   }
   for (int hour = 0; hour < 24; ++hour) {
     // qDebug() << "hour" << hour << "weight" << eatenWeightsPerHour[hour];
@@ -181,4 +182,6 @@ void LogsWidgetImpl::loadData() {
   auto maxXValue = (int)maxPerHour + 1;
   xAxis.setMax(maxXValue);
   xAxis.setTickCount(maxXValue + 1);
+
+  bars.setLabel("Grammes / Heure, Total Jour = " + QString::number((int)totalPeriod));
 }
