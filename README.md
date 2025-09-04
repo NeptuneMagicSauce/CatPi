@@ -8,7 +8,11 @@ ninja
 
 # TODO
 
-- plots ...
+- plots:
+  include total of the view
+  other set: events eaten (in case dispensed is detected at zero)
+  remember the settings: selected set, selected time scale
+  other time scales: last 7 days, last 30 days, last year
 
 - to validate, test this exploit:
   eat right away

@@ -181,10 +181,4 @@ void LogsWidgetImpl::loadData() {
   auto maxXValue = (int)maxPerHour + 1;
   xAxis.setMax(maxXValue);
   xAxis.setTickCount(maxXValue + 1);
-
-  // TODO here
-  // include total of the view
-  // other set: events eaten
-  // remember the settings: selected set, selected time scale
-  // other time scales: last 7 days, last 30 days, last year
 }
