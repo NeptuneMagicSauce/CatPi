@@ -118,11 +118,12 @@ void LogsWidgetImpl::loadData() {
   }
 
 #warning TODO
+  // day navigation +/- with buttons around title
   // have labels on both axis
-  // histograms are collated per hour of day
+
+  // histograms collated per hour of day:
   // - events dispense
   // - events eat
   // - weight eaten
   // with a checkbox to change between these
-  // day navigation +/- with buttons around title
 }
