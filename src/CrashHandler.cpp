@@ -4,6 +4,7 @@
 #include <cfenv>
 #include <cmath>
 #include <csignal>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -60,6 +61,10 @@ namespace {
 #endif
     try {
       std::ostringstream logfilename;
+      auto homeDir = getenv("HOME");
+      if (homeDir != nullptr) {
+        logfilename << homeDir << "/";
+      }
       auto t = std::time(nullptr);
       logfilename << "crashlog-" << std::put_time(std::localtime(&t), "%d-%m-%Y-%Hh%Mm%Ss")
                   << ".txt";
