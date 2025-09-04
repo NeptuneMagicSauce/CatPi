@@ -328,3 +328,5 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - needs detailed logs, last 6 events is not enough
   loading historical data on demand
   have labels on both axis and title
+  day navigation +/- with buttons around title
+  time navigation button disabled if it goes nowhere

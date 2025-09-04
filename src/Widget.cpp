@@ -29,3 +29,10 @@ QWidget* Widget::Spacer() {
 bool Widget::IsSmallScreen() {
   return QGuiApplication::primaryScreen()->geometry().height() <= 720;
 }
+
+QIcon Widget::RotateIcon(QIcon const& source, int degrees, QSize const& size) {
+  QTransform transform;
+  transform.rotate(degrees, Qt::ZAxis);
+  auto pixmap = source.pixmap(size).transformed(transform);
+  return QIcon{pixmap};
+}

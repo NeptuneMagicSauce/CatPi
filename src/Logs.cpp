@@ -154,6 +154,10 @@ QList<Logs::Event> const& Logs::readHistoricalData(QDate const& day) const {
   return impl->data[day.toJulianDay()];
 }
 
+bool Logs::hasHistoricalData(QDate const& day) const {
+  return QFile{impl->dateToFilePath(day)}.exists();
+}
+
 void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
   auto dayIndex = day.toJulianDay();
 

@@ -1,6 +1,9 @@
+#include <QIcon>
+
 struct QString;
 struct QLabel;
 struct QWidget;
+struct QSize;
 
 struct Widget {
   static QWidget* AlignCentered(QLabel* widget);
@@ -9,4 +12,6 @@ struct Widget {
   static QWidget* Spacer();
 
   static bool IsSmallScreen();
+
+  static QIcon RotateIcon(QIcon const& source, int degrees, QSize const& size);
 };

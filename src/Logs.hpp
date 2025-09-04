@@ -24,7 +24,8 @@ struct Logs {
 
   void update(const QDateTime& now);
   void logEvent(QString const& event);
-  QList<Event> const& readHistoricalData(QDate const& day) const;
+  [[nodiscard]] QList<Event> const& readHistoricalData(QDate const& day) const;
+  [[nodiscard]] bool hasHistoricalData(QDate const& day) const;
 
   Events events;
 };

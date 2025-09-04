@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QGroupBox>
 #include <QLabel>
+#include <QToolButton>
 #include <QValueAxis>
 
 #include "Logs.hpp"
@@ -18,9 +19,18 @@ struct LogsWidgetImpl {
 
   Logs const& logs;
 
+  QDate current = QDate::currentDate();
+
   QLayout* layout = nullptr;
   QLabel* title = nullptr;
-  QDate current = QDate::currentDate();
+
+  QAbstractButton* buttonNext = nullptr;
+  QAbstractButton* buttonPrevious = nullptr;
+  struct TimeButton {
+    QAbstractButton* button;
+    QIcon icon;
+  };
+  QMap<int, TimeButton> timeButtons;
 
   QBarSeries barSeries;
   QBarSet bars{""};
@@ -69,11 +79,36 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   layout->setContentsMargins(0, 0, 0, 0);  // we will need all the space we can get
 
   auto titleParent = new QGroupBox;
-  auto titleLayout = new QVBoxLayout;
+  auto titleLayout = new QHBoxLayout;
   titleParent->setLayout(titleLayout);
   titleParent->setMaximumHeight(50);
   title = new QLabel;
+  titleLayout->setContentsMargins(0, 0, 0, 0);
+
+  auto titleButton = [this](const QString& iconName, int changeDirection, bool rotateIcon) {
+    auto ret = new QToolButton;
+    auto icon = QIcon{QPixmap{"://" + iconName}};
+    auto size = QSize{150, 50};
+    if (rotateIcon) {
+      icon = Widget::RotateIcon(icon, 180, size);
+    }
+    ret->setIcon(icon);
+    ret->setIconSize(size);
+    QObject::connect(ret, &QAbstractButton::released, [this, changeDirection] {
+      current = current.addDays(changeDirection);
+      loadData();
+    });
+    timeButtons[changeDirection] = {.button = ret, .icon = icon};
+    return ret;
+  };
+
+  titleLayout->addWidget(Widget::Spacer());
+  titleLayout->addWidget(buttonPrevious = titleButton("back.png", -1, false));
+  titleLayout->addWidget(Widget::Spacer());
   titleLayout->addWidget(title);
+  titleLayout->addWidget(Widget::Spacer());
+  titleLayout->addWidget(buttonNext = titleButton("back.png", +1, true));
+  titleLayout->addWidget(Widget::Spacer());
 
   Widget::FontSized(title, 15);
   Widget::AlignCentered(title);
@@ -101,6 +136,13 @@ void LogsWidget::loadData() { impl->loadData(); }
 void LogsWidgetImpl::loadData() {
   title->setText(FormatDay(current));
   auto const& data = logs.readHistoricalData(current);
+
+  for (auto timeDirection : timeButtons.keys()) {
+    auto const& timeButton = timeButtons[timeDirection];
+    auto enabled = logs.hasHistoricalData(current.addDays(timeDirection));
+    timeButton.button->setEnabled(enabled);
+    timeButton.button->setIcon(enabled ? timeButton.icon : QIcon{});
+  }
 
   bars.remove(0, bars.count());
 
@@ -142,7 +184,6 @@ void LogsWidgetImpl::loadData() {
 
   // TODO here
   // include total of the view
-  // day navigation +/- with buttons around title
   // other set: events eaten
   // remember the settings: selected set, selected time scale
   // other time scales: last 7 days, last 30 days, last year
