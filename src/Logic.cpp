@@ -236,6 +236,13 @@ void LogicImpl::update(optional<double> weightTarred,  //
   auto timeOfDispense = optional<QDateTime>{};
   if (events().empty() == false) {
     timeOfDispense = events().last().timeDispensed;
+
+    if (timeOfDispense < startTime) {
+      // we detected a dispense event from a previous run, in the logs
+      // do not consider it for computing time to dispense
+      // because we start from zero on boot
+      timeOfDispense = {};
+    }
   }
 
   // compute time to dispense
