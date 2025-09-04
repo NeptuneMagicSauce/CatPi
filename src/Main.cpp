@@ -137,6 +137,8 @@ int main(int argc, char** argv) {
              {toolbar->logs, logsWidget},
          }) {
       QObject::connect(i.first, &QAction::triggered, [=](bool checked) {
+#warning BUG
+        // both can be enabled, if we don't disable the first before enabling the second
         if (checked) {
           central->setPage(i.second);
         } else {
