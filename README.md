@@ -8,6 +8,38 @@ ninja
 
 # TODO
 
+- also plot this:
+  weight per dispense event
+  accumulating repeat event on same bar (with different color)
+  in order to debug "how much was dispensed per event"
+
+- bug: I do not see recent data in the journal tab
+  at 0:05 AM, I do not see anything in yesterday 22:00 and 23:00
+  event though I see events in the LogsSmallWidget view
+
+- when I go to the journal at 0:05 AM, and there's not been events today
+  I should go to the empty today view
+  but it goes to yesterday's view
+
+- have debug settings "number of repetitions"
+  including first non-repeat?
+  find a relevant name/label/prompt
+
+- email me the logs
+  per day
+  title = total
+  include the plot as an attached image
+
+- on repeat, do not respect the user setting "button press duration"
+  do a short button press
+  because maybe we're just under the threshold
+  because we don't want to dispense too much
+
+- in logs, include duration of button press, on dispense events
+  in order to see how it affects the dispensed weight
+
+
+
 - !! protect the big screws that are causing injuries
 
 - plots:
