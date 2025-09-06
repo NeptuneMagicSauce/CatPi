@@ -8,6 +8,14 @@ ninja
 
 # TODO
 
+- on repeat, do not respect the user setting "button press duration"
+  do a short button press
+  because maybe we're just under the threshold
+  because we don't want to dispense too much
+
+- in logs, include duration of button press, on dispense events
+  in order to see how it affects the dispensed weight
+
 - !! protect the big screws that are causing injuries
 
 - plots:
