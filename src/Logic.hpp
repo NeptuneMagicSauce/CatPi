@@ -23,7 +23,8 @@ struct Logic {
   void manualDispense();
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
-              bool& justAte);
+              bool& justAte,                       //
+              bool& detectingDispensedWeight);
   void changeDelay(int delta);
   void setDelaySeconds(int delaySeconds);
 

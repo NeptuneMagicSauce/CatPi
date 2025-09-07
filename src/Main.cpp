@@ -221,11 +221,15 @@ int main(int argc, char** argv) {
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
       auto justAte = false;
+      auto detectingDispensedWeight = false;
 
-      logic->update(weight->weightTarred(), weight->isBelowThreshold(), justAte);
+      logic->update(weight->weightTarred(), weight->isBelowThreshold(), justAte,
+                    detectingDispensedWeight);
 
       if (justAte) {
         logs.logEvent(weight->toString());
+        // } else if (detectingDispensedWeight) {
+        // logs.logEvent(weight->toString());
       }
 
       delay->setRemaining(logic->timeToDispenseSeconds());

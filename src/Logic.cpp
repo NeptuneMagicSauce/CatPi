@@ -46,7 +46,8 @@ struct LogicImpl {
 
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
-              bool& justAte);
+              bool& justAte,                       //
+              bool& detectingDispensedWeight);
   void dispense(Mode mode);
   void endDetectDispense();
   bool needsRepeat() const;
@@ -161,8 +162,9 @@ optional<int> Logic::timeToDispenseSeconds() const {
 
 void Logic::update(optional<double> weightTarred,  //
                    bool isWeightBelowThreshold,    //
-                   bool& justAte) {
-  impl->update(weightTarred, isWeightBelowThreshold, justAte);
+                   bool& justAte,                  //
+                   bool& detectingDispensedWeight) {
+  impl->update(weightTarred, isWeightBelowThreshold, justAte, detectingDispensedWeight);
 }
 
 void Logic::manualDispense() { impl->dispense(LogicImpl::Mode::Manual); }
@@ -231,7 +233,8 @@ void LogicImpl::endDetectDispense() {
 
 void LogicImpl::update(optional<double> weightTarred,  //
                        bool isWeightBelowThreshold,    //
-                       bool& justAte) {
+                       bool& justAte,                  //
+                       bool& detectingDispensedWeight) {
   auto now = QDateTime::currentDateTime();
 
   auto timeOfDispense = optional<QDateTime>{};
@@ -267,6 +270,12 @@ void LogicImpl::update(optional<double> weightTarred,  //
     if (timerDetectDispensed.isActive() && weightTarred.has_value()) {
       auto& dispensedWeight = lastEvent.grams;
       dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
+      detectingDispensedWeight = true;
+      {
+        ostringstream ss;
+        ss << fixed << setprecision(3) << weightTarred.value();
+        logs.logEvent(now.toString() + ", detecting " + QString::fromStdString(ss.str()));
+      }
     }
 
     // just ate ?
