@@ -8,50 +8,60 @@ ninja
 
 # TODO
 
-- also plot this:
-  weight per dispense event
-  accumulating repeat event on same bar (with different color)
-  in order to debug "how much was dispensed per event"
-
-- bug: I do not see recent data in the journal tab
-  at 0:05 AM, I do not see anything in yesterday 22:00 and 23:00
-  event though I see events in the LogsSmallWidget view
-
-- when I go to the journal at 0:05 AM, and there's not been events today
-  I should go to the empty today view
-  but it goes to yesterday's view
-
-- have debug settings "number of repetitions"
-  including first non-repeat?
-  find a relevant name/label/prompt
-
-- email me the logs
-  per day
-  title = total
-  include the plot as an attached image
-
 - on repeat, do not respect the user setting "button press duration"
   do a short button press
   because maybe we're just under the threshold
   because we don't want to dispense too much
 
+- validate repeat with shorter duration: is total okay?
+
+- bug: I do not see recent data in the journal tab
+  at 0:05 AM, I do not see anything in yesterday 22:00 and 23:00
+  event though I see events in the LogsSmallWidget view
+  it's because it's not reloaded and yet it is out of date
+  loading needs "is final load"
+  computed as "loaded day is in the past <-> less than today"
+
 - in logs, include duration of button press, on dispense events
   in order to see how it affects the dispensed weight
 
+- email me the logs
+  per day
+  title = total
+  include all plots of the day as an attached image
+  include today's log.txt
+
+- bug: when cat eats while we detect dispense
+  he pushes on the scale
+  and we detect too much
+  look at new log "detecting"
+  it is the weights while detecting
+  maybe fix = remove highest 2 values, then return next highest
+    test this formula on big data: a few days worth
+  maybe fix = do a median?
+    no because at beginning of detection there is nothing
+    it's not yet relevant
 
 
-- !! protect the big screws that are causing injuries
+
+
+- when I go to the journal at 0:05 AM, and there's not been events today
+  I should go to the empty today view
+  but it goes to yesterday's view
+
+- also plot this:
+  weight per dispense event
+  accumulating repeat event on same bar (with different color)
+  in order to debug "how much was dispensed per event"
 
 - plots:
   other set: events eaten (in case dispensed is detected at zero)
   remember the settings: selected set, selected time scale
   other time scales: last 7 days, last 30 days, last year
 
-- to validate, test this exploit:
-  eat right away
-  isn't it detected as a mechanical issue and doesn't it repeat the dispense?
 
-- to validate: is loading historical data slow on boot?
+
+
 
 
 - mask LEDs that are too bright in the night
@@ -72,21 +82,20 @@ ninja
 - `upgrade_cat_pi`:
   git fetch to get new tags
   git stash if dirty
-  git pull --rebase if force pushed
-
-- when cat eats just after dispense,
-  it pushes on the scale
-  and the scale detects too much
-  as high as 4.0 grams
-
-- counter weight behind for no tipping-over
-
-- verify calibration with the independent source of truth
+  ok. git pull --rebase if force pushed
 
 - have a maximum weight per day
   maybe 55 grams (a changeable setting)
   but using the sliding window total
   so that the clamping is smoothed over time
+  XOR doing the clamping gradually
+  when we see it will be too much
+
+# TODO but later for V2
+
+- have debug settings "number of repetitions"
+  including first non-repeat?
+  find a relevant name/label/prompt
 
 - go out of night mode automatically
   into day mode
@@ -94,8 +103,6 @@ ninja
   but then, it's not "day/night buttons"
   it's "day/night modes"
   -> not a default push button, but with property checkable ?!
-
-# TODO but later for V2
 
 - auto restart on crash
   but not on quit
@@ -116,10 +123,6 @@ ninja
 - compress previous log file, when it's a new day (new log file)
 
 - log weight signal raw and processed, to check noise is inhibited
-
-- plot the dispense and eat events in a sub screen
-  or in a web page
-  with the total weight per day and per 24 hours
 
 - bug A: sometimes it dispenses soon after starting
   maybe after fiddling with the delay timer?
@@ -368,3 +371,10 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   day navigation +/- with buttons around title
   time navigation button disabled if it goes nowhere
   include total of the view
+- to validate: is loading historical data slow on boot? NO- to validate, test this exploit:
+  eat right away
+  isn't it detected as a mechanical issue and doesn't it repeat the dispense?
+  NO
+- counter weight behind for no tipping-over
+- redo the calibration
+- !! protect the big screws that are causing injuries
