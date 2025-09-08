@@ -43,6 +43,22 @@ void Mail::sendYesterday() {
 }
 
 void MailImpl::sendYesterday() {
+  auto yesterday = QDate::currentDate().addDays(-1);
+  auto dataDirectory = logs.dataDirectory();
+
+  // verify if it is not already sent
+  auto fileOfLatestSend = QFile{dataDirectory + "/latest.email.txt"};
+  if (fileOfLatestSend.exists()) {
+    fileOfLatestSend.open(QIODeviceBase::ReadOnly);
+    auto latestSend = QDate::fromJulianDay(QString{fileOfLatestSend.readAll()}.toInt());
+    if (latestSend == yesterday) {
+      return;
+    }
+    fileOfLatestSend.close();
+  }
+  fileOfLatestSend.open(QIODeviceBase::WriteOnly);
+  fileOfLatestSend.write(QString::number(yesterday.toJulianDay()).toUtf8());
+
   // build list of recipients from csv file
   auto recipients = [] {
     QList<QString> ret;
@@ -59,6 +75,9 @@ void MailImpl::sendYesterday() {
       fileOfRecipients.open(QIODeviceBase::ReadOnly);
       for (auto const& line : fileOfRecipients.readAll().split('\n')) {
         for (auto const& recipient : line.split(',')) {
+          if (recipient.isEmpty()) {
+            continue;
+          }
           // qDebug() << recipient;
           ret << recipient;
         }
@@ -68,7 +87,6 @@ void MailImpl::sendYesterday() {
   }();
 
   // build logs content as base64 for in-line attaching
-  auto yesterday = QDate::currentDate().addDays(-1);
   auto logPath = logs.dateToFilePath(yesterday);
   auto logsContent = [&] -> optional<QString> {
     auto logFile = QFile{logPath};
@@ -93,7 +111,7 @@ void MailImpl::sendYesterday() {
   int recipientIndex = 0;
   for (const auto& recipient : recipients) {
     auto mailFile =
-        QFile{logs.dataDirectory() + "/mail.recipient." + QString::number(recipientIndex) + ".txt"};
+        QFile{dataDirectory + "/mail.recipient." + QString::number(recipientIndex) + ".txt"};
     auto mailFileName = mailFile.fileName();
     // qDebug() << "mailFile:" << mailFile.fileName();
 
