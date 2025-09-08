@@ -23,6 +23,7 @@ const QSet<Type> Logs::Event::dispenseTypes = {
 struct LogsImpl {
   Events& events;
 
+  QDir dataDirectory;
   QDir logDirectory;
   QFile logFile;
   QMap<qint64, QList<Logs::Event>> data;
@@ -34,7 +35,7 @@ struct LogsImpl {
   optional<Logs::Event*> findLastDispense(auto& day);
   void populateHistoricalEvents(auto const& day, auto const& now);
 
-  QString dateToFilePath(const QDate& date);
+  QString dateToFilePath(const QDate& date) const;
   static QString dateToFileName(const QDate& date);
   static optional<QDate> fileNameToDate(const QString& fileName);
 
@@ -53,10 +54,11 @@ Logs::Logs() {
 void Logs::logEvent(QString const& event) { impl->logEvent(event); }
 
 LogsImpl::LogsImpl(Events& events) : events(events) {
-  logDirectory =
+  dataDirectory =
       QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
-          .first() +
-      "/logs";
+          .first();
+  logDirectory = dataDirectory.path() + "/logs";
+
   std::filesystem::create_directories(logDirectory.path().toStdString());
   cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
 
@@ -106,8 +108,10 @@ optional<Logs::Event*> LogsImpl::findLastDispense(auto& day) {
   return {};
 }
 
+QString Logs::dataDirectory() const { return impl->dataDirectory.path(); }
 QString LogsImpl::dateToFileName(const QDate& date) { return date.toString(Qt::ISODate) + ".txt"; }
-QString LogsImpl::dateToFilePath(const QDate& date) {
+QString Logs::dateToFilePath(const QDate& date) const { return impl->dateToFilePath(date); }
+QString LogsImpl::dateToFilePath(const QDate& date) const {
   return logDirectory.path() + "/" + dateToFileName(date);
 }
 optional<QDate> LogsImpl::fileNameToDate(const QString& fileName) {

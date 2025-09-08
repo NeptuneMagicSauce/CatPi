@@ -26,6 +26,8 @@ struct Logs {
   void logEvent(QString const& event);
   [[nodiscard]] QList<Event> const& readHistoricalData(QDate const& day) const;
   [[nodiscard]] bool hasHistoricalData(QDate const& day) const;
+  [[nodiscard]] QString dateToFilePath(const QDate& date) const;
+  [[nodiscard]] QString dataDirectory() const;
 
   Events events;
 };

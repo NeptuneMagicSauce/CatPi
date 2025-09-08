@@ -17,6 +17,7 @@
 #include "Logs.hpp"
 #include "LogsSmallWidget.hpp"
 #include "LogsWidget.hpp"
+#include "Mail.hpp"
 #include "MainScreen.hpp"
 #include "MainWindow.hpp"
 #include "Menu.hpp"
@@ -57,6 +58,7 @@ int main(int argc, char** argv) {
   auto brightness = ScreenBrightness{};
   auto filterweight = FilterWeight{};
   auto logs = Logs{};
+  auto mail = Mail{logs};
   auto loadcell = new LoadCell;
   auto weight = new Weight;
   auto calibration = new Calibration;
@@ -100,6 +102,12 @@ int main(int argc, char** argv) {
         QTimer::singleShot(250, [window] { window->setEnabled(true); });
       }
     });
+
+#warning "TO REMOVE"
+    // send it daily
+    // send on boot only if yesterday was not sent
+    // needs to cache sent day(s)
+    mail.sendYesterday();
   }
 
   // Connect Signals

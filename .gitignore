@@ -13,6 +13,7 @@ experiments/standardicons/standardicons_autogen/
 experiments/widgetsgallery/
 experiments/widgetsgallery/widgetsgallery
 experiments/widgetsgallery/widgetsgallery_autogen/
+mail.recipients.csv
 .ninja_deps
 .ninja_log
 .qt/
