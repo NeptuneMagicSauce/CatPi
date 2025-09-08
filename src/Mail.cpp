@@ -32,14 +32,16 @@ Mail::Mail(Logs const& logs) {
   impl = new MailImpl{logs};
 }
 
-MailImpl::MailImpl(Logs const& logs) : logs(logs) {}
+MailImpl::MailImpl(Logs const& logs) : logs(logs) {
+  // send it on boot if needed
+  sendYesterday();
 
-void Mail::sendYesterday() {
-  try {
-    impl->sendYesterday();
-  } catch (const std::exception& e) {
-    qDebug() << e.what();
-  }
+  // then check regularly if it needs sending
+  auto timer = new QTimer;
+  timer->setSingleShot(false);
+  timer->setInterval(5 * 60 * 1000);  // every 5 minutes
+  QObject::connect(timer, &QTimer::timeout, [this] { sendYesterday(); });
+  timer->start();
 }
 
 void MailImpl::sendYesterday() {
@@ -52,6 +54,7 @@ void MailImpl::sendYesterday() {
     fileOfLatestSend.open(QIODeviceBase::ReadOnly);
     auto latestSend = QDate::fromJulianDay(QString{fileOfLatestSend.readAll()}.toInt());
     if (latestSend == yesterday) {
+      // qDebug() << Q_FUNC_INFO << "already sent";
       return;
     }
     fileOfLatestSend.close();
@@ -176,9 +179,9 @@ Content-Transfer-Encoding: base64
           "--upload-file",
           mailFileName,
       });
-#warning DEBUG
-      qDebug() << p.program() + " " + p.arguments().join(" ");
-      // p.startDetached();
+      // #warning DEBUG
+      // qDebug() << p.program() + " " + p.arguments().join(" ");
+      p.startDetached();
     });
 
     ++recipientIndex;

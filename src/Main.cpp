@@ -102,12 +102,6 @@ int main(int argc, char** argv) {
         QTimer::singleShot(250, [window] { window->setEnabled(true); });
       }
     });
-
-#warning "TO REMOVE"
-    // send it daily
-    // send on boot only if yesterday was not sent
-    // needs to cache sent day(s)
-    mail.sendYesterday();
   }
 
   // Connect Signals

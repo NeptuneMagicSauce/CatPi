@@ -25,12 +25,6 @@ ninja
 - in logs, include duration of button press, on dispense events
   in order to see how it affects the dispensed weight
 
-- email me the logs
-  per day
-  title = total
-  include all plots of the day as an attached image
-  include today's log.txt
-
 - bug: when cat eats while we detect dispense
   he pushes on the scale
   and we detect too much
@@ -41,6 +35,10 @@ ninja
   maybe fix = do a median?
     no because at beginning of detection there is nothing
     it's not yet relevant
+
+- log email: include the total weight in the title
+
+- log email: include the plots as attachments
 
 
 
@@ -378,3 +376,6 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - counter weight behind for no tipping-over
 - redo the calibration
 - !! protect the big screws that are causing injuries
+- email me the logs
+  per day
+  include today's log.txt
