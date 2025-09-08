@@ -138,7 +138,10 @@ Content-Transfer-Encoding: 7bit
 )";
     // body of the e-mail
     content += yesterday.toString("dddd, MMMM d");
-    content += " [" + hostName + "]\n";
+    if (hostName != "catpi") {
+      content += " [" + hostName + "]";
+    }
+    content += "\n";
 
     if (logsContent.has_value()) {
       content += R"(
