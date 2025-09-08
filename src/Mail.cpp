@@ -8,13 +8,15 @@
 #include <QList>
 #include <QProcess>
 #include <QString>
+#include <optional>
 
 #include "Logs.hpp"
 #include "System.hpp"
 
+using std::optional;
+
 struct MailImpl {
   Logs const& logs;
-  QList<QString> recipients;
 
   MailImpl(Logs const& logs);
   void sendYesterday();
@@ -29,21 +31,7 @@ Mail::Mail(Logs const& logs) {
   impl = new MailImpl{logs};
 }
 
-MailImpl::MailImpl(Logs const& logs) : logs(logs) {
-  auto pid = QString::number(QApplication::applicationPid());
-  auto exe = QFile{"/proc/" + pid + "/exe"};
-  auto realPath = exe.symLinkTarget();
-  auto dirOfExe = QFileInfo{realPath}.absoluteDir();
-  auto pathOfRecipients = dirOfExe.filePath("mail.recipients.csv");
-  auto fileOfRecipients = QFile{pathOfRecipients};
-  if (fileOfRecipients.exists()) {
-    fileOfRecipients.open(QIODeviceBase::ReadOnly);
-    for (auto const& recipient : fileOfRecipients.readAll().split(',')) {
-      // qDebug() << recipient;
-      recipients << recipient;
-    }
-  }
-}
+MailImpl::MailImpl(Logs const& logs) : logs(logs) {}
 
 void Mail::sendYesterday() {
   try {
@@ -54,13 +42,42 @@ void Mail::sendYesterday() {
 }
 
 void MailImpl::sendYesterday() {
-  auto logPath = logs.dateToFilePath(QDate::currentDate().addDays(-1));
-  auto logFile = QFile{logPath};
-  if (logFile.exists() == false) {
-    logPath = "/dev/null";
-  }
-  logFile.open(QIODeviceBase::ReadOnly);
+  // build list of recipients from csv file
+  auto recipients = [] {
+    QList<QString> ret;
+    static auto pathOfRecipients = QString{};
+    if (pathOfRecipients.isEmpty()) {
+      auto pid = QString::number(QApplication::applicationPid());
+      auto exe = QFile{"/proc/" + pid + "/exe"};
+      auto realPath = exe.symLinkTarget();
+      auto dirOfExe = QFileInfo{realPath}.absoluteDir();
+      pathOfRecipients = dirOfExe.filePath("mail.recipients.csv");
+    }
+    auto fileOfRecipients = QFile{pathOfRecipients};
+    if (fileOfRecipients.exists()) {
+      fileOfRecipients.open(QIODeviceBase::ReadOnly);
+      for (auto const& recipient : fileOfRecipients.readAll().split(',')) {
+        // qDebug() << recipient;
+        ret << recipient;
+      }
+    }
+    return ret;
+  }();
 
+  // build logs content as base64 for in-line attaching
+  auto yesterday = QDate::currentDate().addDays(-1);
+  auto logPath = logs.dateToFilePath(yesterday);
+  auto logsContent = [&] -> optional<QString> {
+    auto logFile = QFile{logPath};
+    if (logFile.exists() == false) {
+      return {};
+    }
+    logFile.open(QIODeviceBase::ReadOnly);
+    auto log = logFile.readAll();
+    return QString{log.toBase64()};
+  }();
+
+  // find hostname
   static auto hostName = QString{};
   if (hostName.isEmpty()) {
     auto hostNameFile = QFile{"/proc/sys/kernel/hostname"};
@@ -70,22 +87,55 @@ void MailImpl::sendYesterday() {
     // qDebug() << "HostName:" << hostName;
   }
 
-  auto writeLine = [](auto& file, const auto& line) { file.write((line + "\n").toUtf8()); };
-
   int recipientIndex = 0;
   for (const auto& recipient : recipients) {
     auto mailFile = QFile{logs.dataDirectory() + "/mail.recipient." +
                           QString::number(recipientIndex++) + ".txt"};
     // qDebug() << "mailFile:" << mailFile.fileName();
+
     mailFile.open(QIODeviceBase::WriteOnly);
 
-    writeLine(mailFile, QString{"From: \"Cat Pi\" <foobar@gmail.com>"});
-    writeLine(mailFile, QString{"To: \"\" <" + recipient + ">"});
-    writeLine(mailFile, QString{"Subject: Cat Pi Daily"});
-    writeLine(mailFile, QString{"<samp>"});
-    writeLine(mailFile, QString{"HostName: "} + hostName);
-    writeLine(mailFile, QString{logFile.readAll()});
-    writeLine(mailFile, QString{"</samp>"});
+    // build message, RFC 5322 formatted
+    auto content =
+        QString{
+            R"(From: "Cat Pi" <foobar@gmail.com>
+To: <)"} +
+        recipient + ">";
+    content += R"(
+Subject: Croquettes Report
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUNDARYFOO"
+
+--BOUNDARYFOO
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+)";
+    // body of the e-mail
+    content += yesterday.toString("dddd, MMMM d");
+    content += " [" + hostName + "]\n";
+
+    if (logsContent.has_value()) {
+      content += R"(
+--BOUNDARYFOO
+Content-Type: application/txt
+Content-Disposition: attachment; filename=")";
+      content += QFileInfo{logPath}.fileName();
+      content += R"("
+Content-Transfer-Encoding: base64
+
+)";
+      content += logsContent.value();
+    } else {
+      content += R"(
+-- no content --
+)";
+    }
+    content += R"(
+--BOUNDARYFOO--
+)";
+
+    mailFile.write(content.toUtf8());
     mailFile.close();
 
     auto p = QProcess{};
@@ -102,6 +152,7 @@ void MailImpl::sendYesterday() {
         "--upload-file",
         mailFile.fileName(),
     });
+#warning DEBUG
     qDebug() << p.program() + " " + p.arguments().join(" ");
     // p.startDetached();
   }
