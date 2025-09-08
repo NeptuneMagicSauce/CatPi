@@ -8,6 +8,7 @@
 #include <QList>
 #include <QProcess>
 #include <QString>
+#include <QTimer>
 #include <optional>
 
 #include "Logs.hpp"
@@ -56,9 +57,11 @@ void MailImpl::sendYesterday() {
     auto fileOfRecipients = QFile{pathOfRecipients};
     if (fileOfRecipients.exists()) {
       fileOfRecipients.open(QIODeviceBase::ReadOnly);
-      for (auto const& recipient : fileOfRecipients.readAll().split(',')) {
-        // qDebug() << recipient;
-        ret << recipient;
+      for (auto const& line : fileOfRecipients.readAll().split('\n')) {
+        for (auto const& recipient : line.split(',')) {
+          // qDebug() << recipient;
+          ret << recipient;
+        }
       }
     }
     return ret;
@@ -89,8 +92,9 @@ void MailImpl::sendYesterday() {
 
   int recipientIndex = 0;
   for (const auto& recipient : recipients) {
-    auto mailFile = QFile{logs.dataDirectory() + "/mail.recipient." +
-                          QString::number(recipientIndex++) + ".txt"};
+    auto mailFile =
+        QFile{logs.dataDirectory() + "/mail.recipient." + QString::number(recipientIndex) + ".txt"};
+    auto mailFileName = mailFile.fileName();
     // qDebug() << "mailFile:" << mailFile.fileName();
 
     mailFile.open(QIODeviceBase::WriteOnly);
@@ -138,22 +142,27 @@ Content-Transfer-Encoding: base64
     mailFile.write(content.toUtf8());
     mailFile.close();
 
-    auto p = QProcess{};
-    p.setProgram("curl");
-    p.setArguments({
-        "--ssl-reqd",
-        "--url",
-        "smtps://smtp.gmail.com:465",
-        "--netrc",
-        "--mail-from",
-        "foobar@gmail.com",
-        "--mail-rcpt",
-        recipient,
-        "--upload-file",
-        mailFile.fileName(),
-    });
+    QTimer::singleShot(recipientIndex * 10 * 1000, [=] {
+      // qDebug() << "Mail:" << recipient;
+      auto p = QProcess{};
+      p.setProgram("curl");
+      p.setArguments({
+          "--ssl-reqd",
+          "--url",
+          "smtps://smtp.gmail.com:465",
+          "--netrc",
+          "--mail-from",
+          "foobar@gmail.com",
+          "--mail-rcpt",
+          recipient,
+          "--upload-file",
+          mailFileName,
+      });
 #warning DEBUG
-    qDebug() << p.program() + " " + p.arguments().join(" ");
-    // p.startDetached();
+      qDebug() << p.program() + " " + p.arguments().join(" ");
+      // p.startDetached();
+    });
+
+    ++recipientIndex;
   }
 }
