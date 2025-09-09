@@ -9,6 +9,7 @@
 #include <QProcess>
 #include <QString>
 #include <QTimer>
+#include <cstdlib>
 #include <optional>
 
 #include "Logs.hpp"
@@ -19,6 +20,7 @@ using std::optional;
 struct MailImpl {
   Logs const& logs;
   QTimer timer;
+  QString senderAddress;
 
   MailImpl(Logs const& logs);
   void sendYesterday();
@@ -34,6 +36,33 @@ Mail::Mail(Logs const& logs) {
 }
 
 MailImpl::MailImpl(Logs const& logs) : logs(logs) {
+  // find sender address
+  senderAddress = [] -> QString {
+    auto homeDir = getenv("HOME");
+    if (homeDir == nullptr) {
+      return "";
+    }
+    auto file = QFile{QString{homeDir} + "/.netrc"};
+    if (file.exists() == false) {
+      return "";
+    }
+    file.open(QIODeviceBase::ReadOnly);
+    for (const auto& line : file.readAll().split('\n')) {
+      static auto const pattern = QString{"login "};
+      auto l = QString{line};
+      if (l.startsWith(pattern) && l.endsWith("@gmail.com")) {
+        auto ret = l;
+        ret.remove(pattern);
+        return ret;
+      }
+    }
+    return "";
+  }();
+  if (senderAddress.isEmpty()) {
+    return;
+  }
+  qDebug() << "SenderEmail:" << senderAddress;
+
   // send it on boot if needed
   sendYesterday();
 
@@ -121,11 +150,11 @@ void MailImpl::sendYesterday() {
     mailFile.open(QIODeviceBase::WriteOnly);
 
     // build message, RFC 5322 formatted
-    auto content =
-        QString{
-            R"(From: "Cat Pi" <foobar@gmail.com>
-To: <)"} +
-        recipient + ">";
+    auto content = QString{R"(From: "Cat Pi" <)"};
+    content += senderAddress;
+    content += R"(>
+To: <)";
+    content += recipient + ">";
     content += R"(
 Subject: Croquettes Report
 MIME-Version: 1.0
@@ -166,7 +195,7 @@ Content-Transfer-Encoding: base64
     mailFile.write(content.toUtf8());
     mailFile.close();
 
-    QTimer::singleShot(recipientIndex * 10 * 1000, [=] {
+    QTimer::singleShot(recipientIndex * 10 * 1000, [=, this] {
       // qDebug() << "Mail:" << recipient;
       auto p = QProcess{};
       p.setProgram("curl");
@@ -176,7 +205,7 @@ Content-Transfer-Encoding: base64
           "smtps://smtp.gmail.com:465",
           "--netrc",
           "--mail-from",
-          "foobar@gmail.com",
+          senderAddress,
           "--mail-rcpt",
           recipient,
           "--upload-file",
