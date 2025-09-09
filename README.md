@@ -8,22 +8,19 @@ ninja
 
 # TODO
 
+- rename Event and Event and Events
+
+- in logs, include duration of button press, on dispense events
+  in order to see how it affects the dispensed weight
+
+
+
 - on repeat, do not respect the user setting "button press duration"
   do a short button press
   because maybe we're just under the threshold
   because we don't want to dispense too much
 
 - validate repeat with shorter duration: is total okay?
-
-- bug: I do not see recent data in the journal tab
-  at 0:05 AM, I do not see anything in yesterday 22:00 and 23:00
-  event though I see events in the LogsSmallWidget view
-  it's because it's not reloaded and yet it is out of date
-  loading needs "is final load"
-  computed as "loaded day is in the past <-> less than today"
-
-- in logs, include duration of button press, on dispense events
-  in order to see how it affects the dispensed weight
 
 - bug: when cat eats while we detect dispense
   he pushes on the scale
@@ -35,6 +32,11 @@ ninja
   maybe fix = do a median?
     no because at beginning of detection there is nothing
     it's not yet relevant
+  do an analysis:
+    do I need more logged data, after the eat event?
+    should we take pictures of dispense, to compare with count of croquettes?
+    we could then compare our heuristic/processing with accurate results
+    what do the different heuristics compute for each event?
 
 - log email: include the total weight in the title
 
@@ -379,3 +381,9 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - email me the logs
   per day
   include today's log.txt
+- bug: I do not see recent data in the journal tab
+  at 0:05 AM, I do not see anything in yesterday 22:00 and 23:00
+  event though I see events in the LogsSmallWidget view
+  it's because it's not reloaded and yet it is out of date
+  loading needs "is final load"
+  computed as "loaded day is in the past <-> less than today"

@@ -3,10 +3,10 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
-#include <QMap>
 #include <QSet>
 #include <QStandardPaths>
 #include <iostream>
+#include <map>
 #include <optional>
 
 #include "System.hpp"
@@ -26,12 +26,21 @@ struct LogsImpl {
   QDir dataDirectory;
   QDir logDirectory;
   QFile logFile;
-  QMap<qint64, QList<Logs::Event>> data;
+  struct Data {
+    [[nodiscard]] auto const& at(const auto& day);
+    [[nodiscard]] auto mustLoad(const auto& day) const;
+    void insert(const auto& events, const auto& day, const auto& today);
+    void purge(const auto& day);
+
+   private:
+    map<qint64, QList<Logs::Event>> events;
+    map<qint64, bool> isFinal;
+  } data;
 
   LogsImpl(Events& events);
   void updateLogFile();
   void logEvent(QString const& event);
-  void readHistoricalData(auto const& day, optional<QDate> today = {});
+  void readHistoricalData(auto const& day, auto const& today);
   optional<Logs::Event*> findLastDispense(auto& day);
   void populateHistoricalEvents(auto const& day, auto const& now);
 
@@ -53,6 +62,36 @@ Logs::Logs() {
 
 void Logs::logEvent(QString const& event) { impl->logEvent(event); }
 
+auto const& LogsImpl::Data::at(const auto& day) {
+  if (events.contains(day) == false) {
+    insert(QList<Logs::Event>{}, day, QDate::currentDate().toJulianDay());
+  }
+  return events.at(day);
+}
+
+void LogsImpl::Data::insert(const auto& events, const auto& day, const auto& today) {
+  // qDebug() << "Loaded" << QDate::fromJulianDay(day).toString() << "events" << events.size();
+  this->events[day] = events;
+  isFinal[day] = day < today;
+}
+
+void LogsImpl::Data::purge(const auto& day) {
+  auto it = events.find(day);
+  if (it != events.end()) {
+    events.erase(it);
+  }
+}
+
+auto LogsImpl::Data::mustLoad(const auto& day) const {
+  if (events.contains(day) == false) {
+    return true;
+  }
+  if (isFinal.at(day) == false) {
+    return true;
+  }
+  return false;
+}
+
 LogsImpl::LogsImpl(Events& events) : events(events) {
   dataDirectory =
       QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
@@ -67,7 +106,7 @@ LogsImpl::LogsImpl(Events& events) : events(events) {
   auto yesterday = today.addDays(-1);
 
   for (auto const& dayToLoad : QList{yesterday, today}) {
-    readHistoricalData(dayToLoad);
+    readHistoricalData(dayToLoad, today);
     populateHistoricalEvents(dayToLoad, now);
   }
 
@@ -83,7 +122,7 @@ LogsImpl::LogsImpl(Events& events) : events(events) {
 }
 
 void LogsImpl::populateHistoricalEvents(auto const& day, auto const& now) {
-  for (auto const& historical : data[day.toJulianDay()]) {
+  for (auto const& historical : data.at(day.toJulianDay())) {
     if (eventIsLessThan24HoursOld(historical.time, now)) {
       if (Logs::Event::dispenseTypes.contains(historical.type)) {
         events.data.append({//
@@ -155,33 +194,28 @@ void LogsImpl::logEvent(QString const& event) {
 
 QList<Logs::Event> const& Logs::readHistoricalData(QDate const& day) const {
   impl->readHistoricalData(day, QDate::currentDate());
-  return impl->data[day.toJulianDay()];
+  return impl->data.at(day.toJulianDay());
 }
 
 bool Logs::hasHistoricalData(QDate const& day) const {
   return QFile{impl->dateToFilePath(day)}.exists();
 }
 
-void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
+void LogsImpl::readHistoricalData(auto const& day, auto const& today) {
   auto dayIndex = day.toJulianDay();
 
   auto f = QFile{dateToFilePath(day)};
   if (f.exists() == false) {
-    if (data.contains(dayIndex)) {
-      data[dayIndex].clear();
-    }
+    data.purge(dayIndex);
     return;
   }
 
-  if (today.has_value() &&        // today is known
-      day != today.value() &&     // loading a previous day
-      data.contains(dayIndex)) {  // the previous day is already loaded
+  if (data.mustLoad(dayIndex) == false) {
     // we do not reload historical data, it has not changed
     return;
   }
 
-  auto& d = data[dayIndex];
-  d.clear();
+  auto dayEvents = QList<Logs::Event>{};
 
   // === boot === Tue Sep 2 23:01:02 2025
   // Tue Sep 2 23:25:47 2025, dispense, Automatic
@@ -205,7 +239,7 @@ void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
           qDebug() << "invalid line with time" << l;
           return;
         }
-        d.append({
+        dayEvents.append({
             .type = type,
             .time = time,
             .weight = 0.0,
@@ -223,10 +257,10 @@ void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
     // TODO log in dispense event if it was repeated
 
     // set the weight to the eat event from previous dispense
-    if (d.empty() == false) {
-      auto& lastEvent = d.last();
+    if (dayEvents.empty() == false) {
+      auto& lastEvent = dayEvents.last();
       if (lastEvent.type == Type::Eat) {
-        if (auto lastDispense = findLastDispense(d)) {
+        if (auto lastDispense = findLastDispense(dayEvents)) {
           lastEvent.weight = lastDispense.value()->weight;
         }
       }
@@ -240,7 +274,7 @@ void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
       auto weight = line.toDouble(&ok);
       if (ok) {
         // qDebug() << patternWeight << value;
-        if (auto lastDispense = findLastDispense(d)) {
+        if (auto lastDispense = findLastDispense(dayEvents)) {
           // qDebug() << "last dispense" << (int)lastDispense->type << it->time.toString();
           lastDispense.value()->weight = weight;
         }
@@ -249,6 +283,8 @@ void LogsImpl::readHistoricalData(auto const& day, optional<QDate> today) {
       }
     }
   }
+
+  data.insert(dayEvents, dayIndex, today.toJulianDay());
 
   // // debug
   // for (const auto& e : d) {
