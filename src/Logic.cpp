@@ -207,6 +207,7 @@ void LogicImpl::dispense(Mode mode) {
   //   }
 
   logs.logEvent(now.toString() + ", dispense, " + modeNames.at(mode));
+  logs.logEvent("ButtonTime " + QString::number(Settings::get("DurationRelayImpulse").toInt()));
 }
 
 bool LogicImpl::needsRepeat() const {

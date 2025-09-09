@@ -10,8 +10,8 @@ ninja
 
 - rename Event and Event and Events
 
-- in logs, include duration of button press, on dispense events
-  in order to see how it affects the dispensed weight
+- bug: if dispense and eat are on different days
+  they are not associated
 
 
 
@@ -37,6 +37,7 @@ ninja
     should we take pictures of dispense, to compare with count of croquettes?
     we could then compare our heuristic/processing with accurate results
     what do the different heuristics compute for each event?
+    what about the correlation button-press-time / dispensed-weight ?
 
 - log email: include the total weight in the title
 
@@ -387,3 +388,5 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   it's because it's not reloaded and yet it is out of date
   loading needs "is final load"
   computed as "loaded day is in the past <-> less than today"
+- in logs, include duration of button press, on dispense events
+  in order to see how it affects the dispensed weight
