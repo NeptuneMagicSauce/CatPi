@@ -18,6 +18,7 @@ using std::optional;
 
 struct MailImpl {
   Logs const& logs;
+  QTimer timer;
 
   MailImpl(Logs const& logs);
   void sendYesterday();
@@ -37,11 +38,10 @@ MailImpl::MailImpl(Logs const& logs) : logs(logs) {
   sendYesterday();
 
   // then check regularly if it needs sending
-  auto timer = new QTimer;
-  timer->setSingleShot(false);
-  timer->setInterval(5 * 60 * 1000);  // every 5 minutes
-  QObject::connect(timer, &QTimer::timeout, [this] { sendYesterday(); });
-  timer->start();
+  timer.setSingleShot(false);
+  timer.setInterval(5 * 60 * 1000);  // every 5 minutes
+  QObject::connect(&timer, &QTimer::timeout, [this] { sendYesterday(); });
+  timer.start();
 }
 
 void MailImpl::sendYesterday() {
