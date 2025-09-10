@@ -1,4 +1,5 @@
 #include <QList>
+#include <QTimer>
 
 #include "Events.hpp"
 
@@ -20,14 +21,15 @@ struct Logs {
 
     static const QSet<Type> dispenseTypes;
   };
-  Logs();
+  Logs(QString const& dataDirectory);
+
+  QTimer eventLogFileChanged;
 
   void update(const QDateTime& now);
   void logEvent(QString const& event);
   [[nodiscard]] QList<Event> const& readHistoricalData(QDate const& day) const;
   [[nodiscard]] bool hasHistoricalData(QDate const& day) const;
   [[nodiscard]] QString dateToFilePath(const QDate& date) const;
-  [[nodiscard]] QString dataDirectory() const;
 
   Events events;
 };

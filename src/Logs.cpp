@@ -4,11 +4,11 @@
 #include <QDir>
 #include <QFile>
 #include <QSet>
-#include <QStandardPaths>
 #include <iostream>
 #include <map>
 #include <optional>
 
+#include "Compressor.hpp"
 #include "System.hpp"
 
 using namespace std;
@@ -23,7 +23,6 @@ const QSet<Type> Logs::Event::dispenseTypes = {
 struct LogsImpl {
   Events& events;
 
-  QDir dataDirectory;
   QDir logDirectory;
   QFile logFile;
   struct Data {
@@ -37,9 +36,10 @@ struct LogsImpl {
     map<qint64, bool> isFinal;
   } data;
 
-  LogsImpl(Events& events);
-  void updateLogFile();
-  void logEvent(QString const& event);
+  LogsImpl(Events& events, QString const& dataDirectory);
+  void updateLogFile(bool& logFileChanged);
+  void logEvent(QString const& event, bool& logFileChanged);
+  [[nodiscard]] bool hasHistoricalData(QDate const& day) const;
   void readHistoricalData(auto const& day, auto const& today);
   optional<Logs::Event*> findLastDispense(auto& day);
   void populateHistoricalEvents(auto const& day, auto const& now);
@@ -55,12 +55,20 @@ namespace {
   LogsImpl* impl = nullptr;
 }
 
-Logs::Logs() {
+Logs::Logs(QString const& dataDirectory) {
   AssertSingleton();
-  impl = new LogsImpl{events};
+  eventLogFileChanged.setSingleShot(true);
+  eventLogFileChanged.setInterval(0);
+  impl = new LogsImpl{events, dataDirectory};
 }
 
-void Logs::logEvent(QString const& event) { impl->logEvent(event); }
+void Logs::logEvent(QString const& event) {
+  auto logFileChanged = false;
+  impl->logEvent(event, logFileChanged);
+  if (logFileChanged) {
+    eventLogFileChanged.start();
+  }
+}
 
 auto const& LogsImpl::Data::at(const auto& day) {
   if (events.contains(day) == false) {
@@ -92,11 +100,8 @@ auto LogsImpl::Data::mustLoad(const auto& day) const {
   return false;
 }
 
-LogsImpl::LogsImpl(Events& events) : events(events) {
-  dataDirectory =
-      QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
-          .first();
-  logDirectory = dataDirectory.path() + "/logs";
+LogsImpl::LogsImpl(Events& events, QString const& dataDirectory) : events(events) {
+  logDirectory = dataDirectory + "/logs";
 
   std::filesystem::create_directories(logDirectory.path().toStdString());
   cout << "Logs: " << logDirectory.path().toStdString() << "/" << endl;
@@ -147,7 +152,6 @@ optional<Logs::Event*> LogsImpl::findLastDispense(auto& day) {
   return {};
 }
 
-QString Logs::dataDirectory() const { return impl->dataDirectory.path(); }
 QString LogsImpl::dateToFileName(const QDate& date) { return date.toString(Qt::ISODate) + ".txt"; }
 QString Logs::dateToFilePath(const QDate& date) const { return impl->dateToFilePath(date); }
 QString LogsImpl::dateToFilePath(const QDate& date) const {
@@ -173,20 +177,24 @@ optional<QDate> LogsImpl::fileNameToDate(const QString& fileName) {
   return {};
 }
 
-void LogsImpl::updateLogFile() {
-  auto const path = dateToFilePath(QDate::currentDate());
-  if (logFile.fileName().isEmpty() == false && logFile.fileName() != path) {
-    logFile.close();
+void LogsImpl::updateLogFile(bool& logFileChanged) {
+  auto const newPath = dateToFilePath(QDate::currentDate());
+  auto const oldPath = logFile.fileName();
+  if (newPath != oldPath) {
+    logFileChanged = true;
+    if (oldPath.isEmpty() == false) {
+      logFile.close();
+    }
+    logFile.setFileName(newPath);
+    logFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
   }
-  logFile.setFileName(path);
 }
 
-void LogsImpl::logEvent(QString const& event) {
+void LogsImpl::logEvent(QString const& event, bool& logFileChanged) {
   // print log event to file
-  updateLogFile();
-  logFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
+  updateLogFile(logFileChanged);
   logFile.write((event + "\n").toUtf8());
-  logFile.close();
+  logFile.flush();
 
   // print log event to console
   cout << event.toStdString() << endl;
@@ -197,19 +205,18 @@ QList<Logs::Event> const& Logs::readHistoricalData(QDate const& day) const {
   return impl->data.at(day.toJulianDay());
 }
 
-bool Logs::hasHistoricalData(QDate const& day) const {
-  return QFile{impl->dateToFilePath(day)}.exists();
+bool Logs::hasHistoricalData(QDate const& day) const { return impl->hasHistoricalData(day); }
+bool LogsImpl::hasHistoricalData(QDate const& day) const {
+  return Compressor::Exists(dateToFilePath(day));
 }
 
 void LogsImpl::readHistoricalData(auto const& day, auto const& today) {
   auto dayIndex = day.toJulianDay();
 
-  auto f = QFile{dateToFilePath(day)};
-  if (f.exists() == false) {
+  if (hasHistoricalData(day) == false) {
     data.purge(dayIndex);
     return;
   }
-
   if (data.mustLoad(dayIndex) == false) {
     // we do not reload historical data, it has not changed
     return;
@@ -225,8 +232,8 @@ void LogsImpl::readHistoricalData(auto const& day, auto const& today) {
   // Tue Sep 2 22:14:03 2025, eat
   // Tue Aug 26 00:31:08 2025, recent Weights {MilliSecsAgo, Grams}, {146,0.35}, {358,0.34}, (...)
 
-  f.open(QIODeviceBase::ReadOnly);
-  for (auto const& l : f.readAll().split('\n')) {
+  auto path = dateToFilePath(day);
+  for (auto const& l : Compressor::Read(path).split('\n')) {
     auto line = QString{l};
 
     auto parseSimpleLine = [&](const auto& pattern, const auto type) {

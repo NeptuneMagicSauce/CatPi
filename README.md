@@ -10,8 +10,19 @@ ninja
 
 - rename Event and Event and Events
 
+- plots: have a horizontal marker at every 5 grams
+
 - bug: if dispense and eat are on different days
   they are not associated
+
+
+
+- validate gzip on Pi: how long does it take?
+for i in ~/.local/share/CatPi/logs/*txt ; do basename $i; time gzip -c $i > ~/tmp/tmp.gz; done
+if it is slow, do it in a background thread and signal end with timer
+
+- gzip historical data:
+for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
 
 
 
@@ -390,3 +401,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   computed as "loaded day is in the past <-> less than today"
 - in logs, include duration of button press, on dispense events
   in order to see how it affects the dispensed weight
+- gzip files: in logs dir and as email attachments

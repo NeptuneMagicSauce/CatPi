@@ -107,7 +107,6 @@ namespace {
 
   QStringList cppfilt(const QString& mangled) {
     auto process1 = QProcess{};
-    auto process2 = QProcess{};
     auto f = QTemporaryFile{};
     f.open();
     f.write(mangled.toUtf8());

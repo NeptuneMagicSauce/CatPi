@@ -1,10 +1,12 @@
 #include <QAbstractButton>
 #include <QApplication>
 #include <QShortcut>
+#include <QStandardPaths>
 // #include <iostream>
 
 #include "Calibration.hpp"
 #include "CentralWidget.hpp"
+#include "Compressor.hpp"
 #include "CrashDialog.hpp"
 #include "CrashHandler.hpp"
 #include "CrashTester.hpp"
@@ -44,7 +46,11 @@ struct Application : public QApplication {
     // app name is needed for AppData location, consumed by Logs for logging location
     // otherwise it is derived from file name, which may be a varying symlink
     setApplicationName("CatPi");
+    dataDirectory =
+        QStandardPaths::standardLocations(QStandardPaths::StandardLocation::AppLocalDataLocation)
+            .first();
   }
+  QString dataDirectory;
 };
 
 int main(int argc, char** argv) {
@@ -57,8 +63,8 @@ int main(int argc, char** argv) {
   auto onlyone = OnlyOneInstance{};
   auto brightness = ScreenBrightness{};
   auto filterweight = FilterWeight{};
-  auto logs = Logs{};
-  auto mail = Mail{logs};
+  auto logs = Logs{app->dataDirectory};
+  auto mail = Mail{};
   auto loadcell = new LoadCell;
   auto weight = new Weight;
   auto calibration = new Calibration;
@@ -236,6 +242,16 @@ int main(int argc, char** argv) {
 
       delay->setRemaining(logic->timeToDispenseSeconds());
       logsSmallWidget->update(logs.events.data);
+    });
+
+    // Logs
+    QObject::connect(&logs.eventLogFileChanged, &QTimer::timeout, [&] {
+      auto compressSource = logs.dateToFilePath(QDate::currentDate().addDays(-1));
+      auto compressDest = QString{};
+      Compressor::Do(compressSource, compressDest);
+      if (compressDest.isEmpty() == false) {
+        mail.sendYesterday(compressDest, app->dataDirectory);
+      }
     });
 
     // Delay

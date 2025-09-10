@@ -12,30 +12,32 @@
 #include <cstdlib>
 #include <optional>
 
-#include "Logs.hpp"
 #include "System.hpp"
 
 using std::optional;
 
 struct MailImpl {
-  Logs const& logs;
   QTimer timer;
   QString senderAddress;
 
-  MailImpl(Logs const& logs);
-  void sendYesterday();
+  MailImpl();
+  void sendYesterday(QString const& logPath, QString const& dataDirectory);
 };
 
 namespace {
   MailImpl* impl = nullptr;
 }
 
-Mail::Mail(Logs const& logs) {
+Mail::Mail() {
   AssertSingleton();
-  impl = new MailImpl{logs};
+  impl = new MailImpl;
 }
 
-MailImpl::MailImpl(Logs const& logs) : logs(logs) {
+void Mail::sendYesterday(QString const& logPath, QString const& dataDirectory) {
+  impl->sendYesterday(logPath, dataDirectory);
+}
+
+MailImpl::MailImpl() {
   // find sender address
   senderAddress = [] -> QString {
     auto homeDir = getenv("HOME");
@@ -62,34 +64,10 @@ MailImpl::MailImpl(Logs const& logs) : logs(logs) {
     return;
   }
   qDebug() << "SenderEmail:" << senderAddress;
-
-  // send it on boot if needed
-  sendYesterday();
-
-  // then check regularly if it needs sending
-  timer.setSingleShot(false);
-  timer.setInterval(5 * 60 * 1000);  // every 5 minutes
-  QObject::connect(&timer, &QTimer::timeout, [this] { sendYesterday(); });
-  timer.start();
 }
 
-void MailImpl::sendYesterday() {
+void MailImpl::sendYesterday(QString const& logPath, QString const& dataDirectory) {
   auto yesterday = QDate::currentDate().addDays(-1);
-  auto dataDirectory = logs.dataDirectory();
-
-  // verify if it is not already sent
-  auto fileOfLatestSend = QFile{dataDirectory + "/latest.email.txt"};
-  if (fileOfLatestSend.exists()) {
-    fileOfLatestSend.open(QIODeviceBase::ReadOnly);
-    auto latestSend = QDate::fromJulianDay(QString{fileOfLatestSend.readAll()}.toInt());
-    if (latestSend == yesterday) {
-      // qDebug() << Q_FUNC_INFO << "already sent";
-      return;
-    }
-    fileOfLatestSend.close();
-  }
-  fileOfLatestSend.open(QIODeviceBase::WriteOnly);
-  fileOfLatestSend.write(QString::number(yesterday.toJulianDay()).toUtf8());
 
   // build list of recipients from csv file
   auto recipients = [] {
@@ -119,7 +97,6 @@ void MailImpl::sendYesterday() {
   }();
 
   // build logs content as base64 for in-line attaching
-  auto logPath = logs.dateToFilePath(yesterday);
   auto logsContent = [&] -> optional<QString> {
     auto logFile = QFile{logPath};
     if (logFile.exists() == false) {

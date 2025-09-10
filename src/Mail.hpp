@@ -1,5 +1,6 @@
-struct Logs;
+struct QString;
 
 struct Mail {
-  Mail(Logs const& logs);
+  Mail();
+  void sendYesterday(QString const& path, QString const& dataDirectory);
 };
