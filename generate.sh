@@ -22,6 +22,9 @@ done
 
 rm -fr CMakeCache.txt build.ninja *_autogen/ CMakeFiles/ cmake_install.cmake  compile_commands.json
 
+# clangd background indexer fails with symbolic links -> change to real path
+cd $(realpath .)
+
 cmake . \
       -G Ninja \
       --fresh \
