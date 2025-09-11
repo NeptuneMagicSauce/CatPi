@@ -402,3 +402,10 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
 - in logs, include duration of button press, on dispense events
   in order to see how it affects the dispensed weight
 - gzip files: in logs dir and as email attachments
+- event log-file-changed will be late
+  because it's only detected on logEvent()
+  thus it can not be used to tell if the pi is alive at midnight
+  fix = detect it in a tigher loop, that call LogsImpl::updateLogFile()
+  so it will not be detected by logEvent()
+  and yet logEvent() needs to call updateLogFile()
+  otherwise it would have the wrong log file

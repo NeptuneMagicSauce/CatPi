@@ -60,6 +60,22 @@ Logs::Logs(QString const& dataDirectory) {
   eventLogFileChanged.setSingleShot(true);
   eventLogFileChanged.setInterval(0);
   impl = new LogsImpl{events, dataDirectory};
+
+  // periodically update the log file path
+  // so that it detects a new log file (new day) rapidly when it changes
+  // because it then triggers compressing it and e-mailing it
+  // so that it's consistently done on time
+  auto timerUpdate = new QTimer;
+  timerUpdate->setSingleShot(false);
+  timerUpdate->setInterval(5 * 60 * 1000);  // 5 minutes
+  timerUpdate->start();
+  QObject::connect(timerUpdate, &QTimer::timeout, [&] {
+    auto logFileChanged = false;
+    impl->updateLogFile(logFileChanged);
+    if (logFileChanged) {
+      eventLogFileChanged.start();
+    }
+  });
 }
 
 void Logs::logEvent(QString const& event) {
