@@ -10,11 +10,6 @@ ninja
 
 - rename Event and Event and Events
 
-- bug: if dispense and eat are on different days
-  they are not associated
-
-
-
 - validate gzip on Pi: how long does it take?
 for i in ~/.local/share/CatPi/logs/*txt ; do basename $i; time gzip -c $i > ~/tmp/tmp.gz; done
 if it is slow, do it in a background thread and signal end with timer
@@ -22,9 +17,24 @@ if it is slow, do it in a background thread and signal end with timer
 - gzip historical data:
 for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
 
+- mask LEDs that are too bright in the night
 
+- needs cord extension, une rallonge
 
-- on repeat, do not respect the user setting "button press duration"
+- auto run on boot
+
+- validate: "detectig while cat eats":
+  does it detect too little?
+
+- validate: are there still no-show events?
+  when dispense fails to give anything significant
+  could be detected if there's no issue with detecting too little
+
+- validate: are we dispensing too much on repeats?
+  needs accurate detecting
+
+- if we dispense too much on repeats:
+  on repeat, do not respect the user setting "button press duration"
   do a short button press
   because maybe we're just under the threshold
   because we don't want to dispense too much
@@ -48,6 +58,9 @@ for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
     what do the different heuristics compute for each event?
     what about the correlation button-press-time / dispensed-weight ?
 
+- bug: if dispense and eat are on different days
+  they are not associated
+
 - log email: include the total weight in the title
 
 - log email: include the plots as attachments
@@ -55,9 +68,8 @@ for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
 
 
 
-- when I go to the journal at 0:05 AM, and there's not been events today
-  I should go to the empty today view
-  but it goes to yesterday's view
+
+
 
 - also plot this:
   weight per dispense event
@@ -74,13 +86,7 @@ for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
 
 
 
-- mask LEDs that are too bright in the night
-
-- needs cord extension, une rallonge
-
 - needs auto update button in the GUI
-
-- auto run on boot
 
 - update capability: in the GUI?
   it needs to be bullet-proof for reverting broken updates
