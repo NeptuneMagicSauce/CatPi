@@ -120,11 +120,17 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
 
   yAxis.setRange(0, 24);
   yAxis.setTickCount(25);
+  yAxis.setGridLineVisible(false);
+
   yAxis.setLabelFormat("%d");
   yAxis.setTitleText("Heures");
   chart.addAxis(&yAxis, Qt::AlignBottom);
 
   xAxis.setLabelFormat("%d");
+  auto gridLinePen = QPen{};
+  gridLinePen.setWidth(2);
+  gridLinePen.setColor(QColor{192, 192, 192});
+  xAxis.setGridLinePen(gridLinePen);
   chart.addAxis(&xAxis, Qt::AlignLeft);
 
   layout->addWidget(titleParent);
@@ -180,8 +186,17 @@ void LogsWidgetImpl::loadData() {
     // barSeries.attachAxis(&yAxis);
   }
   auto maxXValue = (int)maxPerHour + 1;
+  auto constexpr subTickPerTick = 5;
+  maxXValue += subTickPerTick - (maxXValue % subTickPerTick);
   xAxis.setMax(maxXValue);
-  xAxis.setTickCount(maxXValue + 1);
+  xAxis.setTickCount((maxXValue / subTickPerTick) + 1);
+  xAxis.setMinorTickCount(subTickPerTick - 1);
+
+  // TODO switch names xAxis yAxis
+  // no markers between hours
+  // hours label offset 1/2 unit right
+  // hide 24.5!
+  // bars wider
 
   bars.setLabel("Grammes / Heure, Total Jour = " + QString::number((int)totalPeriod));
 }
