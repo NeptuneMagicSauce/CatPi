@@ -36,7 +36,7 @@ struct LogsWidgetImpl {
   QBarSet bars{""};
 
   QChart chart;
-  QValueAxis xAxis, yAxis;
+  QValueAxis yAxis, xAxis;
   QChartView chartView;
 
   static QString FormatDay(const auto& day);
@@ -118,20 +118,20 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   chartView.setChart(&chart);
   barSeries.append(&bars);
 
-  yAxis.setRange(0, 24);
-  yAxis.setTickCount(25);
-  yAxis.setGridLineVisible(false);
-
-  yAxis.setLabelFormat("%d");
-  yAxis.setTitleText("Heures");
-  chart.addAxis(&yAxis, Qt::AlignBottom);
+  xAxis.setRange(0, 24);
+  xAxis.setTickCount(25);
+  xAxis.setGridLineVisible(false);
 
   xAxis.setLabelFormat("%d");
+  xAxis.setTitleText("Heures");
+  chart.addAxis(&xAxis, Qt::AlignBottom);
+
+  yAxis.setLabelFormat("%d");
   auto gridLinePen = QPen{};
   gridLinePen.setWidth(2);
   gridLinePen.setColor(QColor{192, 192, 192});
-  xAxis.setGridLinePen(gridLinePen);
-  chart.addAxis(&xAxis, Qt::AlignLeft);
+  yAxis.setGridLinePen(gridLinePen);
+  chart.addAxis(&yAxis, Qt::AlignLeft);
 
   layout->addWidget(titleParent);
   layout->addWidget(&chartView);
@@ -154,7 +154,7 @@ void LogsWidgetImpl::loadData() {
 
   QMap<int, QList<Logs::Event>> eventsPerHour;
   QMap<int, double> eatenWeightsPerHour;
-  xAxis.setTitleText("Grammes");
+  yAxis.setTitleText("Grammes");
   for (const auto& d : data) {
     if (d.type == Logs::Event::Type::Eat) {
       eventsPerHour[d.time.time().hour()].append(d);
@@ -182,17 +182,16 @@ void LogsWidgetImpl::loadData() {
   // it fails when we add the series to the chart earlier in the constructor !?
   if (chart.series().empty()) {
     chart.addSeries(&barSeries);
-    barSeries.attachAxis(&xAxis);
+    barSeries.attachAxis(&yAxis);
     // barSeries.attachAxis(&yAxis);
   }
   auto maxXValue = (int)maxPerHour + 1;
   auto constexpr subTickPerTick = 5;
   maxXValue += subTickPerTick - (maxXValue % subTickPerTick);
-  xAxis.setMax(maxXValue);
-  xAxis.setTickCount((maxXValue / subTickPerTick) + 1);
-  xAxis.setMinorTickCount(subTickPerTick - 1);
+  yAxis.setMax(maxXValue);
+  yAxis.setTickCount((maxXValue / subTickPerTick) + 1);
+  yAxis.setMinorTickCount(subTickPerTick - 1);
 
-  // TODO switch names xAxis yAxis
   // no markers between hours
   // hours label offset 1/2 unit right
   // hide 24.5!
