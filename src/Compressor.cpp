@@ -2,9 +2,14 @@
 
 #include <QFileInfo>
 #include <QProcess>
+#include <iostream>
 
 namespace {
   static constexpr auto suffix = ".gz";
+  void printProcessOutputsToConsole(auto& process) {
+    std::cerr << QString{process.readAllStandardError()}.toStdString();
+    std::cout << QString{process.readAllStandardOutput()}.toStdString();
+  }
 }
 
 void Compressor::Do(QString const& pathSource, QString& pathDest) {
@@ -14,8 +19,10 @@ void Compressor::Do(QString const& pathSource, QString& pathDest) {
   auto process = QProcess{};
   process.start("gzip", {pathSource});
   process.waitForFinished();
-  if (process.exitStatus() == QProcess::NormalExit) {
+  if (process.exitCode() == 0) {
     pathDest = pathSource + ::suffix;
+  } else {
+    printProcessOutputsToConsole(process);
   }
 }
 
@@ -36,8 +43,10 @@ QByteArray Compressor::Read(QString const& path) {
       auto process = QProcess{};
       process.start("zcat", {path + ::suffix});
       process.waitForFinished();
-      if (process.exitStatus() == QProcess::NormalExit) {
+      if (process.exitCode() == 0) {
         return process.readAll();
+      } else {
+        printProcessOutputsToConsole(process);
       }
     }
   }
