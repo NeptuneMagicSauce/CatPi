@@ -116,13 +116,14 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   chart.setMargins({0, 0, 0, 0});
 
   chartView.setChart(&chart);
+  barSeries.setBarWidth(1);  // 100% of the cell width
   barSeries.append(&bars);
 
   xAxis.setRange(0, 24);
-  xAxis.setTickCount(25);
+  xAxis.setTickCount(9);
   xAxis.setGridLineVisible(false);
 
-  xAxis.setLabelFormat("%d");
+  xAxis.setLabelFormat("%dH");
   xAxis.setTitleText("Heures");
   chart.addAxis(&xAxis, Qt::AlignBottom);
 
@@ -191,11 +192,6 @@ void LogsWidgetImpl::loadData() {
   yAxis.setMax(maxXValue);
   yAxis.setTickCount((maxXValue / subTickPerTick) + 1);
   yAxis.setMinorTickCount(subTickPerTick - 1);
-
-  // no markers between hours
-  // hours label offset 1/2 unit right
-  // hide 24.5!
-  // bars wider
 
   bars.setLabel("Grammes / Heure, Total Jour = " + QString::number((int)totalPeriod));
 }

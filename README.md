@@ -10,8 +10,6 @@ ninja
 
 - rename Event and Event and Events
 
-- plots: have a horizontal marker at every 5 grams
-
 - bug: if dispense and eat are on different days
   they are not associated
 
@@ -409,3 +407,4 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   so it will not be detected by logEvent()
   and yet logEvent() needs to call updateLogFile()
   otherwise it would have the wrong log file
+- plots: have a horizontal marker at every 5 grams
