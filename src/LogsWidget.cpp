@@ -186,9 +186,10 @@ void LogsWidgetImpl::loadData() {
     barSeries.attachAxis(&yAxis);
     // barSeries.attachAxis(&yAxis);
   }
-  auto maxXValue = (int)maxPerHour + 1;
   auto constexpr subTickPerTick = 5;
+  auto maxXValue = (int)maxPerHour + 1;
   maxXValue += subTickPerTick - (maxXValue % subTickPerTick);
+  maxXValue = std::max(maxXValue, subTickPerTick * 3);  // minimum 3 ticks
   yAxis.setMax(maxXValue);
   yAxis.setTickCount((maxXValue / subTickPerTick) + 1);
   yAxis.setMinorTickCount(subTickPerTick - 1);
