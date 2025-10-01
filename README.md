@@ -8,14 +8,13 @@ ninja
 
 # TODO
 
+- bug screen saver:
+  once, the screen was off and would not turn on when touched
+  but we did echo 255 > /proc/brightness and it woke up
+  the program was still running
+  another time, the screen was on but the buttons disabled
+
 - rename Event and Event and Events
-
-- validate gzip on Pi: how long does it take?
-for i in ~/.local/share/CatPi/logs/*txt ; do basename $i; time gzip -c $i > ~/tmp/tmp.gz; done
-if it is slow, do it in a background thread and signal end with timer
-
-- gzip historical data:
-for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
 
 - mask LEDs that are too bright in the night
 
@@ -414,3 +413,9 @@ https://irfu.cea.fr/Pisp/frederic.galliano/Computing/manual_elisp.html
   and yet logEvent() needs to call updateLogFile()
   otherwise it would have the wrong log file
 - plots: have a horizontal marker at every 5 grams
+- validate gzip on Pi: how long does it take?
+for i in ~/.local/share/CatPi/logs/*txt ; do basename $i; time gzip -c $i > ~/tmp/tmp.gz; done
+if it is slow, do it in a background thread and signal end with timer
+it is very fast
+- gzip historical data:
+for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
