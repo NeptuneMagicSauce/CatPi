@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QTimer>
 #include <QWidget>
@@ -24,32 +25,31 @@ namespace {
   auto const rangeMin = 1;
   auto const rangeMax = 100;
   auto procfile = QFile{findProcFilePath()};
-  auto isOn = true;
   int delayScreenSaverMinutes = 1;
-  QTimer timerInactive;
+  QTimer timerLoop;
+  QElapsedTimer timerSinceInteraction;
   function<void(bool)> onChangeCallback;
 
-  void change(int byte) {
+  auto settingToValue(int setting) { return (setting * 255) / rangeMax; }
+
+  int readBrightness() {
+    if (procfile.exists() == false) {
+      return 0;
+    }
+    procfile.open(QIODeviceBase::ReadOnly);
+    auto ret = QString{procfile.readAll()}.toInt();
+    // qDebug() << "BrightnessReading:" << ret;
+    procfile.close();
+    return ret;
+  }
+
+  void writeBrightness(int value) {
     if (procfile.exists() == false) {
       return;
     }
     procfile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Append);
-    byte *= 255;
-    byte /= rangeMax;
-    procfile.write(QString::number(byte).toUtf8());
+    procfile.write(QString::number(value).toUtf8());
     procfile.close();
-  }
-
-  void setIsOn(bool isOn) {
-    if (::isOn == isOn) {
-      return;
-    }
-    ::isOn = isOn;
-    if (onChangeCallback != nullptr) {
-      onChangeCallback(isOn);
-    }
-    // qDebug() << Q_FUNC_INFO << isOn;
-    change(isOn ? Settings::get("ScreenBrightness").toInt() : 0);
   }
 }
 
@@ -61,7 +61,7 @@ ScreenBrightness::ScreenBrightness() {
                   .prompt = "",
                   .unit = "Pourcentage",
                   .defaultValue = rangeMax,
-                  .callback = [&](QVariant v) { change(v.toInt()); },
+                  .callback = [&](QVariant v) { writeBrightness(settingToValue(v.toInt())); },
                   .limits = {.minimum = rangeMin, .maximum = rangeMax}});
 
   Settings::load({.key = "ScreenSaverDelay",
@@ -69,36 +69,47 @@ ScreenBrightness::ScreenBrightness() {
                   .prompt = "Temps d'atteinte après lequel l'écran s'éteint",
                   .unit = "Minutes",
                   .defaultValue = 5,
-                  .callback =
-                      [&](QVariant v) {
-                        delayScreenSaverMinutes = v.toInt();
-                        timerInactive.setInterval(delayScreenSaverMinutes * 1000 * 60);
-                        timerInactive.start();
-                      },
+                  .callback = [&](QVariant v) { delayScreenSaverMinutes = v.toInt(); },
                   .limits = {.minimum = 0, .maximum = 20}});
 
-  // install watcher to detect activity
-  timerInactive.setSingleShot(true);
-  QObject::connect(&timerInactive, &QTimer::timeout, [&] {
-    if (delayScreenSaverMinutes == 0) {
-      // that's a disabled screen saver
-      return;
+  timerSinceInteraction.start();
+
+  timerLoop.setSingleShot(false);
+  timerLoop.setInterval(500);
+  timerLoop.start();
+  QObject::connect(&timerLoop, &QTimer::timeout, [&] {
+    auto brightnessValue = settingToValue(Settings::get("ScreenBrightness").toInt());
+    auto newValue = [&] {
+      auto activeWindow = qApp->activeWindow();
+      if (activeWindow == nullptr || activeWindow->isFullScreen() == false) {
+        // we are not the active window
+        return brightnessValue;
+      }
+      if (delayScreenSaverMinutes == 0) {
+        // the screen saver is disabled
+        return brightnessValue;
+      }
+      auto timeSinceInteractionMinutes = timerSinceInteraction.elapsed() / 1000 / 60;
+      if (timeSinceInteractionMinutes >= delayScreenSaverMinutes) {
+        return 0;
+      } else {
+        return brightnessValue;
+      }
+    }();
+    if (readBrightness() != newValue) {
+      writeBrightness(newValue);
+      if (onChangeCallback != nullptr) {
+        onChangeCallback(newValue > 0);
+      }
     }
-    auto activeWindow = qApp->activeWindow();
-    if (activeWindow == nullptr || activeWindow->isFullScreen() == false) {
-      // go to sleep if fullscreen and active
-      // otherwise we will fail to go out of sleep
-      // by interacting with the application
-      return;
-    }
-    setIsOn(false);
   });
+
+  // install watcher to detect activity
   struct Watcher : public QObject {
     bool eventFilter(QObject* dest, QEvent* event) override {
       auto type = event->type();
       if (type == QEvent::MouseMove || type == QEvent::MouseButtonPress) {
-        setIsOn(true);
-        timerInactive.start();
+        timerSinceInteraction.restart();
       }
       return QObject::eventFilter(dest, event);
     }
@@ -107,7 +118,7 @@ ScreenBrightness::ScreenBrightness() {
   qApp->installEventFilter(new Watcher);
 }
 
-void ScreenBrightness::reset() { change(rangeMax); }
+void ScreenBrightness::reset() { writeBrightness(settingToValue(rangeMax)); }
 
 void ScreenBrightness::setCallbackOnChange(std::function<void(bool)> onChangeCallback) {
   ::onChangeCallback = onChangeCallback;
