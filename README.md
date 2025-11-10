@@ -8,6 +8,20 @@ ninja
 
 # TODO
 
+- daily e-mail: include graph as ascii art
+
+- BUG: detects too much weight
+  probably because the user pushes on the bowl
+  maybe fix: detect for a shorter period
+
+- BUG: graphs and e-mails broke:
+  after about 2 weeks of uptime
+  one e-mail did not have the attachment
+  next day e-mail was missing, did not arrive
+  the graphs in the GUI were empty for the previous ~10 days
+  but files on disk were correct
+  restarting the app fixed everything
+
 - bug screen saver:
   once, the screen was off and would not turn on when touched
   but we did echo 255 > /proc/brightness and it woke up
