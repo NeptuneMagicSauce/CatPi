@@ -88,7 +88,7 @@ LogicImpl::LogicImpl(Logs& logs, const double& weightThresholdGrams)
 
   timerEndDispense.setSingleShot(true);
   QObject::connect(&timerEndDispense, &QTimer::timeout, [&] {
-    // qDebug() << "CLOSE RELAY" << QDateTime::currentDateTime().time();
+    // qDebug() << "endDispense" << QTime::currentTime();
     Logic::closeRelay();
   });
 
@@ -117,8 +117,11 @@ LogicImpl::LogicImpl(Logs& logs, const double& weightThresholdGrams)
              durationDispenseRelayMilliseconds = v.toInt() * 1000;
              timerEndDispense.setInterval(durationDispenseRelayMilliseconds);
 
-             // duration of "detect dispense" period = duration of "active dispense" + 3 seconds
-             timerDetectDispensed.setInterval(timerEndDispense.interval() + 3000);
+             // set the timerDtectDispensed to the same duration
+             // because we want it as short as possible
+             // otherwise it detects the cat pushing on the bowl
+             // soon after start of dispensing
+             timerDetectDispensed.setInterval(timerEndDispense.interval() + 0);
            },
        .limits = {.minimum = 1, .maximum = 20}});
 
@@ -216,6 +219,7 @@ bool LogicImpl::needsRepeat() const {
 }
 
 void LogicImpl::endDetectDispense() {
+  // qDebug() << "endDetectDispense" << QTime::currentTime();
   auto dispensedWeight = events().last().grams;
 
   // log the dispensed weight
@@ -226,7 +230,8 @@ void LogicImpl::endDetectDispense() {
   // if it's not enough, there may have been a mechanical issue
   // -> dispense again
   if (needsRepeat()) {
-    dispense(Mode::Repeat);
+    // call dispense() in the future, because current dispense event is not fully finished
+    QTimer::singleShot(3000, [&] { dispense(Mode::Repeat); });
   } else {
     timerAllowManualDispense.start();
   }
