@@ -246,11 +246,12 @@ int main(int argc, char** argv) {
 
     // Logs
     QObject::connect(&logs.eventLogFileChanged, &QTimer::timeout, [&] {
-      auto compressSource = logs.dateToFilePath(QDate::currentDate().addDays(-1));
+      auto const yesterday = QDate::currentDate().addDays(-1);
+      auto compressSource = logs.dateToFilePath(yesterday);
       auto compressDest = QString{};
       Compressor::Do(compressSource, compressDest);
       if (compressDest.isEmpty() == false) {
-        mail.sendYesterday(compressDest, app->dataDirectory);
+        mail.sendYesterday(compressDest, logsWidget->asAscii(yesterday), app->dataDirectory);
       }
     });
 

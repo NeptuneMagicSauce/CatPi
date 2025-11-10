@@ -21,6 +21,8 @@ ninja
   the graphs in the GUI were empty for the previous ~10 days
   but files on disk were correct
   restarting the app fixed everything
+  MAYBE it was because of daylight time savings
+  WHICH happened at the same time as this bug, autumn 2025
 
 - bug screen saver:
   once, the screen was off and would not turn on when touched

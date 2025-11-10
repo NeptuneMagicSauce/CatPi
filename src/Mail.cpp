@@ -21,7 +21,7 @@ struct MailImpl {
   QString senderAddress;
 
   MailImpl();
-  void sendYesterday(QString const& logPath, QString const& dataDirectory);
+  void sendYesterday(QString const& logPath, QString const& ascii, QString const& dataDirectory);
 };
 
 namespace {
@@ -33,8 +33,9 @@ Mail::Mail() {
   impl = new MailImpl;
 }
 
-void Mail::sendYesterday(QString const& logPath, QString const& dataDirectory) {
-  impl->sendYesterday(logPath, dataDirectory);
+void Mail::sendYesterday(QString const& logPath, QString const& ascii,
+                         QString const& dataDirectory) {
+  impl->sendYesterday(logPath, ascii, dataDirectory);
 }
 
 MailImpl::MailImpl() {
@@ -66,7 +67,8 @@ MailImpl::MailImpl() {
   qDebug() << "SenderEmail:" << senderAddress;
 }
 
-void MailImpl::sendYesterday(QString const& logPath, QString const& dataDirectory) {
+void MailImpl::sendYesterday(QString const& logPath, QString const& ascii,
+                             QString const& dataDirectory) {
   auto yesterday = QDate::currentDate().addDays(-1);
 
   // build list of recipients from csv file
@@ -138,16 +140,29 @@ MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="BOUNDARYFOO"
 
 --BOUNDARYFOO
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
 )";
     // body of the e-mail
+
+    content += R"(
+<html>
+  <body>
+    <pre style="font-family: 'Courier New', Courier, monospace;">
+)";
     content += yesterday.toString("dddd, MMMM d");
     if (hostName != "catpi") {
       content += " [" + hostName + "]";
     }
     content += "\n";
+
+    content += ascii + "\n";
+    content += R"(
+    </pre>
+  </body>
+</html>
+)";
 
     if (logsContent.has_value()) {
       content += R"(

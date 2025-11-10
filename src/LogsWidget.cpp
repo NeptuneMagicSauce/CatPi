@@ -9,10 +9,13 @@
 #include <QLabel>
 #include <QToolButton>
 #include <QValueAxis>
+#include <ostream>
 
 #include "Logs.hpp"
 #include "System.hpp"
 #include "Widget.hpp"
+
+using std::endl;
 
 struct LogsWidgetImpl {
   LogsWidgetImpl(Logs const& logs);
@@ -41,6 +44,13 @@ struct LogsWidgetImpl {
 
   static QString FormatDay(const auto& day);
   void loadData();
+
+  struct TabulatedData {
+    QMap<int, double> eatenWeightsPerHour;
+    double maxPerHour = 0;
+    double totalPeriod = 0;
+  };
+  TabulatedData tabulate(const QDate& day);
 };
 
 namespace {
@@ -138,31 +148,15 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   layout->addWidget(&chartView);
 }
 
-void LogsWidget::loadData() { impl->loadData(); }
-
-void LogsWidgetImpl::loadData() {
-  title->setText(FormatDay(current));
-  auto const& data = logs.readHistoricalData(current);
-
-  for (auto timeDirection : timeButtons.keys()) {
-    auto const& timeButton = timeButtons[timeDirection];
-    auto enabled = logs.hasHistoricalData(current.addDays(timeDirection));
-    timeButton.button->setEnabled(enabled);
-    timeButton.button->setIcon(enabled ? timeButton.icon : QIcon{});
-  }
-
-  bars.remove(0, bars.count());
+LogsWidgetImpl::TabulatedData LogsWidgetImpl::tabulate(const QDate& day) {
+  auto ret = TabulatedData{};
 
   QMap<int, QList<Logs::Event>> eventsPerHour;
-  QMap<int, double> eatenWeightsPerHour;
-  yAxis.setTitleText("Grammes");
-  for (const auto& d : data) {
+  for (const auto& d : logs.readHistoricalData(day)) {
     if (d.type == Logs::Event::Type::Eat) {
       eventsPerHour[d.time.time().hour()].append(d);
     }
   }
-  auto maxPerHour = double{0};
-  auto totalPeriod = double{0};
   for (int hour = 0; hour < 24; ++hour) {
     auto totalPerHour = double{0};
     if (eventsPerHour.contains(hour)) {
@@ -171,13 +165,33 @@ void LogsWidgetImpl::loadData() {
         totalPerHour += e.weight;
       }
     }
-    maxPerHour = std::max(maxPerHour, totalPerHour);
-    totalPeriod += totalPerHour;
-    eatenWeightsPerHour[hour] = totalPerHour;
+    ret.maxPerHour = std::max(ret.maxPerHour, totalPerHour);
+    ret.totalPeriod += totalPerHour;
+    ret.eatenWeightsPerHour[hour] = totalPerHour;
   }
+
+  return ret;
+}
+
+void LogsWidget::loadData() { impl->loadData(); }
+
+void LogsWidgetImpl::loadData() {
+  title->setText(FormatDay(current));
+  for (auto timeDirection : timeButtons.keys()) {
+    auto const& timeButton = timeButtons[timeDirection];
+    auto enabled = logs.hasHistoricalData(current.addDays(timeDirection));
+    timeButton.button->setEnabled(enabled);
+    timeButton.button->setIcon(enabled ? timeButton.icon : QIcon{});
+  }
+
+  bars.remove(0, bars.count());
+  yAxis.setTitleText("Grammes");
+
+  const auto tabulatedData = tabulate(current);
+
   for (int hour = 0; hour < 24; ++hour) {
     // qDebug() << "hour" << hour << "weight" << eatenWeightsPerHour[hour];
-    bars << eatenWeightsPerHour[hour];
+    bars << tabulatedData.eatenWeightsPerHour[hour];
   }
 
   // it fails when we add the series to the chart earlier in the constructor !?
@@ -187,12 +201,85 @@ void LogsWidgetImpl::loadData() {
     // barSeries.attachAxis(&yAxis);
   }
   auto constexpr subTickPerTick = 5;
-  auto maxXValue = (int)maxPerHour + 1;
-  maxXValue += subTickPerTick - (maxXValue % subTickPerTick);
-  maxXValue = std::max(maxXValue, subTickPerTick * 3);  // minimum 3 ticks
-  yAxis.setMax(maxXValue);
-  yAxis.setTickCount((maxXValue / subTickPerTick) + 1);
+  auto maxYValue = (int)tabulatedData.maxPerHour + 1;
+  maxYValue += subTickPerTick - (maxYValue % subTickPerTick);
+  maxYValue = std::max(maxYValue, subTickPerTick * 3);  // minimum 3 ticks
+  yAxis.setMax(maxYValue);
+  yAxis.setTickCount((maxYValue / subTickPerTick) + 1);
   yAxis.setMinorTickCount(subTickPerTick - 1);
 
-  bars.setLabel("Grammes / Heure, Total Jour = " + QString::number((int)totalPeriod));
+  bars.setLabel("Grammes / Heure, Total Jour = " + QString::number((int)tabulatedData.totalPeriod));
+}
+
+QString LogsWidget::asAscii(const QDate& date) {
+  auto formatIntegerTwoDigits = [](auto& cout, int value) {
+    if (value < 10) {
+      cout << "0";
+    }
+    cout << value;
+  };
+
+  auto cout = std::ostringstream{};
+  const auto tabulatedData = impl->tabulate(date);
+
+  cout << "Total: " << (int)tabulatedData.totalPeriod << " grammes" << endl;
+
+  static auto cornerTopLeft = "┌";
+  static auto cornerTopRight = "┐";
+  static auto cornerBottomLeft = "└";
+  static auto cornerBottomRight = "┘";
+  static auto barVertical = "│";
+  static auto barHorizontal = "─";
+
+  cout << "  " << cornerTopLeft;
+  for (int hour = 0; hour < 24; ++hour) {
+    cout << barHorizontal;
+  }
+  cout << cornerTopRight << endl;
+
+  static auto const maxValue = 15;
+  for (int height = maxValue; height >= 0; --height) {
+    if (height % 5 == 0) {
+      // cout << std::format("{:02}", height); // not available on pi
+      formatIntegerTwoDigits(cout, height);
+    } else {
+      cout << "  ";
+    }
+    cout << barVertical;
+    for (int hour = 0; hour <= 24; ++hour) {
+      if (hour == 24) {
+        cout << barVertical;
+        continue;
+      }
+      auto value = tabulatedData.eatenWeightsPerHour[hour];
+      if (value > height) {
+        cout << "█";
+      } else {
+        cout << " ";
+      }
+    }
+    cout << endl;
+  }
+
+  cout << "  " << cornerBottomLeft;
+  for (int hour = 0; hour < 24; ++hour) {
+    if (tabulatedData.eatenWeightsPerHour[hour] > 0) {
+      cout << "▀";
+      continue;
+    }
+    cout << barHorizontal;
+  }
+  cout << cornerBottomRight << endl;
+
+  cout << "  ";
+  for (int hour = 0; hour <= 24; ++hour) {
+    if (hour % 3 == 0) {
+      formatIntegerTwoDigits(cout, hour);
+    } else if (hour % 3 == 2) {
+      cout << " ";
+    }
+  }
+  cout << endl;
+
+  return QString::fromStdString(cout.str());
 }
