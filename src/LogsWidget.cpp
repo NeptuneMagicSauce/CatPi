@@ -230,20 +230,23 @@ QString LogsWidget::asAscii(const QDate& date) {
   static auto cornerBottomRight = "┘";
   static auto barVertical = "│";
   static auto barHorizontal = "─";
+  static auto emptyChar = " ";  // U+2007 FIGURE SPACE, this works as fixed width on gmail-ios
+  static auto emptyTimePrefix = std::string{emptyChar} + std::string{emptyChar};
 
-  cout << "  " << cornerTopLeft;
+  cout << emptyTimePrefix << cornerTopLeft;
   for (int hour = 0; hour < 24; ++hour) {
     cout << barHorizontal;
   }
   cout << cornerTopRight << endl;
 
-  static auto const maxValue = 15;
+  static auto const maxValue = 12 - 1;
   for (int height = maxValue; height >= 0; --height) {
-    if (height % 5 == 0) {
+    auto actualHeight = height + 1;
+    if (actualHeight % 4 == 0) {
       // cout << std::format("{:02}", height); // not available on pi
-      formatIntegerTwoDigits(cout, height);
+      formatIntegerTwoDigits(cout, actualHeight);
     } else {
-      cout << "  ";
+      cout << emptyTimePrefix;
     }
     cout << barVertical;
     for (int hour = 0; hour <= 24; ++hour) {
@@ -255,23 +258,23 @@ QString LogsWidget::asAscii(const QDate& date) {
       if (value > height) {
         cout << "█";
       } else {
-        cout << " ";
+        cout << emptyChar;
       }
     }
     cout << endl;
   }
 
-  cout << "  " << cornerBottomLeft;
+  cout << "00" << cornerBottomLeft;
   for (int hour = 0; hour < 24; ++hour) {
     if (tabulatedData.eatenWeightsPerHour[hour] > 0) {
       cout << "▀";
-      continue;
+    } else {
+      cout << barHorizontal;
     }
-    cout << barHorizontal;
   }
   cout << cornerBottomRight << endl;
 
-  cout << "  ";
+  cout << emptyTimePrefix;
   for (int hour = 0; hour <= 24; ++hour) {
     if (hour % 3 == 0) {
       formatIntegerTwoDigits(cout, hour);

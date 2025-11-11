@@ -149,7 +149,7 @@ Content-Transfer-Encoding: quoted-printable
     content += R"(
 <html>
   <body>
-    <pre style="font-family: 'Courier New', Courier, monospace;">
+    <pre style="font-family: monospace;">
 )";
     content += yesterday.toString("dddd, MMMM d");
     if (hostName != "catpi") {
