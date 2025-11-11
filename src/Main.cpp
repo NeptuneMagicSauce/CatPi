@@ -219,20 +219,28 @@ int main(int argc, char** argv) {
     logic->connect({.updateGuiDelay = [&](int newDelay) { delay->setDelay(newDelay); },
                     .onDispense =
                         [&](bool doTare) {
+                          // set the weight sensor to high refresh
+                          loadcell->setPollIntervalMilliseconds(100);
+
                           mainscreen->dispenseButton->setEnabled(false);
                           if (doTare) {
                             weight->doTare();
                           }
+                        },
+                    .onEndDetectWeight =
+                        [&] {
+                          // set the weight sensor to normal refresh
+                          loadcell->setPollIntervalMilliseconds({});
                         }});
 
     QObject::connect(logic->timerAllowManualDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
       auto justAte = false;
-      auto detectingDispensedWeight = false;
+      // auto detectingDispensedWeight = false;
 
-      logic->update(weight->weightTarred(), weight->isBelowThreshold(), justAte,
-                    detectingDispensedWeight);
+      logic->update(weight->weightTarred(), weight->isBelowThreshold(), justAte);
+      // detectingDispensedWeight);
 
       if (justAte) {
         logs.logEvent(weight->toString());

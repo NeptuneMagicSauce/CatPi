@@ -18,13 +18,14 @@ struct Logic {
   struct Callbacks {
     std::function<void(int seconds)> updateGuiDelay;
     std::function<void(bool doTare)> onDispense;
+    std::function<void()> onEndDetectWeight;
   };
   void connect(const Callbacks& callbacks);
   void manualDispense();
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
-              bool& justAte,                       //
-              bool& detectingDispensedWeight);
+              bool& justAte);                      //
+                                                   // bool& detectingDispensedWeight);
   void changeDelay(int delta);
   void setDelaySeconds(int delaySeconds);
 

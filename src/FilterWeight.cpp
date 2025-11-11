@@ -1,5 +1,6 @@
 #include "FilterWeight.hpp"
 
+// #include <QElapsedTimer>
 #include <algorithm>
 #include <vector>
 
@@ -21,7 +22,8 @@ FilterWeight::FilterWeight() {
                   .name = "Filtre Poids Nb Samples",
                   .prompt = "Nombre d'échantillons pour le filtre du poids",
                   .unit = "Nombre",
-                  .defaultValue = 10,
+                  .defaultValue = 6,
+                  // value 6 is good compromise between stability and speed of measuring
                   .callback =
                       [&](QVariant v) {
                         auto newCount = v.toInt();
@@ -41,6 +43,12 @@ bool FilterWeight::isInitializingFinished() const {
 }
 
 double FilterWeight::update(double value) {
+  // static auto t = QElapsedTimer{};
+  // qDebug() << "                                   ### Filter" << value << "samples" <<
+  // sampleCount
+  // << "ms" << t.elapsed();
+  // t.restart();
+
   // invariant: the vector values is always full of values
 
   if (isInitializingFinished() == false) {

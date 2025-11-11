@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <optional>
 
 #include "Logs.hpp"
 #include "PinCtrl.hpp"
@@ -30,24 +31,27 @@ struct LogicImpl {
   optional<int> timeToDispenseSeconds;
 
   int delaySeconds = 0;
-  QTimer timerEndDispense;          // close relay
-  QTimer timerDetectDispensed;      // detect if and how much has been dispensed
-  QTimer timerAllowManualDispense;  // notify GUI
+  QTimer timerEndDispense;  // close relay
+  optional<QDateTime> timeAtEndDispense;
+  bool measuringDispensed = false;
+  // QTimer timerDetectDispensed;      // detect if and how much has been dispensed
+
+  QTimer eventAllowManualDispense;  // notify GUI
   int numberOfDispenseRepeats = 0;
 
   Logic::Callbacks callbacks;
 
   enum struct Mode { Automatic, Manual, Repeat };
   const map<Mode, QString> modeNames = {
-      {Mode::Automatic, "automatic"},
+      {Mode::Automatic, "automatic"},  //
       {Mode::Manual, "manual"},
       {Mode::Repeat, "repeat"},
   };
 
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
-              bool& justAte,                       //
-              bool& detectingDispensedWeight);
+              bool& justAte);                      //
+                                                   // bool& detectingDispensedWeight);
   void dispense(Mode mode);
   void endDetectDispense();
   bool needsRepeat() const;
@@ -63,32 +67,36 @@ Logic::Logic(Logs& logs, const double& weightThresholdGrams) {
   AssertSingleton();
   impl = new LogicImpl{logs, weightThresholdGrams};
 
-  timerAllowManualDispense = &impl->timerAllowManualDispense;
+  timerAllowManualDispense = &impl->eventAllowManualDispense;
 
   timerUpdate = new QTimer;
   timerUpdate->setSingleShot(false);
   timerUpdate->start();
 
-  Settings::load({.key = "LogicInterval",
-                  .name = "Période Logique",
-                  .prompt = "Période de rafraichissement de la boucle principale",
-                  .unit = "Millisecondes",
-                  .defaultValue = 1000,
-                  .callback = [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
-                  .limits = {.minimum = 20, .maximum = {}}});
+  // Settings::load({.key = "LogicInterval",
+  //                 .name = "Période Logique",
+  //                 .prompt = "Période de rafraichissement de la boucle principale",
+  //                 .unit = "Millisecondes",
+  //                 .defaultValue = 1000,
+  //                 .callback = [&](QVariant v) { timerUpdate->setInterval(v.toInt()); },
+  //                 .limits = {.minimum = 20, .maximum = {}}});
+
+  // do not have it user-changeable, this needs to be fast for accuracy of the logic and sensors
+  timerUpdate->setInterval(50);
 }
 
 LogicImpl::LogicImpl(Logs& logs, const double& weightThresholdGrams)
     : logs(logs), weightThresholdGrams(weightThresholdGrams) {
-  timerAllowManualDispense.setSingleShot(true);
-  timerAllowManualDispense.setInterval(0);
+  eventAllowManualDispense.setSingleShot(true);
+  eventAllowManualDispense.setInterval(0);
 
-  timerDetectDispensed.setSingleShot(true);
-  QObject::connect(&timerDetectDispensed, &QTimer::timeout, [&] { endDetectDispense(); });
+  // timerDetectDispensed.setSingleShot(true);
+  // QObject::connect(&timerDetectDispensed, &QTimer::timeout, [&] { endDetectDispense(); });
 
   timerEndDispense.setSingleShot(true);
   QObject::connect(&timerEndDispense, &QTimer::timeout, [&] {
     // qDebug() << "endDispense" << QTime::currentTime();
+    timeAtEndDispense = QDateTime::currentDateTime();
     Logic::closeRelay();
   });
 
@@ -117,11 +125,15 @@ LogicImpl::LogicImpl(Logs& logs, const double& weightThresholdGrams)
              durationDispenseRelayMilliseconds = v.toInt() * 1000;
              timerEndDispense.setInterval(durationDispenseRelayMilliseconds);
 
-             // set the timerDtectDispensed to the same duration
+             // set the timerDetectDispensed to this value
              // because we want it as short as possible
              // otherwise it detects the cat pushing on the bowl
              // soon after start of dispensing
-             timerDetectDispensed.setInterval(timerEndDispense.interval() + 0);
+             // but we also want to detect the final croquette falling down
+             // at end of dipsensing
+             // and there is also a delay in the smoothing of the readings, the sliding window
+
+             // timerDetectDispensed.setInterval(timerEndDispense.interval() + 1.0);
            },
        .limits = {.minimum = 1, .maximum = 20}});
 
@@ -165,9 +177,9 @@ optional<int> Logic::timeToDispenseSeconds() const {
 
 void Logic::update(optional<double> weightTarred,  //
                    bool isWeightBelowThreshold,    //
-                   bool& justAte,                  //
-                   bool& detectingDispensedWeight) {
-  impl->update(weightTarred, isWeightBelowThreshold, justAte, detectingDispensedWeight);
+                   bool& justAte) {                //
+                                                   // bool& detectingDispensedWeight) {
+  impl->update(weightTarred, isWeightBelowThreshold, justAte);
 }
 
 void Logic::manualDispense() { impl->dispense(LogicImpl::Mode::Manual); }
@@ -175,17 +187,22 @@ void Logic::manualDispense() { impl->dispense(LogicImpl::Mode::Manual); }
 void LogicImpl::dispense(Mode mode) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
   // qDebug() << "OPEN RELAY" << QDateTime::currentDateTime().time();
+
+  measuringDispensed = true;
+  timerEndDispense.start();
+  // timerDetectDispensed.start();
+
   if (Logic::hasGPIO) {
     pinctrl("set 17 op dh");
   }
 
   callbacks.onDispense(mode != Mode::Repeat);  // do tare if not mode repeat in order to accumulate
-  timerEndDispense.start();
-  timerDetectDispensed.start();
 
   auto now = QDateTime::currentDateTime();
 
+  // for the repeat feature ->
   if (mode == Mode::Repeat) {
+    // qDebug() << "REPEAT dispensed was" << events().last().grams;
     ++numberOfDispenseRepeats;
   } else {
     numberOfDispenseRepeats = 1;
@@ -214,12 +231,12 @@ void LogicImpl::dispense(Mode mode) {
 }
 
 bool LogicImpl::needsRepeat() const {
-  return events().last().grams < weightThresholdGrams &&  //
-         numberOfDispenseRepeats < 3;
+  return events().last().grams < weightThresholdGrams  //
+         && numberOfDispenseRepeats < 3;
 }
 
 void LogicImpl::endDetectDispense() {
-  // qDebug() << "endDetectDispense" << QTime::currentTime();
+  // qDebug() << "endDetectDispensed" << QTime::currentTime();
   auto dispensedWeight = events().last().grams;
 
   // log the dispensed weight
@@ -228,19 +245,21 @@ void LogicImpl::endDetectDispense() {
   logs.logEvent("DispensedWeight: " + QString::fromStdString(ss.str()) + " grams");
 
   // if it's not enough, there may have been a mechanical issue
-  // -> dispense again
+  // -> dispense again = the repeat feature
   if (needsRepeat()) {
-    // call dispense() in the future, because current dispense event is not fully finished
+    // call dispense() in the future
     QTimer::singleShot(3000, [&] { dispense(Mode::Repeat); });
   } else {
-    timerAllowManualDispense.start();
+    eventAllowManualDispense.start();
   }
+
+  callbacks.onEndDetectWeight();
 }
 
 void LogicImpl::update(optional<double> weightTarred,  //
                        bool isWeightBelowThreshold,    //
-                       bool& justAte,                  //
-                       bool& detectingDispensedWeight) {
+                       bool& justAte) {                //
+                                                       // bool& detectingDispensedWeight) {
   auto now = QDateTime::currentDateTime();
 
   auto timeOfDispense = optional<QDateTime>{};
@@ -267,29 +286,40 @@ void LogicImpl::update(optional<double> weightTarred,  //
     timeToDispenseSeconds = delaySeconds - events().last().timeEaten.value().secsTo(now);
   }
 
+  // when finished measuring dispensed weight, react
+  if (measuringDispensed &&             //
+      timeAtEndDispense.has_value() &&  //
+      timeAtEndDispense.value().msecsTo(now) > 500) {
+    measuringDispensed = false;
+    timeAtEndDispense = {};
+    endDetectDispense();
+  }
+
   if (timeOfDispense.has_value()) {
     // time since dispense
 
     auto& lastEvent = events().last();
 
     // dispensed weight
-    if (timerDetectDispensed.isActive() && weightTarred.has_value()) {
+    if (measuringDispensed /*timerDetectDispensed.isActive()*/ && weightTarred.has_value()) {
       auto& dispensedWeight = lastEvent.grams;
       dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
-      detectingDispensedWeight = true;
-      {
-        ostringstream ss;
-        ss << fixed << setprecision(3) << weightTarred.value();
-        logs.logEvent(now.toString() + ", detecting " + QString::fromStdString(ss.str()));
-      }
+      // // detectingDispensedWeight = true;
+      // {
+      //   ostringstream ss;
+      //   ss << fixed << setprecision(3) << weightTarred.value();
+      //   logs.logEvent(now.toString() + ", detecting " + QString::fromStdString(ss.str()));
+      // }
     }
 
     // just ate ?
     // first detect needs-repeat, then detect just-ate, because it's the same test
     if (lastEvent.timeEaten.has_value() == false &&  // not yet detected just-ate
-        timerDetectDispensed.isActive() == false &&  // not still detecting dispensed weight
-        needsRepeat() == false &&                    // not still needing repeat dispense
-        isWeightBelowThreshold) {                    //
+                                                     // timerDetectDispensed.isActive() == false &&
+                                                     // not still detecting dispensed weight
+        measuringDispensed == false &&
+        needsRepeat() == false &&  // not still needing repeat dispense
+        isWeightBelowThreshold) {  //
       // yes
       lastEvent.timeEaten = now;
       logs.logEvent(now.toString() + ", eat");

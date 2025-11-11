@@ -16,6 +16,7 @@ struct LoadCell {
   std::optional<double> readPreciseRaw() noexcept;
 
   void recalibrate(std::pair<int, int> calibration, QString& status);
+  void setPollIntervalMilliseconds(std::optional<int> milliseconds);
 
   QTimer* timer = nullptr;
 };

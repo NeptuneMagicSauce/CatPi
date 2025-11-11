@@ -13,6 +13,20 @@ ninja
 - BUG: detects too much weight
   probably because the user pushes on the bowl
   maybe fix: detect for a shorter period
+  - have the weight detection faster
+  - with the FilterWeight updated more often
+  - and nb samples for filtering smaller
+  - check minimum time for the sensor: wasn't it ~100 milliseconds? yes
+  - but it's high cpu load: only when detecting dispensed
+  - if the correct value is critical, do not allow debug-change?
+  - stop detecting as early as possible
+  - when repeating: what tare should we use !?
+
+- remove the Repeat feature
+  if not dispensed enough, then
+  set the timer to a short value, like 1 minute
+  this may help for precise, reliable dispensed-weight measurement
+
 
 - BUG: graphs and e-mails broke:
   after about 2 weeks of uptime
@@ -38,7 +52,7 @@ ninja
 
 - auto run on boot
 
-- validate: "detectig while cat eats":
+- validate: "detecting while cat eats":
   does it detect too little?
 
 - validate: are there still no-show events?

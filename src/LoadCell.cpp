@@ -1,5 +1,7 @@
 #include "LoadCell.hpp"
 
+// #include <QDateTime>
+// #include <QElapsedTimer>
 #include <QTimer>
 #include <cassert>
 #include <iostream>
@@ -15,7 +17,9 @@ using namespace HX711;
 using namespace std;
 
 struct LoadCellImpl {
-  const std::chrono::milliseconds pollingTimeout{100};
+  const std::chrono::milliseconds pollingTimeout{120};
+  // a timeout lower than 100 milliseconds fails to get samples reliably
+
   const QString intervalSettingName = "WeightPollInterval";
 
   AdvancedHX711 *hx711 = createHX711(nullopt);
@@ -35,15 +39,21 @@ LoadCell::LoadCell() {
   impl = new LoadCellImpl;
 
   timer = new QTimer;
-  Settings::load({.key = impl->intervalSettingName,
-                  .name = "Période Balance",
-                  .prompt = "Temps d'attente entre les mesures du poids de la balance",
-                  .unit = "Millisecondes",
-                  .defaultValue = 200,
-                  .callback = [&](QVariant v) { timer->setInterval(v.toInt()); },
-                  .limits = {.minimum = 20, .maximum = {}}});
+  // Settings::load({.key = impl->intervalSettingName,
+  //                 .name = "Période Balance",
+  //                 .prompt = "Temps d'attente entre les mesures du poids de la balance",
+  //                 .unit = "Millisecondes",
+  //                 .defaultValue = 200,
+  //                 .callback = [&](QVariant v) { timer->setInterval(v.toInt()); },
+  //                 .limits = {.minimum = 20, .maximum = {}}});
+  setPollIntervalMilliseconds({});
   timer->setSingleShot(false);
   timer->start();
+}
+
+void LoadCell::setPollIntervalMilliseconds(optional<int> milliseconds) {
+  timer->setInterval(milliseconds.value_or(300));
+  // qDebug() << Q_FUNC_INFO << timer->interval();
 }
 
 bool LoadCell::hasGPIO() { return impl->hx711 != nullptr; }
@@ -135,6 +145,11 @@ AdvancedHX711 *LoadCellImpl::createHX711(optional<pair<int, int>> newCalibration
 
 optional<LoadCell::Data> readInMode(const Options &options) noexcept {
   auto mass = impl->valueGrams(options);
+
+  // static auto t = QElapsedTimer{};
+  // qDebug() << ">> LoadCell" << mass.value_or(1.f / 0) << t.elapsed();
+  // t.restart();
+
   if (mass.has_value() == false) {
     return {};
   }
