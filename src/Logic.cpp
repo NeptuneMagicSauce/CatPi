@@ -34,6 +34,7 @@ struct LogicImpl {
   QTimer timerEndDispense;  // close relay
   optional<QDateTime> timeAtEndDispense;
   bool measuringDispensed = false;
+  optional<double> weightTarred;
   // QTimer timerDetectDispensed;      // detect if and how much has been dispensed
 
   QTimer eventAllowManualDispense;  // notify GUI
@@ -188,6 +189,16 @@ void LogicImpl::dispense(Mode mode) {
   // std::cout << __PRETTY_FUNCTION__ << std::endl;
   // qDebug() << "OPEN RELAY" << QDateTime::currentDateTime().time();
 
+  if (mode == Mode::Repeat &&  //
+      weightTarred.value_or(0) > weightThresholdGrams) {
+    // in this repeat-dispense-event
+    // the weight is above the threshold
+    // so, we did not detect the weight above threshold because we are repeating
+    // and yet it is above
+    // -> do not actually repeat
+    return;
+  }
+
   measuringDispensed = true;
   timerEndDispense.start();
   // timerDetectDispensed.start();
@@ -261,6 +272,8 @@ void LogicImpl::update(optional<double> weightTarred,  //
                        bool& justAte) {                //
                                                        // bool& detectingDispensedWeight) {
   auto now = QDateTime::currentDateTime();
+
+  this->weightTarred = weightTarred;
 
   auto timeOfDispense = optional<QDateTime>{};
   if (events().empty() == false) {
