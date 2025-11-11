@@ -196,6 +196,16 @@ void LogicImpl::dispense(Mode mode) {
     // so, we did not detect the weight above threshold because we are repeating
     // and yet it is above
     // -> do not actually repeat
+
+    // but
+    // restart delay depends on isEaten
+    // and isEaten depends on justAte
+    // and justAte depends on needsRepeat == false
+    // and needsRepeat depends on numberOfDispenseRepeats > threshold
+    // -> set it over the threshold
+    // otherwise the delay is not restarted
+    numberOfDispenseRepeats = 99;
+
     return;
   }
 
