@@ -20,6 +20,9 @@ ninja
   - stop detecting as early as possible
   - when repeating: what tare should we use !?
 
+- BUG: on boot, it sometimes dispenses
+  but the delay is just a few seconds into the 10/7 minute wait
+
 - remove the Repeat feature
   if not dispensed enough, then
   set the timer to a short value, like 1 minute
