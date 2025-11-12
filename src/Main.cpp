@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
                           loadcell->setPollIntervalMilliseconds({});
                         }});
 
-    QObject::connect(logic->timerAllowManualDispense, &QTimer::timeout,
+    QObject::connect(&logic->eventAllowManualDispense, &QTimer::timeout,
                      [&] { mainscreen->dispenseButton->setEnabled(true); });
     QObject::connect(logic->timerUpdate, &QTimer::timeout, [&] {
       auto justAte = false;

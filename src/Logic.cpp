@@ -2,7 +2,6 @@
 
 #include <QDateTime>
 #include <QElapsedTimer>
-#include <QTimer>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -68,8 +67,6 @@ Logic::Logic(Logs& logs, const double& weightThresholdGrams) {
   AssertSingleton();
   impl = new LogicImpl{logs, weightThresholdGrams};
 
-  timerAllowManualDispense = &impl->eventAllowManualDispense;
-
   timerUpdate = new QTimer;
   timerUpdate->setSingleShot(false);
   timerUpdate->start();
@@ -84,6 +81,12 @@ Logic::Logic(Logs& logs, const double& weightThresholdGrams) {
 
   // do not have it user-changeable, this needs to be fast for accuracy of the logic and sensors
   timerUpdate->setInterval(50);
+
+  eventAllowManualDispense.setSingleShot(true);
+  eventAllowManualDispense.setInterval(0);
+
+  QObject::connect(&impl->eventAllowManualDispense, &QTimer::timeout,
+                   [&] { this->eventAllowManualDispense.start(); });
 }
 
 LogicImpl::LogicImpl(Logs& logs, const double& weightThresholdGrams)
@@ -206,6 +209,11 @@ void LogicImpl::dispense(Mode mode) {
     // otherwise the delay is not restarted
     numberOfDispenseRepeats = 99;
 
+    // but
+    // manual dispense is still not allowed when we needed-repeat
+    // as set by endDetectDispense()
+    // -> >allow it now
+    eventAllowManualDispense.start();
     return;
   }
 

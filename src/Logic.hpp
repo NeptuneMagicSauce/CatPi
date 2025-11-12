@@ -3,6 +3,7 @@
 struct QTimer;
 struct Logs;
 
+#include <QTimer>
 #include <functional>
 #include <optional>
 
@@ -11,7 +12,7 @@ struct Logic {
 
   static bool hasGPIO;
 
-  QTimer* timerAllowManualDispense = nullptr;
+  QTimer eventAllowManualDispense;  // notify GUI
   QTimer* timerUpdate = nullptr;
 
   int delaySeconds();
