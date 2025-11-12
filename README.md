@@ -8,8 +8,6 @@ ninja
 
 # TODO
 
-- daily e-mail: include graph as ascii art
-
 - BUG: detects too much weight
   probably because the user pushes on the bowl
   maybe fix: detect for a shorter period
@@ -25,6 +23,7 @@ ninja
 - remove the Repeat feature
   if not dispensed enough, then
   set the timer to a short value, like 1 minute
+  and consider the bowl eaten
   this may help for precise, reliable dispensed-weight measurement
 
 
@@ -449,3 +448,4 @@ if it is slow, do it in a background thread and signal end with timer
 it is very fast
 - gzip historical data:
 for i in ~/.local/share/CatPi/logs/*txt ; do gzip -v $i; done
+- daily e-mail: include graph as ascii art
