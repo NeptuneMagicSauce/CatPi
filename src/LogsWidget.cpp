@@ -147,6 +147,12 @@ LogsWidgetImpl::LogsWidgetImpl(Logs const& logs) : logs(logs) {
   layout->addWidget(titleParent);
   layout->addWidget(&chartView);
 }
+void LogsWidget::showEvent(QShowEvent* event) {
+  // reset displayed day to current when we are shown
+  impl->current = QDate::currentDate();
+  loadData();
+  QWidget::showEvent(event);
+}
 
 LogsWidgetImpl::TabulatedData LogsWidgetImpl::tabulate(const QDate& day) {
   auto ret = TabulatedData{};
