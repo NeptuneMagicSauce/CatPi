@@ -19,9 +19,9 @@ namespace {
     return ret;
   }
 
-  auto formatWeight(const auto& grams) {
+  auto formatWeight(auto grams, auto precision) {
     std::ostringstream ss;
-    ss << std::fixed << std::setprecision(1) << grams;
+    ss << std::fixed << std::setprecision(precision) << grams;
     return QString::fromStdString(ss.str());
   }
 }
@@ -73,7 +73,7 @@ void LogsSmallWidget::update(const QList<Event>& events) {
     table->setItem(row, 0, stringToItem(event.timeDispensed.time().toString()));
 
     // weight
-    table->setItem(row, 1, stringToItem(formatWeight(event.grams)));
+    table->setItem(row, 1, stringToItem(formatWeight(event.grams, 1)));
 
     // eat
     table->setItem(
@@ -97,6 +97,6 @@ void LogsSmallWidget::update(const QList<Event>& events) {
     }
   }
 
-  summary->setText("Total Jour: " + formatWeight(totalToday) + " grammes\n" +
-                   "Total 24 heures: " + formatWeight(total24hours) + " grammes");
+  summary->setText("Total Jour: " + formatWeight(totalToday, 0) + " grammes\n" +
+                   "Total 24 heures: " + formatWeight(total24hours, 0) + " grammes");
 }
