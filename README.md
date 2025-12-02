@@ -45,6 +45,19 @@ ninja
   but we did echo 255 > /proc/brightness and it woke up
   the program was still running
   another time, the screen was on but the buttons disabled
+  attaching GDB when its broken, we observe:
+    procfile.exists() = true
+    readBrightness() = 0
+    writeBrightness(255) = does not actually write to file, when I cat it it's still 0
+    when I write with an external program to the proc file,
+      then the new value is not seen by CatPi, it still sees 0
+  maybe try this:
+    after we write a value (if it is non-zero)
+    check it is okay by re-reading it right away
+    should work most of the time
+    if it is not okay -> reboot the software?
+
+
 
 - rename Event and Event and Events
 
