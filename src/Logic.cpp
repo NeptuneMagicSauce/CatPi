@@ -288,7 +288,6 @@ void LogicImpl::endDetectDispense() {
 void LogicImpl::update(optional<double> weightTarred,  //
                        bool isWeightBelowThreshold,    //
                        bool& justAte) {                //
-                                                       // bool& detectingDispensedWeight) {
   auto now = QDateTime::currentDateTime();
 
   this->weightTarred = weightTarred;
