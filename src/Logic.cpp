@@ -51,7 +51,6 @@ struct LogicImpl {
   void update(std::optional<double> weightTarred,  //
               bool isWeightBelowThreshold,         //
               bool& justAte);                      //
-                                                   // bool& detectingDispensedWeight);
   void dispense(Mode mode);
   void endDetectDispense();
   bool needsRepeat() const;
@@ -182,7 +181,6 @@ optional<int> Logic::timeToDispenseSeconds() const {
 void Logic::update(optional<double> weightTarred,  //
                    bool isWeightBelowThreshold,    //
                    bool& justAte) {                //
-                                                   // bool& detectingDispensedWeight) {
   impl->update(weightTarred, isWeightBelowThreshold, justAte);
 }
 
@@ -334,7 +332,7 @@ void LogicImpl::update(optional<double> weightTarred,  //
     if (measuringDispensed /*timerDetectDispensed.isActive()*/ && weightTarred.has_value()) {
       auto& dispensedWeight = lastEvent.grams;
       dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
-      // // detectingDispensedWeight = true;
+
       // {
       //   ostringstream ss;
       //   ss << fixed << setprecision(3) << weightTarred.value();
