@@ -333,6 +333,11 @@ void LogicImpl::update(optional<double> weightTarred,  //
       auto& dispensedWeight = lastEvent.grams;
       dispensedWeight = std::max(weightTarred.value(), dispensedWeight);
 
+      // clamp to max value because
+      // there can be very high measurements
+      // when the cat pushes on the bowl
+      dispensedWeight = std::min(1.5, dispensedWeight);
+
       // {
       //   ostringstream ss;
       //   ss << fixed << setprecision(3) << weightTarred.value();
