@@ -79,6 +79,7 @@ ScreenBrightness::ScreenBrightness() {
   timerLoop.start();
   QObject::connect(&timerLoop, &QTimer::timeout, [&] {
     auto brightnessValue = settingToValue(Settings::get("ScreenBrightness").toInt());
+    static auto const minBrightness = 1;
     auto newValue = [&] {
       auto activeWindow = qApp->activeWindow();
       if (activeWindow == nullptr || activeWindow->isFullScreen() == false) {
@@ -91,7 +92,7 @@ ScreenBrightness::ScreenBrightness() {
       }
       auto timeSinceInteractionMinutes = timerSinceInteraction.elapsed() / 1000 / 60;
       if (timeSinceInteractionMinutes >= delayScreenSaverMinutes) {
-        return 0;
+        return minBrightness;
       } else {
         return brightnessValue;
       }
@@ -99,7 +100,7 @@ ScreenBrightness::ScreenBrightness() {
     if (readBrightness() != newValue) {
       writeBrightness(newValue);
       if (onChangeCallback != nullptr) {
-        onChangeCallback(newValue > 0);
+        onChangeCallback(newValue > minBrightness);
       }
     }
   });
