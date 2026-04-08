@@ -67,6 +67,7 @@ Weight::Weight()
 
 WeightImpl::WeightImpl() {
   label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+  Widget::FontSized(label, 48);
   labelFooter->setText("grammes");
   labelFooter->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   labelFooter->setStyleSheet("QWidget{font-size: 30pt;}");

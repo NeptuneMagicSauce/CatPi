@@ -22,6 +22,7 @@ namespace {
     return dir.path() + "/" + files.first() + "/brightness";
   }
 
+  auto const minBrightness = 1;
   auto const rangeMin = 1;
   auto const rangeMax = 100;
   auto procfile = QFile{findProcFilePath()};
@@ -44,6 +45,15 @@ namespace {
   }
 
   void writeBrightness(int value) {
+    static auto previousStyleSheet = qApp->styleSheet();
+    if (value <= minBrightness) {
+      // dark theme
+      qApp->setStyleSheet("QWidget { background-color: #000000; color: #555555; }");
+    } else {
+      // restore theme
+      qApp->setStyleSheet(previousStyleSheet);
+    }
+
     if (procfile.exists() == false) {
       return;
     }
@@ -79,7 +89,6 @@ ScreenBrightness::ScreenBrightness() {
   timerLoop.start();
   QObject::connect(&timerLoop, &QTimer::timeout, [&] {
     auto brightnessValue = settingToValue(Settings::get("ScreenBrightness").toInt());
-    static auto const minBrightness = 1;
     auto newValue = [&] {
       auto activeWindow = qApp->activeWindow();
       if (activeWindow == nullptr || activeWindow->isFullScreen() == false) {
