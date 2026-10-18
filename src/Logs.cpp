@@ -233,7 +233,13 @@ void LogsImpl::readHistoricalData(auto const& day, auto const& today) {
     data.purge(dayIndex);
     return;
   }
-  if (data.mustLoad(dayIndex) == false) {
+
+  auto todayIndex = today.toJulianDay();
+  if (dayIndex >= todayIndex - 1) {
+    // bugfix, to be tested:
+    // always reload the two most recent days
+    // to prevent the race condition between "write compressed file" and "mark as final"
+  } else if (data.mustLoad(dayIndex) == false) {
     // we do not reload historical data, it has not changed
     return;
   }
