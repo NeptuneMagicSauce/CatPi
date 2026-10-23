@@ -254,9 +254,12 @@ int main(int argc, char** argv) {
       auto const yesterday = QDate::currentDate().addDays(-1);
       auto compressSource = logs.dateToFilePath(yesterday);
       auto compressDest = QString{};
-      Compressor::Do(compressSource, compressDest);
+      auto compressError = QString{};
+      Compressor::Do(compressSource, compressDest, compressError);
       if (compressDest.isEmpty() == false) {
         mail.sendYesterday(compressDest, logsWidget->asAscii(yesterday), app->dataDirectory);
+      } else {
+        mail.sendYesterday({}, compressError, app->dataDirectory);
       }
     });
 

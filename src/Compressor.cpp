@@ -6,13 +6,13 @@
 
 namespace {
   static constexpr auto suffix = ".gz";
-  void printProcessOutputsToConsole(auto& process) {
-    std::cerr << QString{process.readAllStandardError()}.toStdString();
-    std::cout << QString{process.readAllStandardOutput()}.toStdString();
+  QString readProcessOutputs(auto& process) {
+    return QString{process.readAllStandardError()} + "\n" +
+           QString{process.readAllStandardOutput()};
   }
 }
 
-void Compressor::Do(QString const& pathSource, QString& pathDest) {
+void Compressor::Do(QString const& pathSource, QString& pathDest, QString& compressError) {
   if (QFileInfo{pathSource}.exists() == false) {
     return;
   }
@@ -22,7 +22,8 @@ void Compressor::Do(QString const& pathSource, QString& pathDest) {
   if (process.exitCode() == 0) {
     pathDest = pathSource + ::suffix;
   } else {
-    printProcessOutputsToConsole(process);
+    compressError = readProcessOutputs(process);
+    std::cerr << compressError.toStdString();
   }
 }
 
@@ -46,7 +47,7 @@ QByteArray Compressor::Read(QString const& path) {
       if (process.exitCode() == 0) {
         return process.readAll();
       } else {
-        printProcessOutputsToConsole(process);
+        std::cerr << readProcessOutputs(process).toStdString();
       }
     }
   }

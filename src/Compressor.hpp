@@ -3,7 +3,7 @@
 struct QString;
 
 struct Compressor {
-  static void Do(QString const& pathSource, QString& pathDest);
+  static void Do(QString const& pathSource, QString& pathDest, QString& compressError);
   [[nodiscard]] static bool Exists(QString const& path);
   [[nodiscard]] static QByteArray Read(QString const& path);
 };
